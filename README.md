@@ -1,6 +1,6 @@
 # TrinityDev
 
-SistemaAluguelVeiculos
+Sistema de Aluguel de Veiculos
 
 Grupo: Julia, Lorrayne e Henrique |
 Tema: Aluguel de Veículos
