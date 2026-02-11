@@ -1,19 +1,19 @@
 # SistemaAluguelVeiculos
 
-Grupo: Julia, Lorrayne e Henrique 
-Tema: Aluguel de Veículos 
+Grupo: Julia, Lorrayne e Henrique |
+Tema: Aluguel de Veículos
 -----------------------------------------------------------------------------------------------------------------------------------------------
 *Domínio do problema: Sistema de gestão de aluguel de veículos voltado para os funcionários da empresa.
 
 *Processos de negócio:
 1. Gestão de Reserva
-2. Check-in / Check-out 
+2. Check-in / Check-out
 3. Check-up
 
 *Cadastros:
 1. Funcionário
 2. Cliente
-3. Agências 
+3. Agências
 4. Categoria
 5. Veículo
 6. Seguros
@@ -28,17 +28,11 @@ Tema: Aluguel de Veículos
 
 *Relatórios:
 1. Reservas (cliente, Categoria, data/hora, valor)
-2. Check-up (tipo (check-in ou check-out), Funcionário, Veículo, combustível, pneu, paleta, limpeza, avarias) 
+2. Check-up (tipo (check-in ou check-out), Funcionário, Veículo, combustível, pneu, paleta, limpeza, avarias)
 3. Agências
 4. Seguros
-5. Veículos disponíveis 
+5. Veículos disponíveis
 6. Valores de multa
-
-
-
-
-
-
 
 
 
@@ -46,17 +40,10 @@ Tema: Aluguel de Veículos
 Sistema de Aluguel de Veículos 
 Cliente: Mova-se
 
-
 SAV - Sistema de Aluguel de Veículos 
 DOCUMENTO DE REQUISITOS
 
 Versão 1.0
-
-
-
-
-
-
 
 
 
