@@ -7,11 +7,13 @@ Sistema de Aluguel de Veiculos
 ### Domínio do problema: Sistema de gestão de aluguel de veículos voltado para os funcionários da empresa.
 
 ### Processos de negócio:
+
 1. Gestão de Reserva
 2. Check-in / Check-out
 3. Check-up
 
 ### Cadastros:
+
 1. Atendente
 2. Cliente
 3. Agência
@@ -20,6 +22,7 @@ Sistema de Aluguel de Veiculos
 6. Seguro
 
 ### Regras de Negócio (2 p/ cada processo):
+
 1. Reservas com diárias a partir de X dias tem desconto
 2. A data de check-in e check-out deve ser no horário de funcionamento da agência
 3. Cliente/Condutor precisa ter CNH definitiva válida para fazer check-in
@@ -28,6 +31,7 @@ Sistema de Aluguel de Veiculos
 6. Multar o cliente caso haja alguma avaria e não tenha sido contratado um seguro que cubra o dano
 
 ### Relatórios:
+
 1. Reservas (cliente, Categoria, data/hora, valor)
 2. Check-up (tipo (check-in ou check-out), Funcionário, Veículo, combustível, pneu, paleta, limpeza, avarias)
 3. Agências
@@ -35,7 +39,7 @@ Sistema de Aluguel de Veiculos
 5. Veículos disponíveis
 6. Valores de multa
 
------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
 # Visão Geral
 
@@ -48,6 +52,7 @@ O sistema deverá aplicar automaticamente descontos para reservas com diárias a
 ## Abrangência e sistemas relacionados:
 
 ### O SAV é um sistema independente e totalmente auto-contido. Suas principais funcionalidades contemplam:
+
 - Gestão de cadastros: funcionários, clientes, agências, categorias de veículos, veículos e seguros.
 - Gestão de reservas: criação, consulta e cancelamento de reservas de veículos.
 - Check-in / Check-out: registro de retirada e devolução de veículos por clientes.
