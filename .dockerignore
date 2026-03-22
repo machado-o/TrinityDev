@@ -1,0 +1,14 @@
+node_modules/
+
+.git/
+.gitignore
+
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+Requisitos/
+UML/
+README.md
+
+.env

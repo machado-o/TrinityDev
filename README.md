@@ -8,13 +8,13 @@ Sistema de Aluguel de Veiculos
 
 ### Processos de negócio:
 
-1. Gestão de Reserva
-2. Check-in / Check-out
-3. Check-up
+1. Reserva
+2. Check-in
+3. Check-out
 
 ### Cadastros:
 
-1. Atendente
+1. Funcionário
 2. Cliente
 3. Agência
 4. Categoria
