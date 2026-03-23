@@ -106,6 +106,7 @@ class Cliente extends Model {
       }
     }, { sequelize, modelName: 'cliente', tableName: 'clientes' })
   }
+  static associate(models) {}
 }
 
 export { Cliente };

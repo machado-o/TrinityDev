@@ -74,6 +74,7 @@ class CategoriaVeiculo extends Model {
       }
     }, { sequelize, modelName: 'categoriaVeiculo', tableName: 'categoriasVeiculos' });
   }
+  static associate(models) {}
 }
 
 export { CategoriaVeiculo };

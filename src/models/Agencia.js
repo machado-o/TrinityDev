@@ -51,6 +51,7 @@ class Agencia extends Model {
       }
     }, { sequelize, modelName: 'agencia', tableName: 'agencias' });
   }
+  static associate(models) {}
 }
 
 export { Agencia };
