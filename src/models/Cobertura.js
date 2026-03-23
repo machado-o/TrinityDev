@@ -31,9 +31,9 @@ class Cobertura extends Model {
     }, { sequelize, modelName: 'cobertura', tableName: 'coberturas' });
   }
   static associate(models) {
-    this.belongsToMany(models.Seguro, {
+    this.belongsToMany(models.seguro, {
       as: 'seguros',
-      through: 'Seguro_Cobertura',
+      through: 'seguro_cobertura',
       foreignKey: {
         name: 'coberturaId',
         allowNull: false,

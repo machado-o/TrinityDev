@@ -70,7 +70,7 @@ class Reserva extends Model {
     }, { sequelize, modelName: 'reserva', tableName: 'reservas' });
   }
   static associate(models) {
-    this.belongsTo(models.Cliente, {
+    this.belongsTo(models.cliente, {
       as: 'cliente',
       foreignKey: {
         name: 'clienteId',
@@ -82,7 +82,7 @@ class Reserva extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.CategoriaVeiculo, {
+    this.belongsTo(models.categoriaVeiculo, {
       as: 'categoriaVeiculo',
       foreignKey: {
         name: 'categoriaVeiculoId',
@@ -94,7 +94,7 @@ class Reserva extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.Funcionario, {
+    this.belongsTo(models.funcionario, {
       as: 'funcionario',
       foreignKey: {
         name: 'funcionarioId',
@@ -106,7 +106,7 @@ class Reserva extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.Seguro, {
+    this.belongsTo(models.seguro, {
       as: 'seguro',
       foreignKey: {
         name: 'seguroId',
@@ -115,7 +115,7 @@ class Reserva extends Model {
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.Agencia, {
+    this.belongsTo(models.agencia, {
       as: 'agenciaRetirada',
       foreignKey: {
         name: 'agenciaRetiradaId',
@@ -127,7 +127,7 @@ class Reserva extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.Agencia, {
+    this.belongsTo(models.agencia, {
       as: 'agenciaDevolucao',
       foreignKey: {
         name: 'agenciaDevolucaoId',

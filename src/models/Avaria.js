@@ -24,9 +24,9 @@ class Avaria extends Model {
     }, { sequelize, modelName: 'avaria', tableName: 'avarias' });
   }
   static associate(models) {
-    this.belongsToMany(models.Checkout, {
+    this.belongsToMany(models.checkout, {
       as: 'checkouts',
-      through: 'Checkout_Avaria',
+      through: 'checkout_avaria',
       foreignKey: { 
         name: 'avariaId', 
         allowNull: false,

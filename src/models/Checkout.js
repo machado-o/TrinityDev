@@ -95,7 +95,7 @@ class Checkout extends Model {
     }, { sequelize, modelName: 'checkout', tableName: 'checkouts' });
   }
   static associate(models) {
-    this.belongsTo(models.Checkin, {
+    this.belongsTo(models.checkin, {
       as: 'checkin',
       foreignKey: {
         name: 'checkinId',
@@ -107,7 +107,7 @@ class Checkout extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsTo(models.Funcionario, {
+    this.belongsTo(models.funcionario, {
       as: 'funcionario',
       foreignKey: {
         name: 'funcionarioId',
@@ -119,9 +119,9 @@ class Checkout extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-    this.belongsToMany(models.Avaria, {
+    this.belongsToMany(models.avaria, {
       as: 'avarias',
-      through: 'Checkout_Avaria',
+      through: 'checkout_avaria',
       foreignKey: { 
         name: 'checkoutId',
         allowNull: false,

@@ -86,7 +86,7 @@ class Funcionario extends Model {
     }, { sequelize, modelName: 'funcionario', tableName: 'funcionarios' });
   }
   static associate(models) {
-    this.belongsTo(models.Agencia, {
+    this.belongsTo(models.agencia, {
       as: 'agencia',
       foreignKey: {
         name: 'agenciaId',

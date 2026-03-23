@@ -86,7 +86,7 @@ class Veiculo extends Model {
     }, { sequelize, modelName: 'veiculo', tableName: 'veiculos' });
   }
   static associate(models) {
-    this.belongsTo(models.CategoriaVeiculo, {
+    this.belongsTo(models.categoriaVeiculo, {
       as: 'categoria',
       foreignKey: {
         name: 'categoriaVeiculoId',

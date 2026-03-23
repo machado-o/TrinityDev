@@ -37,7 +37,7 @@ class Multa extends Model {
     }, { sequelize, modelName: 'multa', tableName: 'multas' })
   }
   static associate(models) {
-    this.belongsTo(models.Cliente, {
+    this.belongsTo(models.cliente, {
       as: 'cliente',
       foreignKey: {
         name: 'clienteId',
