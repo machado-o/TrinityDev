@@ -7,21 +7,30 @@ class Checkout extends Model {
         type: DataTypes.DATEONLY,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "A data do check-out deve ser preenchida!" },
-          isDate: { msg: "Data de check-out inválida!" }
+          notNull: { msg: "A data do check-out deve ser preenchida!" },
+          isDate: { msg: "Data de check-out inválida!" },
+          isValidDate(value) {
+            const hoje = new Date().toISOString().split('T')[0];
+            if (value < hoje) {
+              throw new Error("A data do check-out não pode ser no passado!");
+            }
+          }
         }
       },
       horarioCheckout: {
         type: DataTypes.TIME,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "O horário do check-out deve ser preenchido!" }
+          notNull: { msg: "O horário do check-out deve ser preenchido!" },
+          is: { args: /^([01]\d|2[0-3]):([0-5]\d)$/, msg: "Horário de check-out inválido! Use o formato HH:mm." }
         }
       },
       quilometragemCheckout: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
+          notNull: { msg: "A quilometragem de devolução deve ser preenchida!" },
+          isDecimal: { msg: "A quilometragem de devolução deve ser um número decimal válido!" },
           min: { args: [0], msg: "A quilometragem de devolução não pode ser negativa!" }
         }
       },
@@ -29,51 +38,106 @@ class Checkout extends Model {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: {
-            args: [['Baixo', 'Médio', 'Alto', 'Vazio']],
-            msg: "O nível de combustível deve ser Baixo, Médio, Alto ou Vazio!"
-          }
+          notNull: { msg: "O nível de combustível deve ser informado!" },
+          notEmpty: { msg: "O nível de combustível deve ser informado!" },
+          isIn: { args: [['Alto', 'Médio', 'Baixo', 'Vazio']], msg: "O nível de combustível deve ser Baixo, Médio, Alto ou Vazio!" }
         }
       },
       condicaoPneus: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "A condição dos pneus deve ser informada!" }
+          notNull: { msg: "A condição dos pneus deve ser informada!" },
+          notEmpty: { msg: "A condição dos pneus deve ser informada!" },
+          isIn: { args: [['Bom', 'Regular', 'Ruim', 'Furado']], msg: "A condição dos pneus deve ser Bom, Regular, Ruim ou Furado!" }
         }
       },
-      condicaoPaletas: {
+      condicaoPalhetas: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "A condição das paletas deve ser informada!" }
+          notNull: { msg: "A condição das palhetas deve ser informada!" },
+          notEmpty: { msg: "A condição das palhetas deve ser informada!" },
+          isIn: { args: [['Boas', 'Ressecadas', 'Quebradas', 'Ausentes']], msg: "A condição das palhetas deve ser Boas, Ressecadas, Quebradas ou Ausentes!" }
         }
       },
       limpoInternamente: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A informação sobre limpeza interna deve ser preenchida!" },
+          isIn: { args: [[true, false]], msg: "O campo de limpeza interna deve ser verdadeiro ou falso!" }
+        }
       },
       limpoExternamente: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A informação sobre limpeza externa deve ser preenchida!" },
+          isIn: { args: [[true, false]], msg: "O campo de limpeza externa deve ser verdadeiro ou falso!" }
+        }
       },
       possuiAvarias: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A informação sobre avarias deve ser preenchida!" },
+          isIn: { args: [[true, false]], msg: "O campo de avarias deve ser verdadeiro ou falso!" }
+        }
+      },
+      observacoes: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        validate: {
+          len: { args: [0, 1000], msg: "As observações do check-out devem ter no máximo 1000 caracteres!" }
+        }
       }
     }, { sequelize, modelName: 'checkout', tableName: 'checkouts' });
   }
-
   static associate(models) {
-
     this.belongsTo(models.Checkin, {
-      foreignKey: { name: 'checkinId', allowNull: false },
-      as: 'checkin'
+      as: 'checkin',
+      foreignKey: {
+        name: 'checkinId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "O check-out deve estar associado a um check-in!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
-
     this.belongsTo(models.Funcionario, {
-      foreignKey: { name: 'funcionarioId', allowNull: false },
-      as: 'funcionario'
+      as: 'funcionario',
+      foreignKey: {
+        name: 'funcionarioId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "O check-out deve estar associado a um funcionário!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+    this.belongsToMany(models.Avaria, {
+      as: 'avarias',
+      through: 'Checkout_Avaria',
+      foreignKey: { 
+        name: 'checkoutId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "O checkout deve estar associado a uma avaria!" }
+        }
+      },
+      otherKey: {
+        name: 'avariaId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A avaria deve estar associada a um checkout!" }
+        }
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
     });
   }
 }

@@ -26,9 +26,9 @@ class Agencia extends Model {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notNull: { msg: "O endereço completo deve ser preenchido!" },
-          notEmpty: { msg: "O endereço completo deve ser preenchido!" },
-          len: { args: [1, 100], msg: "O endereço completo deve ter entre 1 e 100 caracteres!" }
+          notNull: { msg: "O endereço da agência deve ser preenchido!" },
+          notEmpty: { msg: "O endereço da agência deve ser preenchido!" },
+          len: { args: [1, 100], msg: "O endereço da agência deve ter entre 1 e 100 caracteres!" }
         }
       },
       telefone: {

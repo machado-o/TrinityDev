@@ -7,65 +7,72 @@ class CategoriaVeiculo extends Model {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "O nome da categoria deve ser preenchido!" }
+          notNull: { msg: "O nome da categoria deve ser preenchido!" },
+          notEmpty: { msg: "O nome da categoria deve ser preenchido!" },
+          len: { args: [1, 50], msg: "O nome da categoria deve ter entre 1 e 50 caracteres!" }
         }
       },
       descricao: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.TEXT,
+        allowNull: true,
+        validate: {
+          len: { args: [0, 1000], msg: "A descrição da categoria deve ter no máximo 1000 caracteres!" }
+        }
       },
       valorDiaria: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          min: { args: [0.01], msg: "O valor da diária deve ser maior que zero!" }
+          notNull: { msg: "O valor da diária deve ser preenchido!" },
+          min: { args: [0], msg: "O valor da diária não pode ser negativo!" },
+          isDecimal: { msg: "O valor da diária deve ser um número decimal válido!" }
         }
       },
       tipoCarroceria: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: {
-            args: [['Sedan', 'Hatch', 'SUV', 'Picape']],
-            msg: "Tipo de carroceria inválido!"
-          }
+          notNull: { msg: "O tipo de carroceria deve ser preenchido!" },
+          notEmpty: { msg: "O tipo de carroceria deve ser preenchido!" },
+          isIn: { args: [['Sedan', 'Hatch', 'SUV', 'Picape']], msg: "Tipo de carroceria inválido!" }
         }
       },
       propulsao: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: {
-            args: [['Elétrico', 'Híbrido', 'Combustão']],
-            msg: "Tipo de propulsão inválida!"
-          }
+          notNull: { msg: "O tipo de propulsão deve ser preenchido!" },
+          notEmpty: { msg: "O tipo de propulsão deve ser preenchido!" },
+          isIn: { args: [['Elétrico', 'Híbrido', 'Combustão']], msg: "Tipo de propulsão inválida!" }
         }
       },
       cambio: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isIn: {
-            args: [['Automático', 'Manual']],
-            msg: "O câmbio deve ser Automático ou Manual!"
-          }
+          notNull: { msg: "O tipo de câmbio deve ser preenchido!" },
+          notEmpty: { msg: "O tipo de câmbio deve ser preenchido!" },
+          isIn: { args: [['Automático', 'Manual']], msg: "O câmbio deve ser Automático ou Manual!" }
         }
       },
       arCondicionado: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A informação sobre ar-condicionado deve ser preenchida!" },
+          isIn: { args: [[true, false]], msg: "O campo de ar-condicionado deve ser verdadeiro ou falso!" }
+        }
       },
       capacidade: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
+          notNull: { msg: "A capacidade deve ser preenchida!" },
+          isInt: { msg: "A capacidade deve ser um número inteiro!" },
           min: { args: [1], msg: "A capacidade deve ser de pelo menos 1 passageiro!" }
         }
       }
-    }, { sequelize, modelName: 'categoriaVeiculo', tableName: 'categorias_veiculos' });
-  }
-
-  static associate(models) {
+    }, { sequelize, modelName: 'categoriaVeiculo', tableName: 'categoriasVeiculos' });
   }
 }
 

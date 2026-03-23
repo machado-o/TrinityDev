@@ -7,17 +7,22 @@ class Reserva extends Model {
         type: DataTypes.DATE,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "A data/hora de retirada deve ser preenchida!" },
-          isDate: { msg: "Data de retirada inválida!" }
+          notNull: { msg: "A data/hora de retirada deve ser preenchida!" },
+          isDate: { msg: "Data de retirada inválida!" },
+          isValidDate(value) {
+            const hoje = new Date();
+            if (value < hoje) {
+              throw new Error("A data de retirada não pode ser no passado!");
+            }
+          }
         }
       },
       dataDevolucao: {
         type: DataTypes.DATE,
         allowNull: false,
         validate: {
-          notEmpty: { msg: "A data/hora de devolução deve ser preenchida!" },
+          notNull: { msg: "A data/hora de devolução deve ser preenchida!" },
           isDate: { msg: "Data de devolução inválida!" },
-          // Validação customizada e fortíssima:
           isAfterRetirada(value) {
             if (new Date(value) <= new Date(this.dataRetirada)) {
               throw new Error('A data de devolução deve ser posterior à data de retirada!');
@@ -26,72 +31,113 @@ class Reserva extends Model {
         }
       },
       valorDiaria: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          min: { args: [0.01], msg: "O valor da diária não pode ser zero ou negativo!" }
+          notNull: { msg: "O valor da diária deve ser preenchido!" },
+          isDecimal: { msg: "O valor da diária deve ser um número decimal válido!" },
+          min: { args: [0], msg: "O valor da diária não pode ser negativo!" }
         }
       },
-      qtdDias: {
+      quantidadeDias: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
+          notNull: { msg: "A quantidade de dias deve ser preenchida!" },
+          isInt: { msg: "A quantidade de dias deve ser um número inteiro!" },
           min: { args: [1], msg: "A reserva deve ter duração mínima de 1 dia!" },
-          isInt: { msg: "A quantidade de dias deve ser um número inteiro!" }
+          max: { args: [365], msg: "A reserva não pode ter duração superior a 365 dias!" }
         }
       },
       valorSeguro: {
-        type: DataTypes.FLOAT,
-        allowNull: true, // Opcional, pois o cliente pode não querer seguro
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
         defaultValue: 0,
         validate: {
+          isDecimal: { msg: "O valor do seguro deve ser um número decimal válido!" },
           min: { args: [0], msg: "O valor do seguro não pode ser negativo!" }
         }
       },
       valorFinal: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
+          notNull: { msg: "O valor final estimado deve ser preenchido!" },
+          isDecimal: { msg: "O valor final estimado deve ser um número decimal válido!" },
           min: { args: [0], msg: "O valor final estimado não pode ser negativo!" }
         }
       }
     }, { sequelize, modelName: 'reserva', tableName: 'reservas' });
   }
-
   static associate(models) {
-    // 1. Cliente da reserva
     this.belongsTo(models.Cliente, {
-      foreignKey: { name: 'clienteId', allowNull: false },
-      as: 'cliente'
+      as: 'cliente',
+      foreignKey: {
+        name: 'clienteId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A reserva deve estar associada a um cliente!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
-
-    // 2. Categoria de Veículo reservada
     this.belongsTo(models.CategoriaVeiculo, {
-      foreignKey: { name: 'categoriaId', allowNull: false },
-      as: 'categoria'
+      as: 'categoriaVeiculo',
+      foreignKey: {
+        name: 'categoriaVeiculoId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A reserva deve estar associada a uma categoria de veículo!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
-
-    // 3. Funcionário que registrou a reserva no balcão
     this.belongsTo(models.Funcionario, {
-      foreignKey: { name: 'funcionarioId', allowNull: false },
-      as: 'funcionario'
+      as: 'funcionario',
+      foreignKey: {
+        name: 'funcionarioId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A reserva deve estar associada a um funcionário!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
-
-    // 4. Seguro contratado (É o único que permite ficar vazio/nulo)
     this.belongsTo(models.Seguro, {
-      foreignKey: { name: 'seguroId', allowNull: true },
-      as: 'seguro'
+      as: 'seguro',
+      foreignKey: {
+        name: 'seguroId',
+        allowNull: true,
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
     });
-
-    // 5 e 6. As duas Agências (Retirada e Devolução)
     this.belongsTo(models.Agencia, {
-      foreignKey: { name: 'agenciaRetiradaId', allowNull: false },
-      as: 'agenciaRetirada'
+      as: 'agenciaRetirada',
+      foreignKey: {
+        name: 'agenciaRetiradaId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A reserva deve estar associada a uma agência de retirada!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
-
     this.belongsTo(models.Agencia, {
-      foreignKey: { name: 'agenciaDevolucaoId', allowNull: false },
-      as: 'agenciaDevolucao'
+      as: 'agenciaDevolucao',
+      foreignKey: {
+        name: 'agenciaDevolucaoId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A reserva deve estar associada a uma agência de devolução!" }
+        }
+      },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
     });
   }
 }

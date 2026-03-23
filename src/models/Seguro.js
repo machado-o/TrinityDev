@@ -3,56 +3,71 @@ import { Model, DataTypes } from 'sequelize';
 class Seguro extends Model {
   static init(sequelize) {
     super.init({
-      nomePlano: {
+      nome: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
+          notNull: { msg: "O nome do plano de seguro deve ser preenchido!" },
           notEmpty: { msg: "O nome do plano deve ser preenchido!" },
-          len: { args: [3, 100], msg: "O nome do plano deve ter entre 3 e 100 caracteres!" }
+          len: { args: [1, 50], msg: "O nome do plano deve ter entre 1 e 50 caracteres!" }
         }
       },
       empresaSeguradora: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
+          notNull: { msg: "A empresa seguradora deve ser preenchida!" },
           notEmpty: { msg: "A empresa seguradora deve ser preenchida!" },
-          len: { args: [2, 100], msg: "O nome da seguradora deve ter pelo menos 2 caracteres!" }
+          len: { args: [1, 50], msg: "O nome da empresa seguradora deve ter entre 1 e 50 caracteres!" }
         }
       },
       descricao: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: DataTypes.TEXT,
+        allowNull: true,
         validate: {
-          notEmpty: { msg: "A descrição do seguro não pode ficar vazia!" },
-          len: { args: [10, 500], msg: "Forneça uma descrição mais detalhada (mínimo de 10 caracteres)." }
+          len: { args: [0, 1000], msg: "A descrição do seguro deve ter entre 0 e 1000 caracteres!" }
         }
       },
-      valorDiarioAdicional: {
-        type: DataTypes.FLOAT,
+      valorDiariaAdicional: {
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          isFloat: { msg: "O valor diário deve ser um número válido!" },
+          notNull: { msg: "O valor diário adicional do seguro deve ser preenchido!" },
+          isDecimal: { msg: "O valor da diária adicional deve ser um número válido!" },
           min: { args: [0], msg: "O valor diário adicional não pode ser negativo!" }
         }
       },
       franquia: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          isFloat: { msg: "O valor da franquia deve ser um número válido!" },
+          notNull: { msg: "O valor da franquia do seguro deve ser preenchido!" },
+          isDecimal: { msg: "O valor da franquia deve ser um número válido!" },
           min: { args: [0], msg: "O valor da franquia não pode ser negativo!" }
         }
       }
     }, { sequelize, modelName: 'seguro', tableName: 'seguros' });
   }
-
   static associate(models) {
-    this.hasMany(models.Cobertura, {
+    this.belongsToMany(models.Cobertura, {
+      as: 'coberturas',
+      through: 'Seguro_Cobertura',
       foreignKey: {
         name: 'seguroId',
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: { msg: "O seguro deve estar associado a uma cobertura!" }
+        }
       },
-      as: 'coberturas'
+      otherKey: {
+        name: 'coberturaId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "A cobertura deve estar associada a um seguro!" }
+        }
+      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
     });
   }
 }
