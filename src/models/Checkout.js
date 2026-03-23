@@ -8,13 +8,7 @@ class Checkout extends Model {
         allowNull: false,
         validate: {
           notNull: { msg: "A data do check-out deve ser preenchida!" },
-          isDate: { msg: "Data de check-out inválida!" },
-          isValidDate(value) {
-            const hoje = new Date().toISOString().split('T')[0];
-            if (value < hoje) {
-              throw new Error("A data do check-out não pode ser no passado!");
-            }
-          }
+          isDate: { msg: "Data de check-out inválida!" }
         }
       },
       horarioCheckout: {
@@ -35,29 +29,26 @@ class Checkout extends Model {
         }
       },
       nivelCombustivel: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Alto', 'Médio', 'Baixo', 'Vazio'),
         allowNull: false,
         validate: {
           notNull: { msg: "O nível de combustível deve ser informado!" },
-          notEmpty: { msg: "O nível de combustível deve ser informado!" },
           isIn: { args: [['Alto', 'Médio', 'Baixo', 'Vazio']], msg: "O nível de combustível deve ser Baixo, Médio, Alto ou Vazio!" }
         }
       },
       condicaoPneus: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Bom', 'Regular', 'Ruim', 'Furado'),
         allowNull: false,
         validate: {
           notNull: { msg: "A condição dos pneus deve ser informada!" },
-          notEmpty: { msg: "A condição dos pneus deve ser informada!" },
           isIn: { args: [['Bom', 'Regular', 'Ruim', 'Furado']], msg: "A condição dos pneus deve ser Bom, Regular, Ruim ou Furado!" }
         }
       },
       condicaoPalhetas: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Boas', 'Ressecadas', 'Quebradas', 'Ausentes'),
         allowNull: false,
         validate: {
           notNull: { msg: "A condição das palhetas deve ser informada!" },
-          notEmpty: { msg: "A condição das palhetas deve ser informada!" },
           isIn: { args: [['Boas', 'Ressecadas', 'Quebradas', 'Ausentes']], msg: "A condição das palhetas deve ser Boas, Ressecadas, Quebradas ou Ausentes!" }
         }
       },

@@ -24,11 +24,11 @@ class Veiculo extends Model {
         }
       },
       status: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Disponível', 'Reservado', 'Manutenção'),
         allowNull: false,
+        defaultValue: 'Disponível',
         validate: {
           notNull: { msg: "O status do veículo deve ser preenchido!" },
-          notEmpty: { msg: "O status do veículo deve ser preenchido!" },
           isIn: { args: [['Disponível', 'Reservado', 'Manutenção']], msg: "Status inválido!" }
         }
       },
@@ -95,6 +95,13 @@ class Veiculo extends Model {
           notNull: { msg: "O veículo deve estar associado a uma categoria!" }
         }
       },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.checkin, {
+      as: 'checkins',
+      foreignKey: 'veiculoId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });

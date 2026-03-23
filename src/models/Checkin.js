@@ -8,13 +8,7 @@ class Checkin extends Model {
         allowNull: false,
         validate: {
           notNull: { msg: "A data do check-in deve ser preenchida!" },
-          isDate: { msg: "Data de check-in inválida!" },
-          isValidDate(value) {
-            const hoje = new Date().toISOString().split('T')[0];
-            if (value < hoje) {
-              throw new Error("A data do check-in não pode ser no passado!");
-            }
-          }
+          isDate: { msg: "Data de check-in inválida!" }
         }
       },
       horarioCheckin: {
@@ -94,6 +88,13 @@ class Checkin extends Model {
           notNull: { msg: "O check-in deve estar associado a um funcionário!" }
         }
       },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasOne(models.checkout, {
+      as: 'checkout',
+      foreignKey: 'checkinId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });

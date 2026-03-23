@@ -1,4 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
+import bcrypt from 'bcryptjs';
 
 class Funcionario extends Model {
   static init(sequelize) {
@@ -23,11 +24,10 @@ class Funcionario extends Model {
         }
       },
       cargo: {
-        type: DataTypes.STRING, 
+        type: DataTypes.ENUM('Gerente', 'Atendente'),
         allowNull: false,
         validate: {
           notNull: { msg: "O cargo do funcionário deve ser preenchido!" },
-          notEmpty: { msg: "O cargo do funcionário deve ser preenchido!" },
           isIn: { args: [['Gerente', 'Atendente']], msg: "O cargo deve ser Gerente ou Atendente" }
         }
       },
@@ -80,10 +80,31 @@ class Funcionario extends Model {
         validate: {
           notNull: { msg: "A senha do funcionário deve ser preenchida!" },
           notEmpty: { msg: "A senha do funcionário deve ser preenchida!" },
-          len: { args: [8, 100], msg: "A senha do funcionário deve ter entre 8 e 100 caracteres!" }
+          len: { args: [8, 100], msg: "A senha do funcionário deve ter entre 8 e 100 caracteres!" },
+          isStrongPassword(value) {
+            // Exige letra maiúscula, minúscula, número e caractere especial.
+            const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,100}$/;
+            if (!strongRegex.test(value)) {
+              throw new Error("A senha deve conter ao menos 1 maiúscula, 1 minúscula, 1 número e 1 caractere especial!");
+            }
+          }
         }
       }
-    }, { sequelize, modelName: 'funcionario', tableName: 'funcionarios' });
+    }, {
+      sequelize,
+      modelName: 'funcionario',
+      tableName: 'funcionarios',
+      hooks: {
+        beforeCreate: async (funcionario) => {
+          funcionario.senha = await bcrypt.hash(funcionario.senha, 10);
+        },
+        beforeUpdate: async (funcionario) => {
+          if (funcionario.changed('senha')) {
+            funcionario.senha = await bcrypt.hash(funcionario.senha, 10);
+          }
+        }
+      }
+    });
   }
   static associate(models) {
     this.belongsTo(models.agencia, {
@@ -95,6 +116,27 @@ class Funcionario extends Model {
           notNull: { msg: "O funcionário deve estar associado a uma agência!" }
         }
       },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.reserva, {
+      as: 'reservas',
+      foreignKey: 'funcionarioId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.checkin, {
+      as: 'checkins',
+      foreignKey: 'funcionarioId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.checkout, {
+      as: 'checkouts',
+      foreignKey: 'funcionarioId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });

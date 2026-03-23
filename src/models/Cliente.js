@@ -78,11 +78,10 @@ class Cliente extends Model {
         }
       },
       categoriaCnh: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('A', 'B', 'AB', 'C', 'D', 'E', 'AC', 'AD', 'AE'),
         allowNull: false,
         validate: {
           notNull: { msg: "A categoria da CNH deve ser preenchida!" },
-          notEmpty: { msg: "A categoria da CNH deve ser preenchida!" },
           isIn: { args: [['A', 'B', 'AB', 'C', 'D', 'E', 'AC', 'AD', 'AE']], msg: "Categoria da CNH inválida!" }
         }
       },
@@ -106,7 +105,21 @@ class Cliente extends Model {
       }
     }, { sequelize, modelName: 'cliente', tableName: 'clientes' })
   }
-  static associate(models) {}
+  static associate(models) {
+    this.hasMany(models.reserva, {
+      as: 'reservas',
+      foreignKey: 'clienteId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.multa, {
+      as: 'multas',
+      foreignKey: 'clienteId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+  }
 }
 
 export { Cliente };

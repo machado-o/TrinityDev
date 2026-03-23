@@ -2,6 +2,12 @@
 
 Sistema de Aluguel de Veiculos
 
+## Tecnologias
+
+- Node.js + Express
+- Sequelize ORM
+- Banco relacional (SQLite em teste e Postgres em desenvolvimento/producao)
+
 ## Grupo: Henrique, Julia e Lorrayne | Tema: Aluguel de Veículos
 
 ### Domínio do problema: Sistema de gestão de aluguel de veículos voltado para os funcionários da empresa.
@@ -17,35 +23,44 @@ Sistema de Aluguel de Veiculos
 1. Funcionário
 2. Cliente
 3. Agência
-4. Categoria
+4. Categoria de Veículo
 5. Veículo
 6. Seguro
 
 ### Regras de Negócio (2 p/ cada processo):
 
-1. Reservas com diárias a partir de X dias tem desconto
-2. A data de check-in e check-out deve ser no horário de funcionamento da agência
-3. Cliente/Condutor precisa ter CNH definitiva válida para fazer check-in
-4. O carro só pode ser devolvido pelo cliente/condutor que alugou/reservou
-5. O check-up deve ser feita no momento do check-in/check-out
-6. Multar o cliente caso haja alguma avaria e não tenha sido contratado um seguro que cubra o dano
+1. Reserva: Reservas com quantidade de dias igual ou superior ao limite configurado pelo Gerente têm desconto automático aplicado sobre o valor total.
+2. Reserva: O sistema deve bloquear a criação de reservas para clientes com reservas conflitantes.
+3. Check-in: Caso não haja veículos disponíveis da categoria escolhida, o cliente ganha um "upgrade" de categoria gratuitamente.
+4. Check-in: Caso constem débitos pendentes de locações anteriores no histórico do cliente, o sistema deve bloquear a liberação do novo veículo.
+5. Check-out: A quilometragem do carro deve ser maior ou igual à última quilometragem já registrada do veículo.
+6. Check-out: Cliente com mais de 3 avarias registradas em locações anteriores, tem taxa de inspeção aplicada.
 
 ### Relatórios:
 
-1. Reservas (cliente, Categoria, data/hora, valor)
-2. Check-up (tipo (check-in ou check-out), Funcionário, Veículo, combustível, pneu, paleta, limpeza, avarias)
-3. Agências
-4. Seguros
-5. Veículos disponíveis
-6. Valores de multa
+1. Reservas realizadas por funcionário em um período informado. Filtros: Funcionário e Data.
+Totalização: Quantidade e valor de reservas realizadas por um funcionário.
 
----
+2. Reservas por categoria de veículo em um período informado. Filtros: Categoria de Veículo e Data.
+Totalização: Quantidade e valor de reservas de uma categoria de veículo.
+
+3. Check-ins realizados por agência em um período informado. Filtros: Agência e Data.
+Totalização: Quantidade de check-ins de uma agência. // CLiente com mais check-ins nessa agência?
+
+4. Check-ins agrupados por veículo em um período informado. Filtros: Veículo e Data.
+Totalização: Quantidade de check-ins de um veículo. // Funcionário com mais check-ins desse veículo?
+
+5. Check-outs com avarias registradas agrupadas por veículo em um período informado. Filtros: Veículo e Data.
+Totalização: Quantidade e valor de avarias de um veículo.
+
+6. Check-outs com multas aplicadas a clientes em um período. Filtros: Cliente e Data.
+Totalização: Quantidade e valor de multas de um cliente.
 
 # Visão Geral
 
-É proposto o desenvolvimento do Sistema de Aluguel de Veículos (SAV), voltado exclusivamente para os funcionários de uma locadora de veículos. O sistema tem como objetivo informatizar e centralizar os processos de reserva de veículos, check-in, check-out e check-up, garantindo maior controle operacional, rastreabilidade das locações e cumprimento das regras de negócio da empresa.
+É proposto o desenvolvimento do Sistema de Aluguel de Veículos (SAV), voltado exclusivamente para os funcionários de uma locadora de veículos. O sistema tem como objetivo informatizar e centralizar os processos de reserva, check-in e check-out, garantindo maior controle operacional, rastreabilidade das locações e cumprimento das regras de negócio da empresa.
 
-Deverão ser gerados relatórios relacionados aos cadastros básicos e às operações de reserva, check-up, seguros, veículos disponíveis e valores de multa aplicados.
+Deverão ser gerados relatórios relacionados aos cadastros básicos e às operações de reserva, check-in e check-out.
 
 O sistema deverá aplicar automaticamente descontos para reservas com diárias acima do limite definido, e calcular multas para avarias não cobertas por seguro.
 
@@ -54,9 +69,9 @@ O sistema deverá aplicar automaticamente descontos para reservas com diárias a
 ### O SAV é um sistema independente e totalmente auto-contido. Suas principais funcionalidades contemplam:
 
 - Gestão de cadastros: funcionários, clientes, agências, categorias de veículos, veículos e seguros.
-- Gestão de reservas: criação, consulta e cancelamento de reservas de veículos.
-- Check-in / Check-out: registro de retirada e devolução de veículos por clientes.
-- Check-up: registro do estado do veículo (combustível, pneus, limpeza, avarias) no momento do check-in e check-out.
+- Reservas: criação, consulta e cancelamento de reservas de veículos.
+- Check-in: registro de retirada de veículos por clientes.
+- Check-out: registro de devolução de veículos por clientes e do estado do veículo.
 - Relatórios: emissão de relatórios gerenciais conforme necessidade da empresa.
 
 ### Funcionalidades que não serão implementadas nesta versão:
@@ -81,7 +96,7 @@ Os usuários do SAV são exclusivamente os funcionários da empresa. A seguir es
 
 ### Atendente
 
-Usuário operacional responsável pelo atendimento direto ao cliente. Ele realiza as operações de reserva, check-in, check-out e check-up, além de poder consultar e cadastrar clientes.
+Usuário operacional responsável pelo atendimento direto ao cliente. Ele realiza as operações de reserva, check-in e check-out, além de poder consultar e cadastrar clientes.
 
 ### Gerente
 

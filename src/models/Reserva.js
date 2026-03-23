@@ -11,7 +11,11 @@ class Reserva extends Model {
           isDate: { msg: "Data de retirada inválida!" },
           isValidDate(value) {
             const hoje = new Date();
-            if (value < hoje) {
+            const dataRetirada = new Date(value);
+            if (Number.isNaN(dataRetirada.getTime())) {
+              throw new Error("Data de retirada inválida!");
+            }
+            if (dataRetirada.getTime() < hoje.getTime()) {
               throw new Error("A data de retirada não pode ser no passado!");
             }
           }
@@ -136,6 +140,13 @@ class Reserva extends Model {
           notNull: { msg: "A reserva deve estar associada a uma agência de devolução!" }
         }
       },
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasOne(models.checkin, {
+      as: 'checkin',
+      foreignKey: 'reservaId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });

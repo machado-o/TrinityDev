@@ -41,17 +41,38 @@ class Agencia extends Model {
         }
       },
       status: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Ativa', 'Inativa'),
         allowNull: false,
+        defaultValue: 'Ativa',
         validate: {
           notNull: { msg: "O status deve ser preenchido!" },
-          notEmpty: { msg: "O status deve ser preenchido!" },
           isIn: { args: [['Ativa', 'Inativa']], msg: "O status deve ser 'Ativa' ou 'Inativa'!" }
         }
       }
     }, { sequelize, modelName: 'agencia', tableName: 'agencias' });
   }
-  static associate(models) {}
+  static associate(models) {
+    this.hasMany(models.funcionario, {
+      as: 'funcionarios',
+      foreignKey: 'agenciaId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.reserva, {
+      as: 'reservasRetirada',
+      foreignKey: 'agenciaRetiradaId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.reserva, {
+      as: 'reservasDevolucao',
+      foreignKey: 'agenciaDevolucaoId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+  }
 }
 
 export { Agencia };

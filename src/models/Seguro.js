@@ -69,6 +69,13 @@ class Seguro extends Model {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     });
+
+    this.hasMany(models.reserva, {
+      as: 'reservas',
+      foreignKey: 'seguroId',
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    });
   }
 }
 

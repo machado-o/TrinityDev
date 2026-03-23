@@ -29,29 +29,26 @@ class CategoriaVeiculo extends Model {
         }
       },
       tipoCarroceria: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Sedan', 'Hatch', 'SUV', 'Picape'),
         allowNull: false,
         validate: {
           notNull: { msg: "O tipo de carroceria deve ser preenchido!" },
-          notEmpty: { msg: "O tipo de carroceria deve ser preenchido!" },
           isIn: { args: [['Sedan', 'Hatch', 'SUV', 'Picape']], msg: "Tipo de carroceria inválido!" }
         }
       },
       propulsao: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Elétrico', 'Híbrido', 'Combustão'),
         allowNull: false,
         validate: {
           notNull: { msg: "O tipo de propulsão deve ser preenchido!" },
-          notEmpty: { msg: "O tipo de propulsão deve ser preenchido!" },
           isIn: { args: [['Elétrico', 'Híbrido', 'Combustão']], msg: "Tipo de propulsão inválida!" }
         }
       },
       cambio: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Automático', 'Manual'),
         allowNull: false,
         validate: {
           notNull: { msg: "O tipo de câmbio deve ser preenchido!" },
-          notEmpty: { msg: "O tipo de câmbio deve ser preenchido!" },
           isIn: { args: [['Automático', 'Manual']], msg: "O câmbio deve ser Automático ou Manual!" }
         }
       },
@@ -74,7 +71,21 @@ class CategoriaVeiculo extends Model {
       }
     }, { sequelize, modelName: 'categoriaVeiculo', tableName: 'categoriasVeiculos' });
   }
-  static associate(models) {}
+  static associate(models) {
+    this.hasMany(models.veiculo, {
+      as: 'veiculos',
+      foreignKey: 'categoriaVeiculoId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+
+    this.hasMany(models.reserva, {
+      as: 'reservas',
+      foreignKey: 'categoriaVeiculoId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+  }
 }
 
 export { CategoriaVeiculo };
