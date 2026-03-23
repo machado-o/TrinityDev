@@ -5,16 +5,17 @@ services:
     build: .
     volumes:
       - .:/app
-      - /app/node_modules
+      - node_modules_data:/app/node_modules 
     ports:
       - "3000:3000"
     environment:
-      - DB_HOST=db
-      - DB_USER=admin
-      - DB_PASS=admin123
-      - DB_NAME=sav_trinitydev
+      DB_HOST: db
+      DB_USER: admin
+      DB_PASS: admin123
+      DB_NAME: sav_trinitydev
     depends_on:
-      - db
+      db:
+        condition: service_healthy 
 
   db:
     image: postgres:15
@@ -26,6 +27,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U admin -d sav_trinitydev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
+  node_modules_data:

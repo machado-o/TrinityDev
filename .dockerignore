@@ -8,8 +8,7 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 
-Requisitos/
-UML/
+Documentação/
 README.md
 
 .env
