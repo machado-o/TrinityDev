@@ -1,4 +1,4 @@
-
+/*
 // Configuração do banco de dados no ambiente de teste
 export const databaseConfig = {
   dialect: 'sqlite',
@@ -9,22 +9,22 @@ export const databaseConfig = {
     underscored: true
   }
 };
+*/
 
-/*
+
 // Configuração do banco de dados no ambiente de desenvolvimento
 export const databaseConfig = {
   dialect: 'postgres',
-  host: 'localhost',
-  username: 'postgres',
-  password: 'postgres',
-  database: 'scv-backend-node-sequelize',
+  host: 'db',
+  username: 'admin',
+  password: 'admin123',
+  database: 'sav_trinitydev',
   define: {
     timestamps: true,
     freezeTableName: true,
     underscored: true
   }
 };
-*/
 
 /*
 // Configuração do banco de dados no ambiente de produção
