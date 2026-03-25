@@ -20,7 +20,7 @@ class Funcionario extends Model {
         validate: {
           notNull: { msg: "O CPF do funcionário deve ser preenchido!" },
           notEmpty: { msg: "O CPF do funcionário deve ser preenchido!" },
-          is: { args: ["[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}\\-[0-9]{2}"], msg: "Padrão inválido!" }
+          is: { args: ["[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}\\-[0-9]{2}"], msg: "CPF do funcionário deve seguir o padrão NNN.NNN.NNN-NN!" }
         }
       },
       cargo: {
@@ -82,7 +82,6 @@ class Funcionario extends Model {
           notEmpty: { msg: "A senha do funcionário deve ser preenchida!" },
           len: { args: [8, 100], msg: "A senha do funcionário deve ter entre 8 e 100 caracteres!" },
           isStrongPassword(value) {
-            // Exige letra maiúscula, minúscula, número e caractere especial.
             const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,100}$/;
             if (!strongRegex.test(value)) {
               throw new Error("A senha deve conter ao menos 1 maiúscula, 1 minúscula, 1 número e 1 caractere especial!");
