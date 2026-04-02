@@ -1,3 +1,4 @@
+//Julia
 import { Model, DataTypes } from 'sequelize';
 
 class Checkout extends Model {

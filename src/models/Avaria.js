@@ -1,3 +1,5 @@
+//Complemento de Checkout
+//Julia, Lorrayne e Henrique
 import { Model, DataTypes } from 'sequelize';
 
 class Avaria extends Model {

@@ -1,7 +1,8 @@
+//Complemento de Cliente
+//Julia, Lorrayne e Henrique
 import { Model, DataTypes } from 'sequelize';
 
 class Multa extends Model {
-
   static init(sequelize) {
     super.init({
       valor: { 

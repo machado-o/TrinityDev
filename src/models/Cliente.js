@@ -1,7 +1,7 @@
+//Henrique
 import { Model, DataTypes } from 'sequelize';
 
 class Cliente extends Model {
-
   static init(sequelize) {
     super.init({
       nome: { 

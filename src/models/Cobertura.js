@@ -1,3 +1,5 @@
+//Complemento de Seguro
+//Julia, Lorrayne e Henrique
 import { Model, DataTypes } from 'sequelize';
 
 class Cobertura extends Model {

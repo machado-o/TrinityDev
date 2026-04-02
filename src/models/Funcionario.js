@@ -1,3 +1,4 @@
+//Henrique
 import { Model, DataTypes } from 'sequelize';
 import bcrypt from 'bcryptjs';
 

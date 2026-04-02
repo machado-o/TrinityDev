@@ -26,7 +26,6 @@ export const databaseConfig = {
   }
 };
 
-
 /*
 // Configuração do banco de dados no ambiente de produção
 export const databaseConfig = {
