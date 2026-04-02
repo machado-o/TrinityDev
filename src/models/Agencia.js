@@ -58,17 +58,21 @@ class Agencia extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-
     this.hasMany(models.reserva, {
       as: 'reservasRetirada',
       foreignKey: 'agenciaRetiradaId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-
     this.hasMany(models.reserva, {
       as: 'reservasDevolucao',
       foreignKey: 'agenciaDevolucaoId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+    this.hasMany(models.veiculo, {
+      as: 'veiculos',
+      foreignKey: 'agenciaId',
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });

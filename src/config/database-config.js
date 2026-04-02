@@ -26,6 +26,7 @@ export const databaseConfig = {
   }
 };
 
+
 /*
 // Configuração do banco de dados no ambiente de produção
 export const databaseConfig = {
@@ -40,4 +41,22 @@ export const databaseConfig = {
     underscored: true
   }
 };
+*/
+
+/*
+Passo a passo pgadmin
+
+Login:
+  email: admin@admin.com
+  password: admin
+
+Add new server
+  General:
+    Name: Banco Trinity
+  Connection:
+    Host: db
+    Port: 5432
+    Maintenance database: sav_trinitydev
+    Username: admin
+    Password: admin123
 */

@@ -98,10 +98,21 @@ class Veiculo extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
-
     this.hasMany(models.checkin, {
       as: 'checkins',
       foreignKey: 'veiculoId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+    this.belongsTo(models.agencia, {
+      as: 'agencia',
+      foreignKey: {
+        name: 'agenciaId',
+        allowNull: false,
+        validate: {
+          notNull: { msg: "O veículo deve estar associado a uma agência!" },
+        }
+      },
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
