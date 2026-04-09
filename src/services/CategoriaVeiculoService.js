@@ -39,11 +39,9 @@ class CategoriaVeiculoService {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover categoria de veículos com participações em ...!";
+      throw "Não é possível remover esta categoria pois está vinculada a veículos ou reservas!";
     }
   }
 }
 
 export { CategoriaVeiculoService };
-
-

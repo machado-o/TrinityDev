@@ -52,11 +52,9 @@ class VeiculoService {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover veículos...!";
+      throw "Não é possível remover este veículo pois está vinculado a outros registros!";
     }
   }
 }
 
 export { VeiculoService };
-
-

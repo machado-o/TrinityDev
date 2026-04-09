@@ -14,46 +14,50 @@ class CheckoutService {
   }
 
   static async create(req) {
-  const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
-          condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
-          possuiAvarias, observacoes, checkinId, funcionarioId } = req.body;
+    const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
+            condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
+            possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
-  const obj = await Checkout.create({ dataCheckout, horarioCheckout, quilometragemCheckout,
-          nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente,
-          limpoExternamente, possuiAvarias, observacoes, checkinId, funcionarioId });
+    const obj = await Checkout.create({ dataCheckout, horarioCheckout, quilometragemCheckout,
+            nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente,
+            limpoExternamente, possuiAvarias, observacoes, checkinId, funcionarioId });
 
-  return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
-}
+    if (avariaIds) await obj.setAvarias(avariaIds);
+
+    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+  }
 
   static async update(req) {
-  const { id } = req.params;
-  const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
-          condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
-          possuiAvarias, observacoes, checkinId, funcionarioId } = req.body;
+    const { id } = req.params;
+    const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
+            condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
+            possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
-  const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
-  if (obj == null) throw 'Checkout não encontrado!';
+    const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
+    if (obj == null) throw 'Checkout não encontrado!';
 
-  const patch = {
-    dataCheckout,
-    horarioCheckout,
-    quilometragemCheckout,
-    nivelCombustivel,
-    condicaoPneus,
-    condicaoPalhetas,
-    limpoInternamente,
-    limpoExternamente,
-    possuiAvarias,
-    observacoes,
-    checkinId,
-    funcionarioId,
-  };
-  Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
-  Object.assign(obj, patch);
-  await obj.save();
+    const patch = {
+      dataCheckout,
+      horarioCheckout,
+      quilometragemCheckout,
+      nivelCombustivel,
+      condicaoPneus,
+      condicaoPalhetas,
+      limpoInternamente,
+      limpoExternamente,
+      possuiAvarias,
+      observacoes,
+      checkinId,
+      funcionarioId,
+    };
+    Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
+    Object.assign(obj, patch);
+    await obj.save();
 
-  return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
-}
+    if (avariaIds !== undefined) await obj.setAvarias(avariaIds);
+
+    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+  }
 
   static async delete(req) {
     const { id } = req.params;

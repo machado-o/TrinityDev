@@ -219,7 +219,8 @@ function databaseInserts() {
             cor: "Preto",
             anoFabricacao: "2024",
             quilometragem: 1500.50,
-            categoriaVeiculoId: catHatch.id
+            categoriaVeiculoId: catHatch.id,
+            agenciaId: agencia1.id
         });
         const veiculo2 = await Veiculo.create({
             placa: "XYZ9A87",
@@ -230,7 +231,8 @@ function databaseInserts() {
             cor: "Branco",
             anoFabricacao: "2023",
             quilometragem: 25000.00,
-            categoriaVeiculoId: catSUV.id
+            categoriaVeiculoId: catSUV.id,
+            agenciaId: agencia2.id
         });
         const veiculo3 = await Veiculo.create({
             placa: "QWE2R34",
@@ -241,7 +243,8 @@ function databaseInserts() {
             cor: "Prata",
             anoFabricacao: "2022",
             quilometragem: 31000.10,
-            categoriaVeiculoId: catSedan.id
+            categoriaVeiculoId: catSedan.id,
+            agenciaId: agencia3.id
         });
         const veiculo4 = await Veiculo.create({
             placa: "RTY4U56",
@@ -252,7 +255,8 @@ function databaseInserts() {
             cor: "Cinza",
             anoFabricacao: "2021",
             quilometragem: 40210.45,
-            categoriaVeiculoId: catPicape.id
+            categoriaVeiculoId: catPicape.id,
+            agenciaId: agencia4.id
         });
 
         const cobRoubo = await Cobertura.create({
