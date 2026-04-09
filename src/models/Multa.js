@@ -34,6 +34,15 @@ class Multa extends Model {
         validate: {
           len: { args: [0, 1000], msg: "A descrição da multa deve ter entre 0 e 1000 caracteres!" }
         }
+      },
+      status: {
+        type: DataTypes.ENUM('Pendente', 'Paga'),
+        allowNull: false,
+        defaultValue: 'Pendente',
+        validate: {
+          notNull: { msg: "O status da multa deve ser preenchido!" },
+          isIn: { args: [['Pendente', 'Paga']], msg: "O status da multa deve ser 'Pendente' ou 'Paga'!" }
+        }
       }
     }, { sequelize, modelName: 'multa', tableName: 'multas' })
   }

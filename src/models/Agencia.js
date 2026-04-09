@@ -49,6 +49,27 @@ class Agencia extends Model {
           notNull: { msg: "O status deve ser preenchido!" },
           isIn: { args: [['Ativa', 'Inativa']], msg: "O status deve ser 'Ativa' ou 'Inativa'!" }
         }
+      },
+      limiteDiasDesconto: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 7,
+        validate: {
+          notNull: { msg: "O limite de dias para desconto deve ser preenchido!" },
+          isInt: { msg: "O limite de dias para desconto deve ser um número inteiro!" },
+          min: { args: [1], msg: "O limite de dias para desconto deve ser pelo menos 1!" }
+        }
+      },
+      percentualDesconto: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: false,
+        defaultValue: 10.00,
+        validate: {
+          notNull: { msg: "O percentual de desconto deve ser preenchido!" },
+          isDecimal: { msg: "O percentual de desconto deve ser um número decimal válido!" },
+          min: { args: [0], msg: "O percentual de desconto não pode ser negativo!" },
+          max: { args: [100], msg: "O percentual de desconto não pode ultrapassar 100%!" }
+        }
       }
     }, { sequelize, modelName: 'agencia', tableName: 'agencias' });
   }

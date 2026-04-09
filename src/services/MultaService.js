@@ -14,17 +14,17 @@ class MultaService {
   }
 
   static async create(req) {
-    const { valor, dataEmissao, descricao, clienteId } = req.body;
-    const obj = await Multa.create({ valor, dataEmissao, descricao, clienteId });
+    const { valor, dataEmissao, descricao, clienteId, status } = req.body;
+    const obj = await Multa.create({ valor, dataEmissao, descricao, clienteId, status });
     return await Multa.findByPk(obj.id, { include: { all: true, nested: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
-    const { valor, dataEmissao, descricao, clienteId } = req.body;
+    const { valor, dataEmissao, descricao, clienteId, status } = req.body;
     const obj = await Multa.findByPk(id, { include: { all: true, nested: true } });
     if (obj == null) throw 'Multa não encontrada!';
-    const patch = { valor, dataEmissao, descricao, clienteId };
+    const patch = { valor, dataEmissao, descricao, clienteId, status };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
     await obj.save();

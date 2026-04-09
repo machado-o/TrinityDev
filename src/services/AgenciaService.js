@@ -14,17 +14,17 @@ class AgenciaService {
   }
 
   static async create(req) {
-    const { nome, cnpj, endereco, telefone, status } = req.body;
-    const obj = await Agencia.create({ nome, cnpj, endereco, telefone, status });
+    const { nome, cnpj, endereco, telefone, status, limiteDiasDesconto, percentualDesconto } = req.body;
+    const obj = await Agencia.create({ nome, cnpj, endereco, telefone, status, limiteDiasDesconto, percentualDesconto });
     return await Agencia.findByPk(obj.id, { include: { all: true, nested: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
-    const { nome, cnpj, endereco, telefone, status } = req.body;
+    const { nome, cnpj, endereco, telefone, status, limiteDiasDesconto, percentualDesconto } = req.body;
     const obj = await Agencia.findByPk(id, { include: { all: true, nested: true } });
     if (obj == null) throw 'Agência não encontrada!';
-    const patch = { nome, cnpj, endereco, telefone, status };
+    const patch = { nome, cnpj, endereco, telefone, status, limiteDiasDesconto, percentualDesconto };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
     await obj.save();

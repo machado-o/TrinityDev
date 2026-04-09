@@ -33,7 +33,7 @@ Sistema de Aluguel de Veiculos
 2. Reserva: O sistema deve bloquear a criação de reservas para clientes com reservas conflitantes.
 3. Check-in: Caso não haja veículos disponíveis da categoria escolhida, o cliente ganha um "upgrade" de categoria gratuitamente.
 4. Check-in: Caso constem débitos pendentes de locações anteriores no histórico do cliente, o sistema deve bloquear a liberação do novo veículo.
-5. Check-out: A quilometragem do carro deve ser maior ou igual à última quilometragem já registrada do veículo.
+5. Check-out: A quilometragem do carro deve ser maior à última quilometragem já registrada do veículo.
 6. Check-out: Cliente com mais de 3 avarias registradas em locações anteriores, tem taxa de inspeção aplicada.
 
 ### Relatórios:

@@ -63,28 +63,36 @@ function databaseInserts() {
             cnpj: "12.345.678/0001-90",
             endereco: "Avenida Jones dos Santos Neves, 100",
             telefone: "(28) 3333-4444",
-            status: "Ativa"
+            status: "Ativa",
+            limiteDiasDesconto: 3,
+            percentualDesconto: 10.00
         });
         const agencia2 = await Agencia.create({
             nome: "Agência Vitória",
             cnpj: "98.765.432/0001-10",
             endereco: "Avenida Nossa Senhora da Penha, 500",
             telefone: "(27) 99999-1111",
-            status: "Ativa"
+            status: "Ativa",
+            limiteDiasDesconto: 5,
+            percentualDesconto: 15.00
         });
         const agencia3 = await Agencia.create({
             nome: "Agência Vila Velha",
             cnpj: "45.987.123/0001-77",
             endereco: "Rua Sete de Setembro, 280",
             telefone: "(27) 3322-1100",
-            status: "Ativa"
+            status: "Ativa",
+            limiteDiasDesconto: 7,
+            percentualDesconto: 12.00
         });
         const agencia4 = await Agencia.create({
             nome: "Agência Serra",
             cnpj: "77.123.456/0001-55",
             endereco: "Avenida Central, 890",
             telefone: "(27) 3344-2233",
-            status: "Inativa"
+            status: "Inativa",
+            limiteDiasDesconto: 7,
+            percentualDesconto: 10.00
         });
 
         const func1 = await Funcionario.create({
@@ -483,24 +491,28 @@ function databaseInserts() {
             valor: 195.23,
             dataEmissao: "2024-03-20",
             descricao: "Excesso de velocidade na rodovia",
+            status: "Pendente",
             clienteId: cliente1.id
         });
         await Multa.create({
             valor: 320.00,
             dataEmissao: "2024-02-11",
             descricao: "Avanço de sinal vermelho",
+            status: "Paga",
             clienteId: cliente2.id
         });
         await Multa.create({
             valor: 88.50,
             dataEmissao: "2023-12-05",
             descricao: "Estacionamento irregular",
+            status: "Paga",
             clienteId: cliente3.id
         });
         await Multa.create({
             valor: 540.90,
             dataEmissao: "2024-01-17",
             descricao: "Ultrapassagem em local proibido",
+            status: "Pendente",
             clienteId: cliente4.id
         });
     })();

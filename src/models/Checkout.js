@@ -83,6 +83,15 @@ class Checkout extends Model {
         validate: {
           len: { args: [0, 1000], msg: "As observações do check-out devem ter no máximo 1000 caracteres!" }
         }
+      },
+      taxaInspecao: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00,
+        validate: {
+          isDecimal: { msg: "A taxa de inspeção deve ser um número decimal válido!" },
+          min: { args: [0], msg: "A taxa de inspeção não pode ser negativa!" }
+        }
       }
     }, { sequelize, modelName: 'checkout', tableName: 'checkouts' });
   }
