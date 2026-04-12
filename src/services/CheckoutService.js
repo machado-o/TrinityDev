@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+﻿import { Op } from "sequelize";
 import { Checkout } from "../models/Checkout.js";
 import { Checkin } from "../models/Checkin.js";
 import { Reserva } from "../models/Reserva.js";
@@ -9,13 +9,13 @@ const TAXA_INSPECAO = 150.00;
 class CheckoutService {
 
   static async findAll() {
-    const objs = await Checkout.findAll({ include: { all: true, nested: true } });
+    const objs = await Checkout.findAll({ include: { all: true, nested: false } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Checkout.findByPk(id, { include: { all: true, nested: false } });
     return obj;
   }
 
@@ -25,14 +25,14 @@ class CheckoutService {
             possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
     const checkin = await Checkin.findByPk(checkinId);
-    if (!checkin) throw "Check-in não encontrado!";
+    if (!checkin) throw "Check-in nÃ£o encontrado!";
 
     // Regra 5: Quilometragem do checkout deve ser maior que a do checkin
     if (parseFloat(quilometragemCheckout) <= parseFloat(checkin.quilometragemCheckin)) {
-      throw "A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!";
+      throw "A quilometragem de devoluÃ§Ã£o deve ser maior que a quilometragem registrada no check-in!";
     }
 
-    // Regra 6: Taxa de inspeção para clientes com mais de 3 avarias em locações anteriores
+    // Regra 6: Taxa de inspeÃ§Ã£o para clientes com mais de 3 avarias em locaÃ§Ãµes anteriores
     const reserva = await Reserva.findByPk(checkin.reservaId);
     const clienteId = reserva.clienteId;
 
@@ -71,7 +71,7 @@ class CheckoutService {
 
     if (avariaIds) await obj.setAvarias(avariaIds);
 
-    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Checkout.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async update(req) {
@@ -80,14 +80,14 @@ class CheckoutService {
             condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
             possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
-    const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
-    if (obj == null) throw 'Checkout não encontrado!';
+    const obj = await Checkout.findByPk(id, { include: { all: true, nested: false } });
+    if (obj == null) throw 'Checkout nÃ£o encontrado!';
 
     // Regra 5: Validar quilometragem se estiver sendo atualizada
     if (quilometragemCheckout !== undefined) {
       const checkinRef = await Checkin.findByPk(checkinId !== undefined ? checkinId : obj.checkinId);
       if (parseFloat(quilometragemCheckout) <= parseFloat(checkinRef.quilometragemCheckin)) {
-        throw "A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!";
+        throw "A quilometragem de devoluÃ§Ã£o deve ser maior que a quilometragem registrada no check-in!";
       }
     }
 
@@ -111,18 +111,18 @@ class CheckoutService {
 
     if (avariaIds !== undefined) await obj.setAvarias(avariaIds);
 
-    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Checkout.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async delete(req) {
     const { id } = req.params;
     const obj = await Checkout.findByPk(id);
-    if (obj == null) throw 'Checkout não encontrado!';
+    if (obj == null) throw 'Checkout nÃ£o encontrado!';
     try {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover este checkout pois ele está vinculado a um checkin!";
+      throw "NÃ£o Ã© possÃ­vel remover este checkout pois ele estÃ¡ vinculado a um checkin!";
     }
   }
 

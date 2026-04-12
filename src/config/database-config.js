@@ -1,62 +1,25 @@
+﻿const usePostgres = Boolean(process.env.DB_HOST);
 
-// Configuração do banco de dados no ambiente de teste
-export const databaseConfig = {
-  dialect: 'sqlite',
-  storage: 'database.sqlite',
-  define: {
-    timestamps: true,
-    freezeTableName: true,
-    underscored: true
-  }
-};
-
-
-/*
-// Configuração do banco de dados no ambiente de desenvolvimento
-export const databaseConfig = {
-  dialect: 'postgres',
-  host: 'db',
-  username: 'admin',
-  password: 'admin123',
-  database: 'sav_trinitydev',
-  define: {
-    timestamps: true,
-    freezeTableName: true,
-    underscored: true
-  }
-};
-*/
-
-/*
-// Configuração do banco de dados no ambiente de produção
-export const databaseConfig = {
-  dialect: 'postgres',
-  host: 'localhost',
-  username: 'postgres',
-  password: 'postgres',
-  database: 'scv-backend-node-sequelize',
-  define: {
-    timestamps: true,
-    freezeTableName: true,
-    underscored: true
-  }
-};
-*/
-
-/*
-Passo a passo pgadmin
-
-Login:
-  email: admin@admin.com
-  password: admin
-
-Add new server
-  General:
-    Name: Banco Trinity
-  Connection:
-    Host: db
-    Port: 5432
-    Maintenance database: sav_trinitydev
-    Username: admin
-    Password: admin123
-*/
+// Usa Postgres quando as variáveis de ambiente do Docker estão presentes.
+export const databaseConfig = usePostgres
+  ? {
+      dialect: 'postgres',
+      host: process.env.DB_HOST || 'db',
+      username: process.env.DB_USER || 'admin',
+      password: process.env.DB_PASS || 'admin123',
+      database: process.env.DB_NAME || 'sav_trinitydev',
+      define: {
+        timestamps: true,
+        freezeTableName: true,
+        underscored: true,
+      },
+    }
+  : {
+      dialect: 'sqlite',
+      storage: 'database.sqlite',
+      define: {
+        timestamps: true,
+        freezeTableName: true,
+        underscored: true,
+      },
+    };

@@ -1,15 +1,15 @@
-import { Cliente } from "../models/Cliente.js";
+﻿import { Cliente } from "../models/Cliente.js";
 
 class ClienteService {
 
   static async findAll() {
-    const objs = await Cliente.findAll({ include: { all: true, nested: true } });
+    const objs = await Cliente.findAll({ include: { all: true, nested: false } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Cliente.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Cliente.findByPk(id, { include: { all: true, nested: false } });
     return obj;
   }
 
@@ -38,7 +38,7 @@ class ClienteService {
       endereco,
     });
 
-    return await Cliente.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Cliente.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async update(req) {
@@ -55,8 +55,8 @@ class ClienteService {
       endereco,
     } = req.body;
 
-    const obj = await Cliente.findByPk(id, { include: { all: true, nested: true } });
-    if (obj == null) throw "Cliente não encontrado!";
+    const obj = await Cliente.findByPk(id, { include: { all: true, nested: false } });
+    if (obj == null) throw "Cliente nÃ£o encontrado!";
 
     const patch = {
       nome,
@@ -73,18 +73,18 @@ class ClienteService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Cliente.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Cliente.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async delete(req) {
     const { id } = req.params;
     const obj = await Cliente.findByPk(id);
-    if (obj == null) throw "Cliente não encontrado!";
+    if (obj == null) throw "Cliente nÃ£o encontrado!";
     try {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover este cliente pois está vinculado a outros registros.";
+      throw "NÃ£o Ã© possÃ­vel remover este cliente pois estÃ¡ vinculado a outros registros.";
     }
   }
 

@@ -7,7 +7,7 @@ services:
       - .:/app
       - node_modules_data:/app/node_modules 
     ports:
-      - "3000:3000"
+      - "3333:3333"
     environment:
       DB_HOST: db
       DB_USER: admin

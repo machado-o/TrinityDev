@@ -1,15 +1,15 @@
-import { Funcionario } from "../models/Funcionario.js";
+﻿import { Funcionario } from "../models/Funcionario.js";
 
 class FuncionarioService {
 
   static async findAll() {
-    const objs = await Funcionario.findAll({ include: { all: true, nested: true } });
+    const objs = await Funcionario.findAll({ include: { all: true, nested: false } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: false } });
     return obj;
   }
 
@@ -36,7 +36,7 @@ class FuncionarioService {
       agenciaId,
     });
 
-    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async update(req) {
@@ -52,8 +52,8 @@ class FuncionarioService {
       agenciaId,
     } = req.body;
 
-    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: true } });
-    if (obj == null) throw "Funcionário não encontrado!";
+    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: false } });
+    if (obj == null) throw "FuncionÃ¡rio nÃ£o encontrado!";
 
     const patch = {
       nome,
@@ -69,18 +69,18 @@ class FuncionarioService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async delete(req) {
     const { id } = req.params;
     const obj = await Funcionario.findByPk(id);
-    if (obj == null) throw "Funcionário não encontrado!";
+    if (obj == null) throw "FuncionÃ¡rio nÃ£o encontrado!";
     try {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover este funcionário pois está vinculado a outros registros.";
+      throw "NÃ£o Ã© possÃ­vel remover este funcionÃ¡rio pois estÃ¡ vinculado a outros registros.";
     }
   }
 

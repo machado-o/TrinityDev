@@ -1,17 +1,17 @@
-import { Op } from "sequelize";
+﻿import { Op } from "sequelize";
 import { Reserva } from "../models/Reserva.js";
 import { Agencia } from "../models/Agencia.js";
 
 class ReservaService {
 
   static async findAll() {
-    const objs = await Reserva.findAll({ include: { all: true, nested: true } });
+    const objs = await Reserva.findAll({ include: { all: true, nested: false } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Reserva.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Reserva.findByPk(id, { include: { all: true, nested: false } });
     return obj;
   }
 
@@ -41,11 +41,11 @@ class ReservaService {
         ],
       },
     });
-    if (conflito) throw "O cliente já possui uma reserva no período solicitado!";
+    if (conflito) throw "O cliente jÃ¡ possui uma reserva no perÃ­odo solicitado!";
 
-    // Regra 1: Desconto automático se quantidadeDias >= limiteDiasDesconto da agência
+    // Regra 1: Desconto automÃ¡tico se quantidadeDias >= limiteDiasDesconto da agÃªncia
     const agencia = await Agencia.findByPk(agenciaRetiradaId);
-    if (!agencia) throw "Agência de retirada não encontrada!";
+    if (!agencia) throw "AgÃªncia de retirada nÃ£o encontrada!";
 
     let valorFinalCalculado = parseFloat(valorFinal);
     if (quantidadeDias >= agencia.limiteDiasDesconto) {
@@ -68,7 +68,7 @@ class ReservaService {
       agenciaDevolucaoId,
     });
 
-    return await Reserva.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Reserva.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async update(req) {
@@ -88,8 +88,8 @@ class ReservaService {
       agenciaDevolucaoId,
     } = req.body;
 
-    const obj = await Reserva.findByPk(id, { include: { all: true, nested: true } });
-    if (obj == null) throw "Reserva não encontrada!";
+    const obj = await Reserva.findByPk(id, { include: { all: true, nested: false } });
+    if (obj == null) throw "Reserva nÃ£o encontrada!";
 
     // Regra 2: Bloquear reservas conflitantes para o mesmo cliente (excluindo a reserva atual)
     const clienteFinal = clienteId !== undefined ? clienteId : obj.clienteId;
@@ -106,7 +106,7 @@ class ReservaService {
         ],
       },
     });
-    if (conflito) throw "O cliente já possui uma reserva no período solicitado!";
+    if (conflito) throw "O cliente jÃ¡ possui uma reserva no perÃ­odo solicitado!";
 
     const patch = {
       dataRetirada,
@@ -126,18 +126,18 @@ class ReservaService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Reserva.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Reserva.findByPk(obj.id, { include: { all: true, nested: false } });
   }
 
   static async delete(req) {
     const { id } = req.params;
     const obj = await Reserva.findByPk(id);
-    if (obj == null) throw "Reserva não encontrada!";
+    if (obj == null) throw "Reserva nÃ£o encontrada!";
     try {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover esta reserva pois está vinculada a outros registros.";
+      throw "NÃ£o Ã© possÃ­vel remover esta reserva pois estÃ¡ vinculada a outros registros.";
     }
   }
 
