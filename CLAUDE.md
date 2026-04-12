@@ -31,7 +31,7 @@ The app is a REST API using **Express + Sequelize ORM** with ES Modules (`"type"
 - `src/controllers/` — thin controllers that call the corresponding service and pass errors to `next`
 - `src/services/` — business logic layer; all queries use `{ include: { all: true, nested: true } }` to return fully populated objects
 - `src/models/` — Sequelize models with `static init(sequelize)` and `static associate(models)` methods
-- `src/_middleware/error-handler.js` — global error handler; differentiates string errors (thrown manually as business rule violations), Sequelize validation errors, FK constraint errors, and unique constraint errors
+- `src/_middleware/error-handler.js` — global error handler; differentiates string errors (thrown manually as business rule violations), Sequelize validation errors, FK constraint errors, and unique constraint errors. String errors ending in `"não encontrado!"` or `"não encontrada!"` return 404; others return 400. `SequelizeUniqueConstraintError` uses the model's own message via `err.errors[0].message`.
 
 **Database setup:**
 - `src/config/database-config.js` — exports `databaseConfig`; has commented-out SQLite config for local testing and a production Postgres config
@@ -50,11 +50,11 @@ Key entities and their relationships:
 - **Veiculo** → belongs to CategoriaVeiculo; used in Checkins
 - **Seguro** → belongs to many Coberturas (M:N); referenced by Reservas
 - **Cobertura** → belongs to many Seguros (M:N)
-- **Reserva** → belongs to Cliente, CategoriaVeiculo, Funcionario, Seguro, and two Agencias (retirada/devolucao); has one Checkin
-- **Checkin** → belongs to Reserva, Veiculo, Funcionario; has one Checkout
-- **Checkout** → belongs to Checkin, Funcionario; has many Avarias (M:N)
+- **Reserva** → belongs to Cliente, CategoriaVeiculo, Funcionario, Seguro, and two Agencias (retirada/devolucao); has one Checkin; has many Multas. Has a `status` field: `Pendente` → `Confirmada` (on check-in) → `Concluída` (on check-out) | `Cancelada`.
+- **Checkin** → belongs to Reserva, Veiculo, Funcionario; has one Checkout. `dataCheckin` is `DATE` (datetime, no separate time field).
+- **Checkout** → belongs to Checkin, Funcionario; has many Avarias (M:N). `dataCheckout` is `DATE` (datetime, no separate time field). No `possuiAvarias` field — derive from `checkout.avarias.length > 0`.
 - **Avaria** → belongs to many Checkouts (M:N)
-- **Multa** → belongs to Cliente
+- **Multa** → belongs to Cliente and optionally to Reserva (`reservaId` nullable FK)
 
 ## Adding a New Entity
 
@@ -67,9 +67,23 @@ Follow the pattern already established:
 
 ## Business Rules (implemented in Services)
 
-- Reservas with days ≥ manager-configured limit get automatic discount
+**ReservaService.create():**
+- `dataRetirada` must not be in the past (validated here, not in the model)
+- Both `agenciaRetirada` and `agenciaDevolucao` must have `status = 'Ativa'`
 - Conflicting reservations for the same client are blocked
-- Check-in: if no vehicle available in requested category, client gets free category upgrade
-- Check-in: blocked if client has pending debts from previous rentals
-- Check-out: vehicle mileage must be ≥ last recorded mileage
-- Check-out: clients with more than 3 avarias in previous rentals get an inspection fee applied
+- `valorDiaria`, `quantidadeDias`, `valorSeguro`, and `valorFinal` are **calculated by the service** from `CategoriaVeiculo` and `Seguro` — never accepted from the request body
+- Automatic discount applied if `quantidadeDias >= agencia.limiteDiasDesconto`
+
+**CheckinService.create():**
+- `cnhCondutor` must match `reserva.cliente.cnh` exactly
+- Blocked if client has pending multas (`status = 'Pendente'`)
+- If no vehicle available in requested category, client gets a free category upgrade (next category by ID with an available vehicle)
+- After creating: vehicle status → `'Reservado'`; reserva status → `'Confirmada'`
+
+**CheckoutService.create():**
+- `quilometragemCheckout` must be greater than `checkin.quilometragemCheckin`
+- Clients with more than 3 avarias across previous rentals get a R$ 150.00 inspection fee (`taxaInspecao`)
+- After creating: vehicle status → `'Disponível'`; reserva status → `'Concluída'`
+
+**FuncionarioService:**
+- `senha` is excluded from all read queries (`findAll`, `findByPk`) — never returned in responses
