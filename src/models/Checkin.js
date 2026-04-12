@@ -5,19 +5,11 @@ class Checkin extends Model {
   static init(sequelize) {
     super.init({
       dataCheckin: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: false,
         validate: {
-          notNull: { msg: "A data do check-in deve ser preenchida!" },
-          isDate: { msg: "Data de check-in inválida!" }
-        }
-      },
-      horarioCheckin: {
-        type: DataTypes.TIME,
-        allowNull: false,
-        validate: {
-          notNull: { msg: "O horário do check-in deve ser preenchido!" },
-          is: { args: /^([01]\d|2[0-3]):([0-5]\d)$/, msg: "Horário de check-in inválido! Use o formato HH:mm." }
+          notNull: { msg: "A data/hora do check-in deve ser preenchida!" },
+          isDate: { msg: "Data/hora de check-in inválida!" }
         }
       },
       cnhCondutor: {

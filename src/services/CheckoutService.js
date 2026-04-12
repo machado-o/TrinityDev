@@ -3,6 +3,7 @@ import { Checkout } from "../models/Checkout.js";
 import { Checkin } from "../models/Checkin.js";
 import { Reserva } from "../models/Reserva.js";
 import { Avaria } from "../models/Avaria.js";
+import { Veiculo } from "../models/Veiculo.js";
 
 const TAXA_INSPECAO = 150.00;
 
@@ -20,9 +21,9 @@ class CheckoutService {
   }
 
   static async create(req) {
-    const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
+    const { dataCheckout, quilometragemCheckout, nivelCombustivel,
             condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
-            possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
+            observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
     const checkin = await Checkin.findByPk(checkinId);
     if (!checkin) throw "Check-in não encontrado!";
@@ -64,21 +65,30 @@ class CheckoutService {
 
     const taxaInspecao = totalAvariasAnteriores > 3 ? TAXA_INSPECAO : 0.00;
 
-    const obj = await Checkout.create({ dataCheckout, horarioCheckout, quilometragemCheckout,
+    const obj = await Checkout.create({ dataCheckout, quilometragemCheckout,
             nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente,
-            limpoExternamente, possuiAvarias, observacoes, checkinId, funcionarioId,
+            limpoExternamente, observacoes, checkinId, funcionarioId,
             taxaInspecao });
 
     if (avariaIds) await obj.setAvarias(avariaIds);
+
+    // Item 10: Atualizar status do veículo para 'Disponível'
+    const veiculo = await Veiculo.findByPk(checkin.veiculoId);
+    veiculo.status = 'Disponível';
+    await veiculo.save();
+
+    // Item 11: Atualizar status da reserva para 'Concluída'
+    reserva.status = 'Concluída';
+    await reserva.save();
 
     return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
-    const { dataCheckout, horarioCheckout, quilometragemCheckout, nivelCombustivel,
+    const { dataCheckout, quilometragemCheckout, nivelCombustivel,
             condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
-            possuiAvarias, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
+            observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
     const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
     if (obj == null) throw 'Checkout não encontrado!';
@@ -93,14 +103,12 @@ class CheckoutService {
 
     const patch = {
       dataCheckout,
-      horarioCheckout,
       quilometragemCheckout,
       nivelCombustivel,
       condicaoPneus,
       condicaoPalhetas,
       limpoInternamente,
       limpoExternamente,
-      possuiAvarias,
       observacoes,
       checkinId,
       funcionarioId,

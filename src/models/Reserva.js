@@ -9,17 +9,7 @@ class Reserva extends Model {
         allowNull: false,
         validate: {
           notNull: { msg: "A data/hora de retirada deve ser preenchida!" },
-          isDate: { msg: "Data de retirada inválida!" },
-          isValidDate(value) {
-            const hoje = new Date();
-            const dataRetirada = new Date(value);
-            if (Number.isNaN(dataRetirada.getTime())) {
-              throw new Error("Data de retirada inválida!");
-            }
-            if (dataRetirada.getTime() < hoje.getTime()) {
-              throw new Error("A data de retirada não pode ser no passado!");
-            }
-          }
+          isDate: { msg: "Data de retirada inválida!" }
         }
       },
       dataDevolucao: {
@@ -70,6 +60,15 @@ class Reserva extends Model {
           notNull: { msg: "O valor final estimado deve ser preenchido!" },
           isDecimal: { msg: "O valor final estimado deve ser um número decimal válido!" },
           min: { args: [0], msg: "O valor final estimado não pode ser negativo!" }
+        }
+      },
+      status: {
+        type: DataTypes.ENUM('Pendente', 'Confirmada', 'Cancelada', 'Concluída'),
+        allowNull: false,
+        defaultValue: 'Pendente',
+        validate: {
+          notNull: { msg: "O status da reserva deve ser preenchido!" },
+          isIn: { args: [['Pendente', 'Confirmada', 'Cancelada', 'Concluída']], msg: "Status inválido!" }
         }
       }
     }, { sequelize, modelName: 'reserva', tableName: 'reservas' });
@@ -149,6 +148,12 @@ class Reserva extends Model {
       as: 'checkin',
       foreignKey: 'reservaId',
       onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE'
+    });
+    this.hasMany(models.multa, {
+      as: 'multas',
+      foreignKey: 'reservaId',
+      onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
     });
   }

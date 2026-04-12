@@ -3,13 +3,13 @@ import { Funcionario } from "../models/Funcionario.js";
 class FuncionarioService {
 
   static async findAll() {
-    const objs = await Funcionario.findAll({ include: { all: true, nested: true } });
+    const objs = await Funcionario.findAll({ attributes: { exclude: ['senha'] }, include: { all: true, nested: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Funcionario.findByPk(id, { attributes: { exclude: ['senha'] }, include: { all: true, nested: true } });
     return obj;
   }
 

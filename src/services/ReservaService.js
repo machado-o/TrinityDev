@@ -1,6 +1,8 @@
 import { Op } from "sequelize";
 import { Reserva } from "../models/Reserva.js";
 import { Agencia } from "../models/Agencia.js";
+import { CategoriaVeiculo } from "../models/CategoriaVeiculo.js";
+import { Seguro } from "../models/Seguro.js";
 
 class ReservaService {
 
@@ -19,10 +21,6 @@ class ReservaService {
     const {
       dataRetirada,
       dataDevolucao,
-      valorDiaria,
-      quantidadeDias,
-      valorSeguro,
-      valorFinal,
       clienteId,
       categoriaVeiculoId,
       funcionarioId,
@@ -30,6 +28,9 @@ class ReservaService {
       agenciaRetiradaId,
       agenciaDevolucaoId,
     } = req.body;
+
+    // Item 2: Validação de data futura
+    if (new Date(dataRetirada) < new Date()) throw "A data de retirada não pode ser no passado!";
 
     // Regra 2: Bloquear reservas conflitantes para o mesmo cliente
     const conflito = await Reserva.findOne({
@@ -43,14 +44,36 @@ class ReservaService {
     });
     if (conflito) throw "O cliente já possui uma reserva no período solicitado!";
 
-    // Regra 1: Desconto automático se quantidadeDias >= limiteDiasDesconto da agência
+    // Item 14: Verificar se agências estão ativas
     const agencia = await Agencia.findByPk(agenciaRetiradaId);
     if (!agencia) throw "Agência de retirada não encontrada!";
+    if (agencia.status === 'Inativa') throw "A agência de retirada está inativa e não pode receber reservas!";
 
-    let valorFinalCalculado = parseFloat(valorFinal);
+    const agenciaDevolucao = await Agencia.findByPk(agenciaDevolucaoId);
+    if (!agenciaDevolucao) throw "Agência de devolução não encontrada!";
+    if (agenciaDevolucao.status === 'Inativa') throw "A agência de devolução está inativa e não pode receber reservas!";
+
+    // Item 6: Calcular campos financeiros a partir das entidades associadas
+    const categoria = await CategoriaVeiculo.findByPk(categoriaVeiculoId);
+    if (!categoria) throw "Categoria de veículo não encontrada!";
+
+    const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
+    const valorDiaria = parseFloat(categoria.valorDiaria);
+
+    let valorDiariaSeguro = 0;
+    if (seguroId) {
+      const seguro = await Seguro.findByPk(seguroId);
+      if (!seguro) throw "Seguro não encontrado!";
+      valorDiariaSeguro = parseFloat(seguro.valorDiariaAdicional);
+    }
+
+    const valorSeguro = parseFloat((valorDiariaSeguro * quantidadeDias).toFixed(2));
+    let valorFinal = parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2));
+
+    // Regra 1: Desconto automático se quantidadeDias >= limiteDiasDesconto da agência
     if (quantidadeDias >= agencia.limiteDiasDesconto) {
-      const desconto = valorFinalCalculado * (parseFloat(agencia.percentualDesconto) / 100);
-      valorFinalCalculado = parseFloat((valorFinalCalculado - desconto).toFixed(2));
+      const desconto = valorFinal * (parseFloat(agencia.percentualDesconto) / 100);
+      valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
     }
 
     const obj = await Reserva.create({
@@ -59,7 +82,7 @@ class ReservaService {
       valorDiaria,
       quantidadeDias,
       valorSeguro,
-      valorFinal: valorFinalCalculado,
+      valorFinal,
       clienteId,
       categoriaVeiculoId,
       funcionarioId,

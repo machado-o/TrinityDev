@@ -21,7 +21,6 @@ class CheckinService {
   static async create(req) {
     const {
       dataCheckin,
-      horarioCheckin,
       cnhCondutor,
       cnhValidade,
       quilometragemCheckin,
@@ -30,8 +29,12 @@ class CheckinService {
       funcionarioId,
     } = req.body;
 
-    const reserva = await Reserva.findByPk(reservaId);
+    const reserva = await Reserva.findByPk(reservaId, { include: { all: true, nested: true } });
     if (!reserva) throw "Reserva não encontrada!";
+
+    // Item 7B: Validar que a CNH informada corresponde à CNH do cliente da reserva
+    if (cnhCondutor !== reserva.cliente.cnh)
+      throw "A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!";
 
     // Regra 4: Bloquear check-in se o cliente tiver débitos pendentes
     const debitosPendentes = await Multa.count({
@@ -80,7 +83,6 @@ class CheckinService {
 
     const obj = await Checkin.create({
       dataCheckin,
-      horarioCheckin,
       cnhCondutor,
       cnhValidade,
       quilometragemCheckin,
@@ -89,6 +91,15 @@ class CheckinService {
       funcionarioId,
     });
 
+    // Item 10: Atualizar status do veículo para 'Reservado'
+    const veiculo = await Veiculo.findByPk(veiculoFinalId);
+    veiculo.status = 'Reservado';
+    await veiculo.save();
+
+    // Item 11: Atualizar status da reserva para 'Confirmada'
+    reserva.status = 'Confirmada';
+    await reserva.save();
+
     return await Checkin.findByPk(obj.id, { include: { all: true, nested: true } });
   }
 
@@ -96,7 +107,6 @@ class CheckinService {
     const { id } = req.params;
     const {
       dataCheckin,
-      horarioCheckin,
       cnhCondutor,
       cnhValidade,
       quilometragemCheckin,
@@ -110,7 +120,6 @@ class CheckinService {
 
     const patch = {
       dataCheckin,
-      horarioCheckin,
       cnhCondutor,
       cnhValidade,
       quilometragemCheckin,

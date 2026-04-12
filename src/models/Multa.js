@@ -59,6 +59,15 @@ class Multa extends Model {
       onDelete: 'RESTRICT',
       onUpdate: 'CASCADE'
     });
+    this.belongsTo(models.reserva, {
+      as: 'reserva',
+      foreignKey: {
+        name: 'reservaId',
+        allowNull: true,
+      },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE'
+    });
   }
 }
 

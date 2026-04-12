@@ -321,6 +321,7 @@ function databaseInserts() {
             quantidadeDias: 4,
             valorSeguro: 240.00,
             valorFinal: 1640.00,
+            status: 'Concluída',
             clienteId: cliente1.id,
             categoriaVeiculoId: catSUV.id,
             funcionarioId: func1.id,
@@ -335,6 +336,7 @@ function databaseInserts() {
             quantidadeDias: 4,
             valorSeguro: 80.00,
             valorFinal: 480.00,
+            status: 'Concluída',
             clienteId: cliente2.id,
             categoriaVeiculoId: catHatch.id,
             funcionarioId: func2.id,
@@ -349,6 +351,7 @@ function databaseInserts() {
             quantidadeDias: 5,
             valorSeguro: 175.00,
             valorFinal: 1275.00,
+            status: 'Concluída',
             clienteId: cliente3.id,
             categoriaVeiculoId: catSedan.id,
             funcionarioId: func3.id,
@@ -363,6 +366,7 @@ function databaseInserts() {
             quantidadeDias: 3,
             valorSeguro: 180.00,
             valorFinal: 1020.00,
+            status: 'Concluída',
             clienteId: cliente4.id,
             categoriaVeiculoId: catPicape.id,
             funcionarioId: func4.id,
@@ -372,8 +376,7 @@ function databaseInserts() {
         });
 
         const checkin1 = await Checkin.create({
-            dataCheckin: toDateOnly(plusDays(2)),
-            horarioCheckin: "08:10",
+            dataCheckin: formatDateTime(plusDays(2), "08:10"),
             quilometragemCheckin: 25000.00,
             cnhCondutor: cliente1.cnh,
             cnhValidade: cliente1.validadeCnh,
@@ -382,8 +385,7 @@ function databaseInserts() {
             funcionarioId: func1.id
         });
         const checkin2 = await Checkin.create({
-            dataCheckin: toDateOnly(plusDays(3)),
-            horarioCheckin: "09:40",
+            dataCheckin: formatDateTime(plusDays(3), "09:40"),
             quilometragemCheckin: 1600.00,
             cnhCondutor: cliente2.cnh,
             cnhValidade: cliente2.validadeCnh,
@@ -392,8 +394,7 @@ function databaseInserts() {
             funcionarioId: func2.id
         });
         const checkin3 = await Checkin.create({
-            dataCheckin: toDateOnly(plusDays(4)),
-            horarioCheckin: "10:20",
+            dataCheckin: formatDateTime(plusDays(4), "10:20"),
             quilometragemCheckin: 31200.00,
             cnhCondutor: cliente3.cnh,
             cnhValidade: cliente3.validadeCnh,
@@ -402,8 +403,7 @@ function databaseInserts() {
             funcionarioId: func3.id
         });
         const checkin4 = await Checkin.create({
-            dataCheckin: toDateOnly(plusDays(5)),
-            horarioCheckin: "08:00",
+            dataCheckin: formatDateTime(plusDays(5), "08:00"),
             quilometragemCheckin: 40300.00,
             cnhCondutor: cliente4.cnh,
             cnhValidade: cliente4.validadeCnh,
@@ -430,54 +430,46 @@ function databaseInserts() {
         });
 
         const checkout1 = await Checkout.create({
-            dataCheckout: toDateOnly(plusDays(6)),
-            horarioCheckout: "17:30",
+            dataCheckout: formatDateTime(plusDays(6), "17:30"),
             quilometragemCheckout: 25400.00,
             nivelCombustivel: "Médio",
             condicaoPneus: "Bom",
             condicaoPalhetas: "Boas",
             limpoInternamente: false,
             limpoExternamente: true,
-            possuiAvarias: true,
             checkinId: checkin1.id,
             funcionarioId: func2.id
         });
         const checkout2 = await Checkout.create({
-            dataCheckout: toDateOnly(plusDays(7)),
-            horarioCheckout: "16:45",
+            dataCheckout: formatDateTime(plusDays(7), "16:45"),
             quilometragemCheckout: 1880.00,
             nivelCombustivel: "Alto",
             condicaoPneus: "Regular",
             condicaoPalhetas: "Boas",
             limpoInternamente: true,
             limpoExternamente: true,
-            possuiAvarias: true,
             checkinId: checkin2.id,
             funcionarioId: func1.id
         });
         const checkout3 = await Checkout.create({
-            dataCheckout: toDateOnly(plusDays(9)),
-            horarioCheckout: "15:10",
+            dataCheckout: formatDateTime(plusDays(9), "15:10"),
             quilometragemCheckout: 31800.00,
             nivelCombustivel: "Baixo",
             condicaoPneus: "Ruim",
             condicaoPalhetas: "Ressecadas",
             limpoInternamente: false,
             limpoExternamente: false,
-            possuiAvarias: true,
             checkinId: checkin3.id,
             funcionarioId: func4.id
         });
         const checkout4 = await Checkout.create({
-            dataCheckout: toDateOnly(plusDays(8)),
-            horarioCheckout: "14:50",
+            dataCheckout: formatDateTime(plusDays(8), "14:50"),
             quilometragemCheckout: 40900.00,
             nivelCombustivel: "Vazio",
             condicaoPneus: "Furado",
             condicaoPalhetas: "Quebradas",
             limpoInternamente: true,
             limpoExternamente: false,
-            possuiAvarias: true,
             checkinId: checkin4.id,
             funcionarioId: func3.id
         });
