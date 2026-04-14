@@ -3,32 +3,32 @@ import { Avaria } from "../models/Avaria.js";
 class AvariaService {
 
   static async findAll() {
-    const objs = await Avaria.findAll({ include: { all: true, nested: true } });
+    const objs = await Avaria.findAll({ include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Avaria.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Avaria.findByPk(id, { include: { all: true } });
     return obj;
   }
 
   static async create(req) {
     const { nome, valor } = req.body;
     const obj = await Avaria.create({ nome, valor });
-    return await Avaria.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Avaria.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
     const { nome, valor } = req.body;
-    const obj = await Avaria.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Avaria.findByPk(id, { include: { all: true } });
     if (obj == null) throw 'Avaria não encontrada!';
     const patch = { nome, valor };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
     await obj.save();
-    return await Avaria.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Avaria.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {

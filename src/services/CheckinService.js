@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import sequelize from "../config/database-connection.js";
 import { Checkin } from "../models/Checkin.js";
 import { Reserva } from "../models/Reserva.js";
 import { Veiculo } from "../models/Veiculo.js";
@@ -8,13 +9,13 @@ import { Multa } from "../models/Multa.js";
 class CheckinService {
 
   static async findAll() {
-    const objs = await Checkin.findAll({ include: { all: true, nested: true } });
+    const objs = await Checkin.findAll({ include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Checkin.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Checkin.findByPk(id, { include: { all: true } });
     return obj;
   }
 
@@ -29,7 +30,7 @@ class CheckinService {
       funcionarioId,
     } = req.body;
 
-    const reserva = await Reserva.findByPk(reservaId, { include: { all: true, nested: true } });
+    const reserva = await Reserva.findByPk(reservaId, { include: { all: true } });
     if (!reserva) throw "Reserva não encontrada!";
 
     // Item 7B: Validar que a CNH informada corresponde à CNH do cliente da reserva
@@ -81,26 +82,28 @@ class CheckinService {
         throw "O veículo selecionado não pertence à categoria da reserva!";
     }
 
-    const obj = await Checkin.create({
-      dataCheckin,
-      cnhCondutor,
-      cnhValidade,
-      quilometragemCheckin,
-      reservaId,
-      veiculoId: veiculoFinalId,
-      funcionarioId,
+    return await sequelize.transaction(async (t) => {
+      const obj = await Checkin.create({
+        dataCheckin,
+        cnhCondutor,
+        cnhValidade,
+        quilometragemCheckin,
+        reservaId,
+        veiculoId: veiculoFinalId,
+        funcionarioId,
+      }, { transaction: t });
+
+      // Item 10: Atualizar status do veículo para 'Reservado'
+      const veiculo = await Veiculo.findByPk(veiculoFinalId, { transaction: t });
+      veiculo.status = 'Reservado';
+      await veiculo.save({ transaction: t });
+
+      // Item 11: Atualizar status da reserva para 'Confirmada'
+      reserva.status = 'Confirmada';
+      await reserva.save({ transaction: t });
+
+      return await Checkin.findByPk(obj.id, { include: { all: true }, transaction: t });
     });
-
-    // Item 10: Atualizar status do veículo para 'Reservado'
-    const veiculo = await Veiculo.findByPk(veiculoFinalId);
-    veiculo.status = 'Reservado';
-    await veiculo.save();
-
-    // Item 11: Atualizar status da reserva para 'Confirmada'
-    reserva.status = 'Confirmada';
-    await reserva.save();
-
-    return await Checkin.findByPk(obj.id, { include: { all: true, nested: true } });
   }
 
   static async update(req) {
@@ -115,7 +118,7 @@ class CheckinService {
       funcionarioId,
     } = req.body;
 
-    const obj = await Checkin.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Checkin.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Checkin não encontrado!";
 
     const patch = {
@@ -131,7 +134,7 @@ class CheckinService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Checkin.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Checkin.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {

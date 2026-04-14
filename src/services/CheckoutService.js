@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import sequelize from "../config/database-connection.js";
 import { Checkout } from "../models/Checkout.js";
 import { Checkin } from "../models/Checkin.js";
 import { Reserva } from "../models/Reserva.js";
@@ -10,13 +11,13 @@ const TAXA_INSPECAO = 150.00;
 class CheckoutService {
 
   static async findAll() {
-    const objs = await Checkout.findAll({ include: { all: true, nested: true } });
+    const objs = await Checkout.findAll({ include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Checkout.findByPk(id, { include: { all: true } });
     return obj;
   }
 
@@ -65,23 +66,25 @@ class CheckoutService {
 
     const taxaInspecao = totalAvariasAnteriores > 3 ? TAXA_INSPECAO : 0.00;
 
-    const obj = await Checkout.create({ dataCheckout, quilometragemCheckout,
-            nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente,
-            limpoExternamente, observacoes, checkinId, funcionarioId,
-            taxaInspecao });
+    return await sequelize.transaction(async (t) => {
+      const obj = await Checkout.create({ dataCheckout, quilometragemCheckout,
+              nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente,
+              limpoExternamente, observacoes, checkinId, funcionarioId,
+              taxaInspecao }, { transaction: t });
 
-    if (avariaIds) await obj.setAvarias(avariaIds);
+      if (avariaIds) await obj.setAvarias(avariaIds, { transaction: t });
 
-    // Item 10: Atualizar status do veículo para 'Disponível'
-    const veiculo = await Veiculo.findByPk(checkin.veiculoId);
-    veiculo.status = 'Disponível';
-    await veiculo.save();
+      // Item 10: Atualizar status do veículo para 'Disponível'
+      const veiculo = await Veiculo.findByPk(checkin.veiculoId, { transaction: t });
+      veiculo.status = 'Disponível';
+      await veiculo.save({ transaction: t });
 
-    // Item 11: Atualizar status da reserva para 'Concluída'
-    reserva.status = 'Concluída';
-    await reserva.save();
+      // Item 11: Atualizar status da reserva para 'Concluída'
+      reserva.status = 'Concluída';
+      await reserva.save({ transaction: t });
 
-    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+      return await Checkout.findByPk(obj.id, { include: { all: true }, transaction: t });
+    });
   }
 
   static async update(req) {
@@ -90,7 +93,7 @@ class CheckoutService {
             condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente,
             observacoes, checkinId, funcionarioId, avariaIds } = req.body;
 
-    const obj = await Checkout.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Checkout.findByPk(id, { include: { all: true } });
     if (obj == null) throw 'Checkout não encontrado!';
 
     // Regra 5: Validar quilometragem se estiver sendo atualizada
@@ -101,25 +104,27 @@ class CheckoutService {
       }
     }
 
-    const patch = {
-      dataCheckout,
-      quilometragemCheckout,
-      nivelCombustivel,
-      condicaoPneus,
-      condicaoPalhetas,
-      limpoInternamente,
-      limpoExternamente,
-      observacoes,
-      checkinId,
-      funcionarioId,
-    };
-    Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
-    Object.assign(obj, patch);
-    await obj.save();
+    return await sequelize.transaction(async (t) => {
+      const patch = {
+        dataCheckout,
+        quilometragemCheckout,
+        nivelCombustivel,
+        condicaoPneus,
+        condicaoPalhetas,
+        limpoInternamente,
+        limpoExternamente,
+        observacoes,
+        checkinId,
+        funcionarioId,
+      };
+      Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
+      Object.assign(obj, patch);
+      await obj.save({ transaction: t });
 
-    if (avariaIds !== undefined) await obj.setAvarias(avariaIds);
+      if (avariaIds !== undefined) await obj.setAvarias(avariaIds, { transaction: t });
 
-    return await Checkout.findByPk(obj.id, { include: { all: true, nested: true } });
+      return await Checkout.findByPk(obj.id, { include: { all: true }, transaction: t });
+    });
   }
 
   static async delete(req) {

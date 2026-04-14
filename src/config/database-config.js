@@ -1,4 +1,4 @@
-
+/*
 // Configuração do banco de dados no ambiente de teste
 export const databaseConfig = {
   dialect: 'sqlite',
@@ -9,9 +9,8 @@ export const databaseConfig = {
     underscored: true
   }
 };
+*/
 
-
-/*
 // Configuração do banco de dados no ambiente de desenvolvimento
 export const databaseConfig = {
   dialect: 'postgres',
@@ -25,7 +24,6 @@ export const databaseConfig = {
     underscored: true
   }
 };
-*/
 
 /*
 // Configuração do banco de dados no ambiente de produção

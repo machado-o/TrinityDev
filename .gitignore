@@ -3,3 +3,6 @@ database.sqlite
 
 .claude
 .env
+
+/postman
+/.postman

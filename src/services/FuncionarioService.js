@@ -3,13 +3,13 @@ import { Funcionario } from "../models/Funcionario.js";
 class FuncionarioService {
 
   static async findAll() {
-    const objs = await Funcionario.findAll({ attributes: { exclude: ['senha'] }, include: { all: true, nested: true } });
+    const objs = await Funcionario.findAll({ attributes: { exclude: ['senha'] }, include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Funcionario.findByPk(id, { attributes: { exclude: ['senha'] }, include: { all: true, nested: true } });
+    const obj = await Funcionario.findByPk(id, { attributes: { exclude: ['senha'] }, include: { all: true } });
     return obj;
   }
 
@@ -36,7 +36,7 @@ class FuncionarioService {
       agenciaId,
     });
 
-    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Funcionario.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
@@ -52,7 +52,7 @@ class FuncionarioService {
       agenciaId,
     } = req.body;
 
-    const obj = await Funcionario.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Funcionario.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Funcionário não encontrado!";
 
     const patch = {
@@ -69,7 +69,7 @@ class FuncionarioService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Funcionario.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Funcionario.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {

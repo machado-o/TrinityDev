@@ -1,0 +1,1155 @@
+{
+  "info": {
+    "_postman_id": "sav-api-collection-2026",
+    "name": "SAV - Sistema de Aluguel de Veículos",
+    "description": "Collection completa do SAV API.\n\nVariável `baseUrl`:\n- Docker (recomendado): http://localhost:3000\n- Dev (nodemon):       http://localhost:3333\n\nO banco é RESETADO a cada reinício do servidor. IDs do seed:\n- Agências 1–4 | Funcionários 1–4 | Clientes 1–4\n- CategoriaVeículos 1–4 | Veículos 1–4 | Coberturas 1–4\n- Seguros 1–4 | Reservas 1–4 | Checkins 1–4 | Checkouts 1–4 | Multas 1–4\n\nCliente 1 (Henrique) e Cliente 4 (Renata) têm multas Pendentes — não podem fazer check-in.\nCliente 2 (Marina, CNH 23456789012) e Cliente 3 (Paulo, CNH 34567890123) estão aptos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Agência",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Agência Guarapari\",\n  \"cnpj\": \"11.222.333/0001-44\",\n  \"endereco\": \"Rua das Praias, 200, Guarapari\",\n  \"telefone\": \"(27) 3344-5566\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 5,\n  \"percentualDesconto\": 10.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cnpj\": \"invalido\",\n  \"endereco\": \"\",\n  \"telefone\": \"99999\",\n  \"status\": \"Fechada\",\n  \"limiteDiasDesconto\": 0,\n  \"percentualDesconto\": 150\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos — SequelizeValidationError):\n• nome vazio → notEmpty\n• cnpj formato inválido → regex NN.NNN.NNN/NNNN-NN\n• endereco vazio → notEmpty\n• telefone formato inválido → regex (NN) NNNN-NNNN\n• status 'Fechada' → fora do ENUM Ativa|Inativa\n• limiteDiasDesconto 0 → min é 1\n• percentualDesconto 150 → max é 100"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Agência Cachoeiro Atualizada\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 4,\n  \"percentualDesconto\": 12.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["agencias", "4"]
+            },
+            "description": "Agência 4 (Serra – Inativa). Falha com FK constraint caso possua funcionários ou veículos vinculados."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Avaria",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Vidro traseiro quebrado\",\n  \"valor\": 650.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valor\": -50\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias"]
+            },
+            "description": "Erros esperados:\n• nome vazio → notEmpty\n• valor negativo → min é 0"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Arranhão profundo na porta\",\n  \"valor\": 420.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["avarias", "1"]
+            },
+            "description": "Falha se a avaria estiver vinculada a algum checkout (FK constraint)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categoria de Veículo",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Minivan Familiar\",\n  \"descricao\": \"Ideal para famílias grandes, com amplo espaço no porta-malas.\",\n  \"valorDiaria\": 200.00,\n  \"tipoCarroceria\": \"Sedan\",\n  \"propulsao\": \"Combustão\",\n  \"cambio\": \"Automático\",\n  \"arCondicionado\": true,\n  \"capacidade\": 7\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valorDiaria\": -100,\n  \"tipoCarroceria\": \"Caminhão\",\n  \"propulsao\": \"Gasolina\",\n  \"cambio\": \"CVT\",\n  \"arCondicionado\": null,\n  \"capacidade\": 0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos"]
+            },
+            "description": "Erros esperados:\n• nome vazio → notEmpty\n• valorDiaria negativo → min é 0\n• tipoCarroceria 'Caminhão' → ENUM Sedan|Hatch|SUV|Picape\n• propulsao 'Gasolina' → ENUM Elétrico|Híbrido|Combustão\n• cambio 'CVT' → ENUM Automático|Manual\n• arCondicionado null → notNull\n• capacidade 0 → min é 1"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Hatch Compacto Premium\",\n  \"valorDiaria\": 120.00,\n  \"arCondicionado\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["categoriasdeveiculos", "4"]
+            },
+            "description": "Falha se existirem veículos ou reservas vinculadas (FK constraint)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check-in",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2026-05-10 08:30:00\",\n  \"cnhCondutor\": \"34567890123\",\n  \"cnhValidade\": \"2031-06-10\",\n  \"quilometragemCheckin\": 40900.00,\n  \"reservaId\": 5,\n  \"veiculoId\": 1,\n  \"funcionarioId\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins"]
+            },
+            "description": "PRÉ-REQUISITO: Criar primeiro uma Reserva (POST /reservas) para o cliente 3 (Paulo, CNH 34567890123) com categoriaVeiculoId 4 e atribuir reservaId ao id gerado.\n\nRegras verificadas:\n• cnhCondutor deve bater com reserva.cliente.cnh\n• Cliente 3 não tem multas Pendentes\n• Veículo 1 está Disponível (status do seed)\n\nEfeitos após criar:\n• Veículo 1 → status 'Reservado'\n• Reserva 5 → status 'Confirmada'"
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"data-invalida\",\n  \"cnhCondutor\": \"ABC\",\n  \"cnhValidade\": \"2020-01-01\",\n  \"quilometragemCheckin\": -100,\n  \"reservaId\": 9999,\n  \"veiculoId\": null,\n  \"funcionarioId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins"]
+            },
+            "description": "Erro esperado (service dispara primeiro — 404):\n• reservaId 9999 → 'Reserva não encontrada!'\n\nSe reservaId fosse válido, os erros de modelo disparariam:\n• cnhCondutor 'ABC' → não numérico, comprimento ≠ 11\n• cnhValidade '2020-01-01' → CNH vencida (no passado)\n• quilometragemCheckin -100 → min é 0\n• veiculoId / funcionarioId null → notNull"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quilometragemCheckin\": 25050.00,\n  \"cnhValidade\": \"2032-01-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkins", "1"]
+            },
+            "description": "Falha se existir checkout vinculado (FK constraint)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check-out",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"2026-05-15 17:00:00\",\n  \"quilometragemCheckout\": 41500.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"observacoes\": \"Veículo devolvido em ótimo estado.\",\n  \"checkinId\": 5,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts"]
+            },
+            "description": "PRÉ-REQUISITO: Criar Reserva → Checkin (que gera checkinId 5).\n\nRegras verificadas:\n• quilometragemCheckout (41500) > quilometragemCheckin (40900) ✓\n• taxaInspecao calculada automaticamente (R$ 150 se cliente tiver > 3 avarias em locações anteriores)\n• avariaIds: lista de IDs de avarias (pode ser vazia)\n\nEfeitos após criar:\n• Veículo vinculado ao checkin 5 → status 'Disponível'\n• Reserva vinculada → status 'Concluída'"
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"data-invalida\",\n  \"quilometragemCheckout\": -1,\n  \"nivelCombustivel\": \"Cheio\",\n  \"condicaoPneus\": \"Perfeito\",\n  \"condicaoPalhetas\": \"Ok\",\n  \"limpoInternamente\": null,\n  \"limpoExternamente\": null,\n  \"checkinId\": 9999,\n  \"funcionarioId\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts"]
+            },
+            "description": "Erro esperado (service dispara primeiro — 404):\n• checkinId 9999 → 'Check-in não encontrado!'\n\nSe checkinId fosse válido, os erros de modelo disparariam:\n• dataCheckout inválido → isDate\n• quilometragemCheckout -1 → min é 0; e regra de negócio: deve ser > quilometragemCheckin\n• nivelCombustivel 'Cheio' → ENUM Alto|Médio|Baixo|Vazio\n• condicaoPneus 'Perfeito' → ENUM Bom|Regular|Ruim|Furado\n• condicaoPalhetas 'Ok' → ENUM Boas|Ressecadas|Quebradas|Ausentes\n• limpoInternamente null → notNull\n• limpoExternamente null → notNull\n• funcionarioId null → notNull"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivelCombustivel\": \"Médio\",\n  \"condicaoPneus\": \"Regular\",\n  \"observacoes\": \"Pequeno risco no para-choque identificado na devolução.\",\n  \"avariaIds\": [1]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkouts", "1"]
+            },
+            "description": "Falha com FK constraint pois checkout está vinculado a checkin."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fernanda Lima\",\n  \"cpf\": \"987.654.321-00\",\n  \"dataNascimento\": \"1995-07-20\",\n  \"telefone\": \"(27) 99876-5432\",\n  \"email\": \"fernanda.lima@email.com\",\n  \"cnh\": \"55566677788\",\n  \"categoriaCnh\": \"B\",\n  \"validadeCnh\": \"2030-06-01\",\n  \"endereco\": \"Rua Nova, 321, Vitória\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"dataNascimento\": \"2012-05-15\",\n  \"telefone\": \"99999\",\n  \"email\": \"email-invalido\",\n  \"cnh\": \"123\",\n  \"categoriaCnh\": \"Z\",\n  \"validadeCnh\": \"nao-e-data\",\n  \"endereco\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos):\n• nome vazio → notEmpty\n• cpf '000' → formato inválido NNN.NNN.NNN-NN\n• dataNascimento 2012 → idade < 18 anos\n• telefone '99999' → formato inválido\n• email 'email-invalido' → isEmail\n• cnh '123' → deve ter exatamente 11 dígitos numéricos\n• categoriaCnh 'Z' → ENUM A|B|AB|C|D|E|AC|AD|AE\n• validadeCnh 'nao-e-data' → isDate\n• endereco vazio → notEmpty"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefone\": \"(28) 99111-2233\",\n  \"email\": \"henrique.novo@email.com\",\n  \"endereco\": \"Avenida Atlântica, 500, Cachoeiro\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", "1"]
+            },
+            "description": "Falha com FK constraint pois cliente está vinculado a reservas e multas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cobertura",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Proteção Chuva de Granizo\",\n  \"descricao\": \"Cobre danos causados por granizo e eventos climáticos severos.\",\n  \"valorIndenizacaoMax\": 15000.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valorIndenizacaoMax\": -1000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas"]
+            },
+            "description": "Erros esperados:\n• nome vazio → notEmpty\n• valorIndenizacaoMax negativo → min é 0"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Roubo, Furto e Extorsão\",\n  \"valorIndenizacaoMax\": 60000.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["coberturas", "1"]
+            },
+            "description": "Falha se a cobertura estiver vinculada a algum seguro (FK constraint)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Funcionário",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios"]
+            },
+            "description": "O campo 'senha' é excluído de todas as respostas."
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios", "1"]
+            },
+            "description": "O campo 'senha' é excluído da resposta."
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Ana Paula Costa\",\n  \"cpf\": \"123.456.789-09\",\n  \"cargo\": \"Atendente\",\n  \"dataNascimento\": \"1998-03-15\",\n  \"telefone\": \"(27) 98765-4321\",\n  \"email\": \"anapaula@trityon.com\",\n  \"senha\": \"Senh@Forte1\",\n  \"agenciaId\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios"]
+            },
+            "description": "A senha é armazenada com hash bcrypt. O campo 'senha' nunca retorna nas respostas."
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"cargo\": \"Diretor\",\n  \"dataNascimento\": \"2015-01-01\",\n  \"telefone\": \"12345\",\n  \"email\": \"email\",\n  \"senha\": \"fraca\",\n  \"agenciaId\": 9999\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos):\n• nome vazio → notEmpty\n• cpf '000' → formato inválido NNN.NNN.NNN-NN\n• cargo 'Diretor' → ENUM Gerente|Atendente\n• dataNascimento 2015 → idade < 16 anos\n• telefone '12345' → formato inválido\n• email 'email' → isEmail\n• senha 'fraca' → muito curta + sem maiúscula/número/especial\n• agenciaId 9999 → FK não encontrada (SequelizeForeignKeyConstraintError)"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cargo\": \"Gerente\",\n  \"telefone\": \"(28) 98888-9999\",\n  \"email\": \"emanuelly.nova@trityon.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["funcionarios", "1"]
+            },
+            "description": "Falha com FK constraint pois funcionário está vinculado a reservas, checkins ou checkouts."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Multa",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 293.47,\n  \"dataEmissao\": \"2026-04-10\",\n  \"descricao\": \"Estacionamento em local proibido na Av. Beira Mar.\",\n  \"status\": \"Pendente\",\n  \"clienteId\": 3,\n  \"reservaId\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas"]
+            },
+            "description": "reservaId é opcional — pode ser omitido ou enviado como null."
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": -100,\n  \"dataEmissao\": \"2030-01-01\",\n  \"status\": \"Arquivada\",\n  \"clienteId\": 9999\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos):\n• valor negativo → min é 0\n• dataEmissao '2030-01-01' → não pode ser no futuro\n• status 'Arquivada' → ENUM Pendente|Paga\n• clienteId 9999 → FK não encontrada"
+          }
+        },
+        {
+          "name": "PUT Atualizar (quitar multa)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Paga\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas", "1"]
+            },
+            "description": "Quita a multa pendente do Cliente 1 (Henrique), liberando-o para realizar check-in."
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["multas", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reserva",
+      "item": [
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2026-05-10 08:00:00\",\n  \"dataDevolucao\": \"2026-05-14 18:00:00\",\n  \"clienteId\": 3,\n  \"categoriaVeiculoId\": 4,\n  \"funcionarioId\": 3,\n  \"seguroId\": 2,\n  \"agenciaRetiradaId\": 3,\n  \"agenciaDevolucaoId\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas"]
+            },
+            "description": "Os campos valorDiaria, quantidadeDias, valorSeguro e valorFinal são CALCULADOS pelo service — não envie no body.\n\nCálculo esperado (categoria 4 = R$280/dia, seguro 2 = R$20/dia adicional, 4 dias):\n• valorDiaria = 280.00\n• quantidadeDias = 4\n• valorSeguro = 80.00 (20 × 4)\n• valorFinal = 1200.00 (300 × 4)\n• Desconto: agência 3 tem limiteDiasDesconto=7; 4 < 7 → sem desconto\n\nCliente 3 (Paulo) não tem multas pendentes e não tem reservas conflitantes."
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2020-01-01 08:00:00\",\n  \"dataDevolucao\": \"2019-12-28 18:00:00\",\n  \"clienteId\": 9999,\n  \"categoriaVeiculoId\": 9999,\n  \"funcionarioId\": 9999,\n  \"agenciaRetiradaId\": 4,\n  \"agenciaDevolucaoId\": 9999\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas"]
+            },
+            "description": "Erros em cascata (service verifica na ordem):\n1. dataRetirada no passado (2020) → 'A data de retirada não pode ser no passado!' (400) ← DISPARA PRIMEIRO\n2. Se data fosse futura: agenciaRetiradaId 4 (Serra – Inativa) → 'A agência de retirada está inativa!' (400)\n3. agenciaDevolucaoId 9999 → 'Agência de devolução não encontrada!' (404)\n4. categoriaVeiculoId 9999 → 'Categoria de veículo não encontrada!' (404)\n\nEnvie body com dataRetirada futura para avançar aos erros seguintes."
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Cancelada\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reservas", "1"]
+            },
+            "description": "Falha com FK constraint pois reserva está vinculada a checkin e multas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seguro",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Plano Diamond\",\n  \"empresaSeguradora\": \"Mapfre Seguros\",\n  \"descricao\": \"Cobertura completa com assistência 24h e carro reserva.\",\n  \"valorDiariaAdicional\": 75.00,\n  \"franquia\": 500.00,\n  \"coberturaIds\": [1, 2, 3, 4]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros"]
+            },
+            "description": "coberturaIds é opcional. Quando fornecido, vincula as coberturas via tabela M:N seguro_cobertura em uma única transação."
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"empresaSeguradora\": \"\",\n  \"valorDiariaAdicional\": -1,\n  \"franquia\": -500\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos):\n• nome vazio → notEmpty\n• empresaSeguradora vazio → notEmpty\n• valorDiariaAdicional negativo → min é 0\n• franquia negativa → min é 0"
+          }
+        },
+        {
+          "name": "PUT Atualizar (com coberturas)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valorDiariaAdicional\": 55.00,\n  \"franquia\": 1200.00,\n  \"coberturaIds\": [1, 2]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros", "1"]
+            },
+            "description": "coberturaIds substitui completamente as coberturas vinculadas (setAvarias). Operação atômica via transaction."
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["seguros", "1"]
+            },
+            "description": "Falha se o seguro estiver vinculado a reservas (FK constraint)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Veículo",
+      "item": [
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos"]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST Criar (válido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"GHI5J67\",\n  \"chassi\": \"9BWZZZ37ZVT000099\",\n  \"status\": \"Disponível\",\n  \"marca\": \"Honda\",\n  \"modelo\": \"HR-V\",\n  \"cor\": \"Branco\",\n  \"anoFabricacao\": \"2024\",\n  \"quilometragem\": 0.00,\n  \"categoriaVeiculoId\": 2,\n  \"agenciaId\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Placa no padrão Mercosul (LLLNLNN) ou antigo (LLLNNNN). Chassi: 17 chars alfanuméricos (sem I, O, Q)."
+          }
+        },
+        {
+          "name": "POST Criar (máximo de erros)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"INVALIDA\",\n  \"chassi\": \"ABCDEFG\",\n  \"status\": \"Alugado\",\n  \"marca\": \"Lamborghini\",\n  \"modelo\": \"\",\n  \"cor\": \"Vermelha\",\n  \"anoFabricacao\": \"2099\",\n  \"quilometragem\": -100,\n  \"categoriaVeiculoId\": 9999,\n  \"agenciaId\": 9999\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos"]
+            },
+            "description": "Erros esperados (múltiplos simultâneos):\n• placa 'INVALIDA' → formato inválido (LLLNLNN ou LLLNNNN)\n• chassi 'ABCDEFG' → deve ter exatamente 17 chars (sem I, O, Q)\n• status 'Alugado' → ENUM Disponível|Reservado|Manutenção\n• marca 'Lamborghini' → fora da lista de marcas permitidas\n• modelo vazio → notEmpty\n• cor 'Vermelha' → ENUM Branco|Preto|Cinza|Prata|Outra\n• anoFabricacao '2099' → ano no futuro\n• quilometragem -100 → min é 0\n• categoriaVeiculoId 9999 → FK não encontrada\n• agenciaId 9999 → FK não encontrada"
+          }
+        },
+        {
+          "name": "PUT Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Manutenção\",\n  \"quilometragem\": 26000.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["veiculos", "1"]
+            },
+            "description": "Falha com FK constraint pois veículo está vinculado a checkins."
+          }
+        }
+      ]
+    }
+  ]
+}

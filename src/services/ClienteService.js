@@ -3,13 +3,13 @@ import { Cliente } from "../models/Cliente.js";
 class ClienteService {
 
   static async findAll() {
-    const objs = await Cliente.findAll({ include: { all: true, nested: true } });
+    const objs = await Cliente.findAll({ include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Cliente.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Cliente.findByPk(id, { include: { all: true } });
     return obj;
   }
 
@@ -38,7 +38,7 @@ class ClienteService {
       endereco,
     });
 
-    return await Cliente.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Cliente.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
@@ -55,7 +55,7 @@ class ClienteService {
       endereco,
     } = req.body;
 
-    const obj = await Cliente.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Cliente.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Cliente não encontrado!";
 
     const patch = {
@@ -73,7 +73,7 @@ class ClienteService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Cliente.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Cliente.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {

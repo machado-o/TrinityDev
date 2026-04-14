@@ -7,13 +7,13 @@ import { Seguro } from "../models/Seguro.js";
 class ReservaService {
 
   static async findAll() {
-    const objs = await Reserva.findAll({ include: { all: true, nested: true } });
+    const objs = await Reserva.findAll({ include: { all: true } });
     return objs;
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Reserva.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Reserva.findByPk(id, { include: { all: true } });
     return obj;
   }
 
@@ -91,7 +91,7 @@ class ReservaService {
       agenciaDevolucaoId,
     });
 
-    return await Reserva.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Reserva.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
@@ -111,7 +111,7 @@ class ReservaService {
       agenciaDevolucaoId,
     } = req.body;
 
-    const obj = await Reserva.findByPk(id, { include: { all: true, nested: true } });
+    const obj = await Reserva.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Reserva não encontrada!";
 
     // Regra 2: Bloquear reservas conflitantes para o mesmo cliente (excluindo a reserva atual)
@@ -149,7 +149,7 @@ class ReservaService {
     Object.assign(obj, patch);
     await obj.save();
 
-    return await Reserva.findByPk(obj.id, { include: { all: true, nested: true } });
+    return await Reserva.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {
