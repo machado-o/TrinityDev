@@ -3,152 +3,130 @@ import { Reserva } from "../models/Reserva.js";
 import { Agencia } from "../models/Agencia.js";
 import { CategoriaVeiculo } from "../models/CategoriaVeiculo.js";
 import { Seguro } from "../models/Seguro.js";
+import { Cliente } from "../models/Cliente.js";
+import { Funcionario } from "../models/Funcionario.js";
+import { validarModel } from "./_validarModel.js";
+
+function calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada }) {
+  const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
+  const valorDiaria = categoria ? parseFloat(categoria.valorDiaria) : null;
+  const valorDiariaSeguro = seguro ? parseFloat(seguro.valorDiariaAdicional) : 0;
+  const diasValidos = isNaN(quantidadeDias) ? 0 : quantidadeDias;
+  const valorSeguro = parseFloat((valorDiariaSeguro * diasValidos).toFixed(2));
+
+  let valorFinal = valorDiaria !== null
+    ? parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2))
+    : null;
+
+  if (valorFinal !== null && agenciaRetirada && quantidadeDias >= agenciaRetirada.limiteDiasDesconto) {
+    const desconto = valorFinal * (parseFloat(agenciaRetirada.percentualDesconto) / 100);
+    valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
+  }
+
+  return { quantidadeDias, valorDiaria, valorSeguro, valorFinal };
+}
 
 class ReservaService {
 
   static async findAll() {
-    const objs = await Reserva.findAll({ include: { all: true } });
-    return objs;
+    return await Reserva.findAll({ include: { all: true } });
   }
 
   static async findByPk(req) {
     const { id } = req.params;
-    const obj = await Reserva.findByPk(id, { include: { all: true } });
-    return obj;
+    return await Reserva.findByPk(id, { include: { all: true } });
   }
 
   static async create(req) {
-    const {
-      dataRetirada,
-      dataDevolucao,
-      clienteId,
-      categoriaVeiculoId,
-      funcionarioId,
-      seguroId,
-      agenciaRetiradaId,
-      agenciaDevolucaoId,
-    } = req.body;
+    const { dataRetirada, dataDevolucao, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId } = req.body;
+    const erros = [];
 
-    // Item 2: Validação de data futura
-    if (new Date(dataRetirada) < new Date()) throw "A data de retirada não pode ser no passado!";
+    if (new Date(dataRetirada) < new Date()) erros.push("A data de retirada não pode ser no passado!");
 
-    // Regra 2: Bloquear reservas conflitantes para o mesmo cliente
-    const conflito = await Reserva.findOne({
-      where: {
-        clienteId,
-        [Op.and]: [
-          { dataRetirada: { [Op.lt]: dataDevolucao } },
-          { dataDevolucao: { [Op.gt]: dataRetirada } },
-        ],
-      },
-    });
-    if (conflito) throw "O cliente já possui uma reserva no período solicitado!";
+    const [cliente, funcionario, agenciaRetirada, agenciaDevolucao, categoria] = await Promise.all([
+      Cliente.findByPk(clienteId),
+      Funcionario.findByPk(funcionarioId),
+      Agencia.findByPk(agenciaRetiradaId),
+      Agencia.findByPk(agenciaDevolucaoId),
+      CategoriaVeiculo.findByPk(categoriaVeiculoId),
+    ]);
 
-    // Item 14: Verificar se agências estão ativas
-    const agencia = await Agencia.findByPk(agenciaRetiradaId);
-    if (!agencia) throw "Agência de retirada não encontrada!";
-    if (agencia.status === 'Inativa') throw "A agência de retirada está inativa e não pode receber reservas!";
+    if (!cliente) erros.push("Cliente não encontrado!");
+    if (!funcionario) erros.push("Funcionário não encontrado!");
+    if (!agenciaRetirada) erros.push("Agência de retirada não encontrada!");
+    else if (agenciaRetirada.status === 'Inativa') erros.push("A agência de retirada está inativa e não pode receber reservas!");
+    if (!agenciaDevolucao) erros.push("Agência de devolução não encontrada!");
+    else if (agenciaDevolucao.status === 'Inativa') erros.push("A agência de devolução está inativa e não pode receber reservas!");
+    if (!categoria) erros.push("Categoria de veículo não encontrada!");
 
-    const agenciaDevolucao = await Agencia.findByPk(agenciaDevolucaoId);
-    if (!agenciaDevolucao) throw "Agência de devolução não encontrada!";
-    if (agenciaDevolucao.status === 'Inativa') throw "A agência de devolução está inativa e não pode receber reservas!";
-
-    // Item 6: Calcular campos financeiros a partir das entidades associadas
-    const categoria = await CategoriaVeiculo.findByPk(categoriaVeiculoId);
-    if (!categoria) throw "Categoria de veículo não encontrada!";
-
-    const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
-    const valorDiaria = parseFloat(categoria.valorDiaria);
-
-    let valorDiariaSeguro = 0;
+    let seguro = null;
     if (seguroId) {
-      const seguro = await Seguro.findByPk(seguroId);
-      if (!seguro) throw "Seguro não encontrado!";
-      valorDiariaSeguro = parseFloat(seguro.valorDiariaAdicional);
+      seguro = await Seguro.findByPk(seguroId);
+      if (!seguro) erros.push("Seguro não encontrado!");
     }
 
-    const valorSeguro = parseFloat((valorDiariaSeguro * quantidadeDias).toFixed(2));
-    let valorFinal = parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2));
-
-    // Regra 1: Desconto automático se quantidadeDias >= limiteDiasDesconto da agência
-    if (quantidadeDias >= agencia.limiteDiasDesconto) {
-      const desconto = valorFinal * (parseFloat(agencia.percentualDesconto) / 100);
-      valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
+    if (cliente) {
+      const conflito = await Reserva.findOne({
+        where: {
+          clienteId,
+          status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
+          [Op.and]: [
+            { dataRetirada: { [Op.lt]: dataDevolucao } },
+            { dataDevolucao: { [Op.gt]: dataRetirada } },
+          ],
+        },
+      });
+      if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
     }
+
+    const { quantidadeDias, valorDiaria, valorSeguro, valorFinal } = calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada });
+
+    erros.push(...await validarModel(Reserva.build({ dataRetirada, dataDevolucao })));
+
+    if (erros.length > 0) throw erros.join(" ");
 
     const obj = await Reserva.create({
-      dataRetirada,
-      dataDevolucao,
-      valorDiaria,
-      quantidadeDias,
-      valorSeguro,
-      valorFinal,
-      clienteId,
-      categoriaVeiculoId,
-      funcionarioId,
-      seguroId,
-      agenciaRetiradaId,
-      agenciaDevolucaoId,
+      dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal,
+      clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId,
     });
-
     return await Reserva.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
-    const {
-      dataRetirada,
-      dataDevolucao,
-      valorDiaria,
-      quantidadeDias,
-      valorSeguro,
-      valorFinal,
-      clienteId,
-      categoriaVeiculoId,
-      funcionarioId,
-      seguroId,
-      agenciaRetiradaId,
-      agenciaDevolucaoId,
-    } = req.body;
+    const { dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId } = req.body;
 
     const obj = await Reserva.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Reserva não encontrada!";
 
-    // Regra 2: Bloquear reservas conflitantes para o mesmo cliente (excluindo a reserva atual)
-    const clienteFinal = clienteId !== undefined ? clienteId : obj.clienteId;
-    const retiradaFinal = dataRetirada !== undefined ? dataRetirada : obj.dataRetirada;
-    const devolucaoFinal = dataDevolucao !== undefined ? dataDevolucao : obj.dataDevolucao;
+    const erros = [];
+
+    const clienteFinal = clienteId ?? obj.clienteId;
+    const retiradaFinal = dataRetirada ?? obj.dataRetirada;
+    const devolucaoFinal = dataDevolucao ?? obj.dataDevolucao;
 
     const conflito = await Reserva.findOne({
       where: {
         clienteId: clienteFinal,
         id: { [Op.ne]: id },
+        status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
         [Op.and]: [
           { dataRetirada: { [Op.lt]: devolucaoFinal } },
           { dataDevolucao: { [Op.gt]: retiradaFinal } },
         ],
       },
     });
-    if (conflito) throw "O cliente já possui uma reserva no período solicitado!";
+    if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
 
-    const patch = {
-      dataRetirada,
-      dataDevolucao,
-      valorDiaria,
-      quantidadeDias,
-      valorSeguro,
-      valorFinal,
-      clienteId,
-      categoriaVeiculoId,
-      funcionarioId,
-      seguroId,
-      agenciaRetiradaId,
-      agenciaDevolucaoId,
-    };
+    const patch = { dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
-    await obj.save();
 
+    erros.push(...await validarModel(obj));
+
+    if (erros.length > 0) throw erros.join(" ");
+
+    await obj.save({ validate: false });
     return await Reserva.findByPk(obj.id, { include: { all: true } });
   }
 
