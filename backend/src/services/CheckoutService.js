@@ -10,6 +10,19 @@ import { validarModel } from "./_validarModel.js";
 
 const TAXA_INSPECAO = 150.00;
 
+// Regra: quilometragem de devolução deve ser maior que a do check-in
+function validarQuilometragem(quilometragemCheckout, checkin, erros) {
+  if (parseFloat(quilometragemCheckout) <= parseFloat(checkin.quilometragemCheckin))
+    erros.push("A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!");
+}
+
+// Regra: data de devolução não pode ser anterior à data do check-in
+function validarDataCheckout(dataCheckout, checkin, erros) {
+  if (new Date(dataCheckout) < new Date(checkin.dataCheckin))
+    erros.push("A data de devolução não pode ser anterior à data do check-in!");
+}
+
+// Regra: clientes com mais de 3 avarias em aluguéis anteriores pagam taxa de inspeção de R$ 150,00
 async function calcularTaxaInspecao(clienteId) {
   const checkinsDoCliente = await Checkin.findAll({
     include: [{ model: Reserva, as: "reserva", required: true, where: { clienteId }, attributes: [] }],
@@ -26,6 +39,19 @@ async function calcularTaxaInspecao(clienteId) {
 
   const totalAvarias = checkoutsAnteriores.reduce((total, co) => total + co.avarias.length, 0);
   return totalAvarias > 3 ? TAXA_INSPECAO : 0;
+}
+
+// Orquestra todas as validações de negócio para create e update
+async function verificarRegrasDeNegocio({ dataCheckout, quilometragemCheckout, checkinId, obj, erros }) {
+  const checkin = checkinId ? await Checkin.findByPk(checkinId) : obj;
+
+  if (!checkin) {
+    erros.push("Check-in não encontrado!");
+    return;
+  }
+
+  if (quilometragemCheckout !== undefined) validarQuilometragem(quilometragemCheckout, checkin, erros);
+  if (dataCheckout !== undefined) validarDataCheckout(dataCheckout, checkin, erros);
 }
 
 class CheckoutService {
@@ -49,16 +75,10 @@ class CheckoutService {
       Funcionario.findByPk(funcionarioId),
     ]);
 
-    if (!checkin) {
-      erros.push("Check-in não encontrado!");
-    } else {
-      if (parseFloat(quilometragemCheckout) <= parseFloat(checkin.quilometragemCheckin))
-        erros.push("A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!");
-      if (new Date(dataCheckout) < new Date(checkin.dataCheckin))
-        erros.push("A data de devolução não pode ser anterior à data do check-in!");
-    }
-
+    if (!checkin) erros.push("Check-in não encontrado!");
     if (!funcionario) erros.push("Funcionário não encontrado!");
+
+    if (checkin) await verificarRegrasDeNegocio({ dataCheckout, quilometragemCheckout, checkinId: null, obj: checkin, erros });
 
     erros.push(...await validarModel(Checkout.build({ dataCheckout, quilometragemCheckout, nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, checkinId, funcionarioId, taxaInspecao: 0 })));
 
@@ -93,17 +113,13 @@ class CheckoutService {
 
     const erros = [];
 
-    if (quilometragemCheckout !== undefined) {
-      const checkinRef = await Checkin.findByPk(checkinId ?? obj.checkinId);
-      if (!checkinRef) {
-        erros.push("Check-in não encontrado!");
-      } else {
-        if (parseFloat(quilometragemCheckout) <= parseFloat(checkinRef.quilometragemCheckin))
-          erros.push("A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!");
-        if (dataCheckout !== undefined && new Date(dataCheckout) < new Date(checkinRef.dataCheckin))
-          erros.push("A data de devolução não pode ser anterior à data do check-in!");
-      }
-    }
+    await verificarRegrasDeNegocio({
+      dataCheckout,
+      quilometragemCheckout,
+      checkinId: checkinId ?? obj.checkinId,
+      obj: null,
+      erros,
+    });
 
     const patch = { dataCheckout, quilometragemCheckout, nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, checkinId, funcionarioId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);

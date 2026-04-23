@@ -7,6 +7,40 @@ import { Cliente } from "../models/Cliente.js";
 import { Funcionario } from "../models/Funcionario.js";
 import { validarModel } from "./_validarModel.js";
 
+// Regra: data de retirada não pode ser no passado
+function validarDataRetirada(dataRetirada, erros) {
+  if (new Date(dataRetirada) < new Date()) erros.push("A data de retirada não pode ser no passado!");
+}
+
+// Regra: agência de retirada deve existir e estar ativa
+function validarAgenciaRetirada(agenciaRetirada, erros) {
+  if (!agenciaRetirada) erros.push("Agência de retirada não encontrada!");
+  else if (agenciaRetirada.status === 'Inativa') erros.push("A agência de retirada está inativa e não pode receber reservas!");
+}
+
+// Regra: agência de devolução deve existir e estar ativa
+function validarAgenciaDevolucao(agenciaDevolucao, erros) {
+  if (!agenciaDevolucao) erros.push("Agência de devolução não encontrada!");
+  else if (agenciaDevolucao.status === 'Inativa') erros.push("A agência de devolução está inativa e não pode receber reservas!");
+}
+
+// Regra: cliente não pode ter reserva ativa conflitante no mesmo período
+async function validarConflitoReservaCliente(clienteId, dataRetirada, dataDevolucao, erros, excludeId = null) {
+  const where = {
+    clienteId,
+    status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
+    [Op.and]: [
+      { dataRetirada: { [Op.lt]: dataDevolucao } },
+      { dataDevolucao: { [Op.gt]: dataRetirada } },
+    ],
+  };
+  if (excludeId) where.id = { [Op.ne]: excludeId };
+
+  const conflito = await Reserva.findOne({ where });
+  if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
+}
+
+// Regra: valores financeiros são calculados pelo sistema (diária, dias, seguro, desconto)
 function calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada }) {
   const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
   const valorDiaria = categoria ? parseFloat(categoria.valorDiaria) : null;
@@ -18,12 +52,32 @@ function calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevol
     ? parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2))
     : null;
 
+  // Regra: desconto automático aplicado quando quantidade de dias >= limite da agência
   if (valorFinal !== null && agenciaRetirada && quantidadeDias >= agenciaRetirada.limiteDiasDesconto) {
     const desconto = valorFinal * (parseFloat(agenciaRetirada.percentualDesconto) / 100);
     valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
   }
 
   return { quantidadeDias, valorDiaria, valorSeguro, valorFinal };
+}
+
+// Orquestra todas as validações de negócio para create e update
+async function verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId, agenciaRetiradaId, agenciaDevolucaoId, reservaId, erros }) {
+  if (dataRetirada) validarDataRetirada(dataRetirada, erros);
+
+  const [agenciaRetirada, agenciaDevolucao] = await Promise.all([
+    agenciaRetiradaId ? Agencia.findByPk(agenciaRetiradaId) : Promise.resolve(undefined),
+    agenciaDevolucaoId ? Agencia.findByPk(agenciaDevolucaoId) : Promise.resolve(undefined),
+  ]);
+
+  if (agenciaRetiradaId !== undefined) validarAgenciaRetirada(agenciaRetirada, erros);
+  if (agenciaDevolucaoId !== undefined) validarAgenciaDevolucao(agenciaDevolucao, erros);
+
+  if (clienteId && dataRetirada && dataDevolucao) {
+    await validarConflitoReservaCliente(clienteId, dataRetirada, dataDevolucao, erros, reservaId ?? null);
+  }
+
+  return { agenciaRetirada };
 }
 
 class ReservaService {
@@ -41,22 +95,14 @@ class ReservaService {
     const { dataRetirada, dataDevolucao, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId } = req.body;
     const erros = [];
 
-    if (new Date(dataRetirada) < new Date()) erros.push("A data de retirada não pode ser no passado!");
-
-    const [cliente, funcionario, agenciaRetirada, agenciaDevolucao, categoria] = await Promise.all([
+    const [cliente, funcionario, categoria] = await Promise.all([
       Cliente.findByPk(clienteId),
       Funcionario.findByPk(funcionarioId),
-      Agencia.findByPk(agenciaRetiradaId),
-      Agencia.findByPk(agenciaDevolucaoId),
       CategoriaVeiculo.findByPk(categoriaVeiculoId),
     ]);
 
     if (!cliente) erros.push("Cliente não encontrado!");
     if (!funcionario) erros.push("Funcionário não encontrado!");
-    if (!agenciaRetirada) erros.push("Agência de retirada não encontrada!");
-    else if (agenciaRetirada.status === 'Inativa') erros.push("A agência de retirada está inativa e não pode receber reservas!");
-    if (!agenciaDevolucao) erros.push("Agência de devolução não encontrada!");
-    else if (agenciaDevolucao.status === 'Inativa') erros.push("A agência de devolução está inativa e não pode receber reservas!");
     if (!categoria) erros.push("Categoria de veículo não encontrada!");
 
     let seguro = null;
@@ -65,19 +111,7 @@ class ReservaService {
       if (!seguro) erros.push("Seguro não encontrado!");
     }
 
-    if (cliente) {
-      const conflito = await Reserva.findOne({
-        where: {
-          clienteId,
-          status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
-          [Op.and]: [
-            { dataRetirada: { [Op.lt]: dataDevolucao } },
-            { dataDevolucao: { [Op.gt]: dataRetirada } },
-          ],
-        },
-      });
-      if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
-    }
+    const { agenciaRetirada } = await verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId, agenciaRetiradaId, agenciaDevolucaoId, erros });
 
     const { quantidadeDias, valorDiaria, valorSeguro, valorFinal } = calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada });
 
@@ -105,18 +139,15 @@ class ReservaService {
     const retiradaFinal = dataRetirada ?? obj.dataRetirada;
     const devolucaoFinal = dataDevolucao ?? obj.dataDevolucao;
 
-    const conflito = await Reserva.findOne({
-      where: {
-        clienteId: clienteFinal,
-        id: { [Op.ne]: id },
-        status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
-        [Op.and]: [
-          { dataRetirada: { [Op.lt]: devolucaoFinal } },
-          { dataDevolucao: { [Op.gt]: retiradaFinal } },
-        ],
-      },
+    await verificarRegrasDeNegocio({
+      dataRetirada: dataRetirada !== undefined ? retiradaFinal : undefined,
+      dataDevolucao: devolucaoFinal,
+      clienteId: clienteFinal,
+      agenciaRetiradaId: agenciaRetiradaId,
+      agenciaDevolucaoId: agenciaDevolucaoId,
+      reservaId: id,
+      erros,
     });
-    if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
 
     const patch = { dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);

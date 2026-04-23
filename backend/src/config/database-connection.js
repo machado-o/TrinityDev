@@ -49,464 +49,145 @@ function databaseInserts() {
 
         await sequelize.sync({ force: true });
 
-        const today = new Date();
-        const toDateOnly = (date) => date.toISOString().slice(0, 10);
-        const plusDays = (days) => {
-            const d = new Date(today);
-            d.setDate(d.getDate() + days);
-            return d;
-        };
-        const formatDateTime = (date, hhmm) => `${toDateOnly(date)} ${hhmm}:00`;
+        const toDateOnly = (d) => d.toISOString().slice(0, 10);
+        const plusDays = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return d; };
+        const fmt = (date, hhmm) => `${toDateOnly(date)} ${hhmm}:00`;
 
-        const agencia1 = await Agencia.create({
-            nome: "Agência Cachoeiro",
-            cnpj: "12.345.678/0001-90",
-            endereco: "Avenida Jones dos Santos Neves, 100",
-            telefone: "(28) 3333-4444",
-            status: "Ativa",
-            limiteDiasDesconto: 3,
-            percentualDesconto: 10.00
-        });
-        const agencia2 = await Agencia.create({
-            nome: "Agência Vitória",
-            cnpj: "98.765.432/0001-10",
-            endereco: "Avenida Nossa Senhora da Penha, 500",
-            telefone: "(27) 99999-1111",
-            status: "Ativa",
-            limiteDiasDesconto: 5,
-            percentualDesconto: 15.00
-        });
-        const agencia3 = await Agencia.create({
-            nome: "Agência Vila Velha",
-            cnpj: "45.987.123/0001-77",
-            endereco: "Rua Sete de Setembro, 280",
-            telefone: "(27) 3322-1100",
-            status: "Ativa",
-            limiteDiasDesconto: 7,
-            percentualDesconto: 12.00
-        });
-        const agencia4 = await Agencia.create({
-            nome: "Agência Serra",
-            cnpj: "77.123.456/0001-55",
-            endereco: "Avenida Central, 890",
-            telefone: "(27) 3344-2233",
-            status: "Inativa",
-            limiteDiasDesconto: 7,
-            percentualDesconto: 10.00
-        });
+        // ─── AGÊNCIAS ───────────────────────────────────────────────────────────
+        // agencia4 (Inativa) → testa RN agência de retirada/devolução inativa
+        const agencia1 = await Agencia.create({ nome: "Agência Cachoeiro", cnpj: "12.345.678/0001-90", endereco: "Av. Jones dos Santos Neves, 100", telefone: "(28) 3333-4444", status: "Ativa", limiteDiasDesconto: 3, percentualDesconto: 10.00 });
+        const agencia2 = await Agencia.create({ nome: "Agência Vitória", cnpj: "98.765.432/0001-10", endereco: "Av. Nossa Senhora da Penha, 500", telefone: "(27) 99999-1111", status: "Ativa", limiteDiasDesconto: 5, percentualDesconto: 15.00 });
+        const agencia3 = await Agencia.create({ nome: "Agência Vila Velha", cnpj: "45.987.123/0001-77", endereco: "Rua Sete de Setembro, 280", telefone: "(27) 3322-1100", status: "Ativa", limiteDiasDesconto: 7, percentualDesconto: 12.00 });
+        const agencia4 = await Agencia.create({ nome: "Agência Serra", cnpj: "77.123.456/0001-55", endereco: "Av. Central, 890", telefone: "(27) 3344-2233", status: "Inativa", limiteDiasDesconto: 7, percentualDesconto: 10.00 });
 
-        const func1 = await Funcionario.create({
-            nome: "Emanuelly",
-            cpf: "111.111.111-11",
-            cargo: "Gerente",
-            dataNascimento: "1990-02-10",
-            telefone: "(28) 3333-1111",
-            email: "emanuelly@example.com",
-            senha: "Senha@1234",
-            agenciaId: agencia1.id
-        });
-        const func2 = await Funcionario.create({
-            nome: "Carlos",
-            cpf: "222.222.222-22",
-            cargo: "Atendente",
-            dataNascimento: "1998-06-20",
-            telefone: "(27) 99999-2222",
-            email: "carlos@example.com",
-            senha: "Senha@1234",
-            agenciaId: agencia2.id
-        });
-        const func3 = await Funcionario.create({
-            nome: "Juliana",
-            cpf: "444.444.444-44",
-            cargo: "Atendente",
-            dataNascimento: "1995-11-03",
-            telefone: "(27) 98123-4567",
-            email: "juliana@example.com",
-            senha: "Senha@1234",
-            agenciaId: agencia3.id
-        });
-        const func4 = await Funcionario.create({
-            nome: "Rafael",
-            cpf: "555.555.555-55",
-            cargo: "Gerente",
-            dataNascimento: "1987-09-12",
-            telefone: "(27) 98888-1212",
-            email: "rafael@example.com",
-            senha: "Senha@1234",
-            agenciaId: agencia4.id
-        });
+        // ─── FUNCIONÁRIOS ───────────────────────────────────────────────────────
+        const func1 = await Funcionario.create({ nome: "Emanuelly", cpf: "111.111.111-11", cargo: "Gerente", dataNascimento: "1990-02-10", telefone: "(28) 3333-1111", email: "emanuelly@example.com", senha: "Senha@1234", agenciaId: agencia1.id });
+        const func2 = await Funcionario.create({ nome: "Carlos", cpf: "222.222.222-22", cargo: "Atendente", dataNascimento: "1998-06-20", telefone: "(27) 99999-2222", email: "carlos@example.com", senha: "Senha@1234", agenciaId: agencia2.id });
+        const func3 = await Funcionario.create({ nome: "Juliana", cpf: "444.444.444-44", cargo: "Atendente", dataNascimento: "1995-11-03", telefone: "(27) 98123-4567", email: "juliana@example.com", senha: "Senha@1234", agenciaId: agencia3.id });
+        const func4 = await Funcionario.create({ nome: "Rafael", cpf: "555.555.555-55", cargo: "Gerente", dataNascimento: "1987-09-12", telefone: "(27) 98888-1212", email: "rafael@example.com", senha: "Senha@1234", agenciaId: agencia4.id });
 
-        const cliente1 = await Cliente.create({
-            nome: "Henrique",
-            cpf: "333.333.333-33",
-            email: "henrique@email.com",
-            dataNascimento: "2000-05-15",
-            telefone: "(28) 3333-2222",
-            cnh: "12345678901",
-            categoriaCnh: "B",
-            validadeCnh: "2030-01-01",
-            endereco: "Rua Exemplo, 123"
-        });
-        const cliente2 = await Cliente.create({
-            nome: "Marina",
-            cpf: "666.666.666-66",
-            email: "marina@email.com",
-            dataNascimento: "1997-08-22",
-            telefone: "(27) 97777-6666",
-            cnh: "23456789012",
-            categoriaCnh: "AB",
-            validadeCnh: "2029-12-31",
-            endereco: "Rua das Flores, 50"
-        });
-        const cliente3 = await Cliente.create({
-            nome: "Paulo",
-            cpf: "777.777.777-77",
-            email: "paulo@email.com",
-            dataNascimento: "1992-03-09",
-            telefone: "(27) 96666-4444",
-            cnh: "34567890123",
-            categoriaCnh: "B",
-            validadeCnh: "2031-06-10",
-            endereco: "Av. Beira Mar, 900"
-        });
-        const cliente4 = await Cliente.create({
-            nome: "Renata",
-            cpf: "888.888.888-88",
-            email: "renata@email.com",
-            dataNascimento: "1989-12-30",
-            telefone: "(28) 95555-3333",
-            cnh: "45678901234",
-            categoriaCnh: "D",
-            validadeCnh: "2028-04-25",
-            endereco: "Rua Santa Clara, 18"
-        });
+        // ─── CLIENTES ───────────────────────────────────────────────────────────
+        // cliente1 (Henrique, CNH 12345678901): tem Multa Pendente → testa RN débitos pendentes (reserva8)
+        const cliente1 = await Cliente.create({ nome: "Henrique", cpf: "333.333.333-33", email: "henrique@email.com", dataNascimento: "2000-05-15", telefone: "(28) 3333-2222", cnh: "12345678901", categoriaCnh: "B", validadeCnh: "2030-01-01", endereco: "Rua Exemplo, 123" });
+        // cliente2 (Marina, CNH 23456789012): sem multas, reserva7 Pendente → testa check-in válido / CNH errada / veículo inválido
+        const cliente2 = await Cliente.create({ nome: "Marina", cpf: "666.666.666-66", email: "marina@email.com", dataNascimento: "1997-08-22", telefone: "(27) 97777-6666", cnh: "23456789012", categoriaCnh: "AB", validadeCnh: "2029-12-31", endereco: "Rua das Flores, 50" });
+        // cliente3 (Paulo, CNH 34567890123): sem multas, reserva9 Confirmada + checkin7 ativo → testa checkout
+        const cliente3 = await Cliente.create({ nome: "Paulo", cpf: "777.777.777-77", email: "paulo@email.com", dataNascimento: "1992-03-09", telefone: "(27) 96666-4444", cnh: "34567890123", categoriaCnh: "B", validadeCnh: "2031-06-10", endereco: "Av. Beira Mar, 900" });
+        // cliente4 (Renata, CNH 45678901234): tem Multa Pendente
+        const cliente4 = await Cliente.create({ nome: "Renata", cpf: "888.888.888-88", email: "renata@email.com", dataNascimento: "1989-12-30", telefone: "(28) 95555-3333", cnh: "45678901234", categoriaCnh: "D", validadeCnh: "2028-04-25", endereco: "Rua Santa Clara, 18" });
+        // cliente5 (Lucas, CNH 56789012345): sem multas, 4 avarias históricas → testa taxa de inspeção (checkin8)
+        const cliente5 = await Cliente.create({ nome: "Lucas", cpf: "999.999.999-99", email: "lucas@email.com", dataNascimento: "1994-07-11", telefone: "(27) 94444-5555", cnh: "56789012345", categoriaCnh: "B", validadeCnh: "2032-03-15", endereco: "Rua das Palmeiras, 77" });
 
-        const catHatch = await CategoriaVeiculo.create({
-            nome: "Hatch Compacto",
-            valorDiaria: 100.00,
-            tipoCarroceria: "Hatch",
-            propulsao: "Híbrido",
-            cambio: "Automático",
-            arCondicionado: true,
-            capacidade: 5
-        });
-        const catSUV = await CategoriaVeiculo.create({
-            nome: "SUV Premium",
-            valorDiaria: 350.00,
-            tipoCarroceria: "SUV",
-            propulsao: "Combustão",
-            cambio: "Automático",
-            arCondicionado: true,
-            capacidade: 5
-        });
-        const catSedan = await CategoriaVeiculo.create({
-            nome: "Sedan Executivo",
-            valorDiaria: 220.00,
-            tipoCarroceria: "Sedan",
-            propulsao: "Elétrico",
-            cambio: "Automático",
-            arCondicionado: true,
-            capacidade: 5
-        });
-        const catPicape = await CategoriaVeiculo.create({
-            nome: "Picape Utilitária",
-            valorDiaria: 280.00,
-            tipoCarroceria: "Picape",
-            propulsao: "Combustão",
-            cambio: "Manual",
-            arCondicionado: false,
-            capacidade: 5
-        });
+        // ─── CATEGORIAS ─────────────────────────────────────────────────────────
+        const catHatch  = await CategoriaVeiculo.create({ nome: "Hatch Compacto",    valorDiaria: 100.00, tipoCarroceria: "Hatch",  propulsao: "Híbrido",   cambio: "Automático", arCondicionado: true,  capacidade: 5 });
+        const catSUV    = await CategoriaVeiculo.create({ nome: "SUV Premium",        valorDiaria: 350.00, tipoCarroceria: "SUV",    propulsao: "Combustão", cambio: "Automático", arCondicionado: true,  capacidade: 5 });
+        const catSedan  = await CategoriaVeiculo.create({ nome: "Sedan Executivo",    valorDiaria: 220.00, tipoCarroceria: "Sedan",  propulsao: "Elétrico",  cambio: "Automático", arCondicionado: true,  capacidade: 5 });
+        const catPicape = await CategoriaVeiculo.create({ nome: "Picape Utilitária",  valorDiaria: 280.00, tipoCarroceria: "Picape", propulsao: "Combustão", cambio: "Manual",     arCondicionado: false, capacidade: 5 });
 
-        const veiculo1 = await Veiculo.create({
-            placa: "ABC1D23",
-            chassi: "9BWZZZ37ZVT000001",
-            status: "Disponível",
-            marca: "BYD",
-            modelo: "Dolphin",
-            cor: "Preto",
-            anoFabricacao: "2024",
-            quilometragem: 1500.50,
-            categoriaVeiculoId: catHatch.id,
-            agenciaId: agencia1.id
-        });
-        const veiculo2 = await Veiculo.create({
-            placa: "XYZ9A87",
-            chassi: "9BWZZZ37ZVT000002",
-            status: "Disponível",
-            marca: "Jeep",
-            modelo: "Compass",
-            cor: "Branco",
-            anoFabricacao: "2023",
-            quilometragem: 25000.00,
-            categoriaVeiculoId: catSUV.id,
-            agenciaId: agencia2.id
-        });
-        const veiculo3 = await Veiculo.create({
-            placa: "QWE2R34",
-            chassi: "9BWZZZ37ZVT000003",
-            status: "Reservado",
-            marca: "Toyota",
-            modelo: "Corolla",
-            cor: "Prata",
-            anoFabricacao: "2022",
-            quilometragem: 31000.10,
-            categoriaVeiculoId: catSedan.id,
-            agenciaId: agencia3.id
-        });
-        const veiculo4 = await Veiculo.create({
-            placa: "RTY4U56",
-            chassi: "9BWZZZ37ZVT000004",
-            status: "Manutenção",
-            marca: "Fiat",
-            modelo: "Toro",
-            cor: "Cinza",
-            anoFabricacao: "2021",
-            quilometragem: 40210.45,
-            categoriaVeiculoId: catPicape.id,
-            agenciaId: agencia4.id
-        });
+        // ─── VEÍCULOS ───────────────────────────────────────────────────────────
+        // veiculo1 (Hatch, Disponível): para check-in válido da reserva7
+        const veiculo1 = await Veiculo.create({ placa: "ABC1D23", chassi: "9BWZZZ37ZVT000001", status: "Disponível", marca: "BYD",        modelo: "Dolphin", cor: "Preto", anoFabricacao: "2024", quilometragem: 1500.50,  categoriaVeiculoId: catHatch.id,  agenciaId: agencia1.id });
+        // veiculo2 (SUV, ficará Reservado via checkin8)
+        const veiculo2 = await Veiculo.create({ placa: "XYZ9A87", chassi: "9BWZZZ37ZVT000002", status: "Disponível", marca: "Jeep",       modelo: "Compass", cor: "Branco", anoFabricacao: "2023", quilometragem: 25000.00, categoriaVeiculoId: catSUV.id,    agenciaId: agencia2.id });
+        // veiculo3 (Sedan, ficará Reservado via checkin7)
+        const veiculo3 = await Veiculo.create({ placa: "QWE2R34", chassi: "9BWZZZ37ZVT000003", status: "Disponível", marca: "Toyota",     modelo: "Corolla", cor: "Prata", anoFabricacao: "2022", quilometragem: 31000.10, categoriaVeiculoId: catSedan.id,  agenciaId: agencia3.id });
+        // veiculo4 (Picape, Disponível)
+        const veiculo4 = await Veiculo.create({ placa: "RTY4U56", chassi: "9BWZZZ37ZVT000004", status: "Disponível", marca: "Fiat",       modelo: "Toro",    cor: "Cinza", anoFabricacao: "2021", quilometragem: 40210.45, categoriaVeiculoId: catPicape.id, agenciaId: agencia1.id });
+        // veiculo5 (Hatch, Reservado): testa RN veículo não disponível (mesma categoria de reserva7)
+        const veiculo5 = await Veiculo.create({ placa: "MNO3P45", chassi: "9BWZZZ37ZVT000005", status: "Reservado", marca: "Volkswagen", modelo: "Gol",     cor: "Prata", anoFabricacao: "2023", quilometragem: 8500.00,  categoriaVeiculoId: catHatch.id,  agenciaId: agencia1.id });
 
-        const cobRoubo = await Cobertura.create({
-            nome: "Roubo e Furto",
-            valorIndenizacaoMax: 50000.00
-        });
-        const cobBatida = await Cobertura.create({
-            nome: "Colisão Total",
-            valorIndenizacaoMax: 80000.00
-        });
-        const cobVidros = await Cobertura.create({
-            nome: "Danos a Vidros",
-            valorIndenizacaoMax: 2000.00
-        });
-        const cobTerceiros = await Cobertura.create({
-            nome: "Danos a Terceiros",
-            valorIndenizacaoMax: 100000.00
-        });
+        // ─── COBERTURAS E SEGUROS ────────────────────────────────────────────────
+        const cobRoubo    = await Cobertura.create({ nome: "Roubo e Furto",       valorIndenizacaoMax: 50000.00 });
+        const cobBatida   = await Cobertura.create({ nome: "Colisão Total",       valorIndenizacaoMax: 80000.00 });
+        const cobVidros   = await Cobertura.create({ nome: "Danos a Vidros",      valorIndenizacaoMax: 2000.00  });
+        const cobTerceiros = await Cobertura.create({ nome: "Danos a Terceiros", valorIndenizacaoMax: 100000.00 });
 
-        const seguroOuro = await Seguro.create({
-            nome: "Plano Ouro",
-            empresaSeguradora: "Porto Seguro",
-            valorDiariaAdicional: 50.00,
-            franquia: 1500.00
-        });
-        const seguroBasico = await Seguro.create({
-            nome: "Plano Básico",
-            empresaSeguradora: "Allianz",
-            valorDiariaAdicional: 20.00,
-            franquia: 4000.00
-        });
-        const seguroPrata = await Seguro.create({
-            nome: "Plano Prata",
-            empresaSeguradora: "Bradesco Seguros",
-            valorDiariaAdicional: 35.00,
-            franquia: 2500.00
-        });
-        const seguroPlus = await Seguro.create({
-            nome: "Plano Plus",
-            empresaSeguradora: "Tokio Marine",
-            valorDiariaAdicional: 60.00,
-            franquia: 1000.00
-        });
+        const seguroOuro   = await Seguro.create({ nome: "Plano Ouro",   empresaSeguradora: "Porto Seguro",      valorDiariaAdicional: 50.00, franquia: 1500.00 });
+        const seguroBasico = await Seguro.create({ nome: "Plano Básico", empresaSeguradora: "Allianz",           valorDiariaAdicional: 20.00, franquia: 4000.00 });
+        const seguroPrata  = await Seguro.create({ nome: "Plano Prata",  empresaSeguradora: "Bradesco Seguros",  valorDiariaAdicional: 35.00, franquia: 2500.00 });
+        const seguroPlus   = await Seguro.create({ nome: "Plano Plus",   empresaSeguradora: "Tokio Marine",      valorDiariaAdicional: 60.00, franquia: 1000.00 });
 
         await seguroOuro.addCoberturas([cobRoubo, cobBatida, cobVidros, cobTerceiros]);
         await seguroBasico.addCoberturas([cobRoubo]);
         await seguroPrata.addCoberturas([cobRoubo, cobBatida]);
         await seguroPlus.addCoberturas([cobRoubo, cobBatida, cobTerceiros]);
 
-        const reserva1 = await Reserva.create({
-            dataRetirada: formatDateTime(plusDays(2), "08:00"),
-            dataDevolucao: formatDateTime(plusDays(6), "18:00"),
-            valorDiaria: 350.00,
-            quantidadeDias: 4,
-            valorSeguro: 240.00,
-            valorFinal: 1640.00,
-            status: 'Concluída',
-            clienteId: cliente1.id,
-            categoriaVeiculoId: catSUV.id,
-            funcionarioId: func1.id,
-            seguroId: seguroOuro.id,
-            agenciaRetiradaId: agencia1.id,
-            agenciaDevolucaoId: agencia1.id
-        });
-        const reserva2 = await Reserva.create({
-            dataRetirada: formatDateTime(plusDays(3), "09:30"),
-            dataDevolucao: formatDateTime(plusDays(7), "17:30"),
-            valorDiaria: 100.00,
-            quantidadeDias: 4,
-            valorSeguro: 80.00,
-            valorFinal: 480.00,
-            status: 'Concluída',
-            clienteId: cliente2.id,
-            categoriaVeiculoId: catHatch.id,
-            funcionarioId: func2.id,
-            seguroId: seguroBasico.id,
-            agenciaRetiradaId: agencia2.id,
-            agenciaDevolucaoId: agencia3.id
-        });
-        const reserva3 = await Reserva.create({
-            dataRetirada: formatDateTime(plusDays(4), "10:00"),
-            dataDevolucao: formatDateTime(plusDays(9), "16:00"),
-            valorDiaria: 220.00,
-            quantidadeDias: 5,
-            valorSeguro: 175.00,
-            valorFinal: 1275.00,
-            status: 'Concluída',
-            clienteId: cliente3.id,
-            categoriaVeiculoId: catSedan.id,
-            funcionarioId: func3.id,
-            seguroId: seguroPrata.id,
-            agenciaRetiradaId: agencia3.id,
-            agenciaDevolucaoId: agencia2.id
-        });
-        const reserva4 = await Reserva.create({
-            dataRetirada: formatDateTime(plusDays(5), "07:45"),
-            dataDevolucao: formatDateTime(plusDays(8), "15:15"),
-            valorDiaria: 280.00,
-            quantidadeDias: 3,
-            valorSeguro: 180.00,
-            valorFinal: 1020.00,
-            status: 'Concluída',
-            clienteId: cliente4.id,
-            categoriaVeiculoId: catPicape.id,
-            funcionarioId: func4.id,
-            seguroId: seguroPlus.id,
-            agenciaRetiradaId: agencia4.id,
-            agenciaDevolucaoId: agencia4.id
-        });
+        // ─── RESERVAS HISTÓRICAS (Concluídas) ───────────────────────────────────
+        const reserva1 = await Reserva.create({ dataRetirada: fmt(plusDays(-30), "08:00"), dataDevolucao: fmt(plusDays(-26), "18:00"), valorDiaria: 350.00, quantidadeDias: 4, valorSeguro: 200.00, valorFinal: 1980.00, status: "Concluída", clienteId: cliente1.id, categoriaVeiculoId: catSUV.id,    funcionarioId: func1.id, seguroId: seguroOuro.id,   agenciaRetiradaId: agencia1.id, agenciaDevolucaoId: agencia1.id });
+        const reserva2 = await Reserva.create({ dataRetirada: fmt(plusDays(-28), "09:30"), dataDevolucao: fmt(plusDays(-24), "17:30"), valorDiaria: 100.00, quantidadeDias: 4, valorSeguro:  80.00, valorFinal:  432.00, status: "Concluída", clienteId: cliente2.id, categoriaVeiculoId: catHatch.id,  funcionarioId: func2.id, seguroId: seguroBasico.id, agenciaRetiradaId: agencia2.id, agenciaDevolucaoId: agencia3.id });
+        const reserva3 = await Reserva.create({ dataRetirada: fmt(plusDays(-25), "10:00"), dataDevolucao: fmt(plusDays(-20), "16:00"), valorDiaria: 220.00, quantidadeDias: 5, valorSeguro: 175.00, valorFinal: 1275.00, status: "Concluída", clienteId: cliente3.id, categoriaVeiculoId: catSedan.id,  funcionarioId: func3.id, seguroId: seguroPrata.id,  agenciaRetiradaId: agencia3.id, agenciaDevolucaoId: agencia2.id });
+        const reserva4 = await Reserva.create({ dataRetirada: fmt(plusDays(-22), "07:45"), dataDevolucao: fmt(plusDays(-19), "15:15"), valorDiaria: 280.00, quantidadeDias: 3, valorSeguro: 180.00, valorFinal: 1116.00, status: "Concluída", clienteId: cliente4.id, categoriaVeiculoId: catPicape.id, funcionarioId: func4.id, seguroId: seguroPlus.id,   agenciaRetiradaId: agencia1.id, agenciaDevolucaoId: agencia1.id });
+        // reservas 5 e 6: histórico de avarias do cliente5 → 4 avarias totais → taxa de inspeção aplica
+        const reserva5 = await Reserva.create({ dataRetirada: fmt(plusDays(-40), "08:00"), dataDevolucao: fmt(plusDays(-35), "18:00"), valorDiaria: 100.00, quantidadeDias: 5, valorSeguro:   0.00, valorFinal:  500.00, status: "Concluída", clienteId: cliente5.id, categoriaVeiculoId: catHatch.id,  funcionarioId: func1.id, agenciaRetiradaId: agencia1.id, agenciaDevolucaoId: agencia1.id });
+        const reserva6 = await Reserva.create({ dataRetirada: fmt(plusDays(-20), "08:00"), dataDevolucao: fmt(plusDays(-15), "18:00"), valorDiaria: 350.00, quantidadeDias: 5, valorSeguro:   0.00, valorFinal: 1487.50, status: "Concluída", clienteId: cliente5.id, categoriaVeiculoId: catSUV.id,    funcionarioId: func2.id, agenciaRetiradaId: agencia2.id, agenciaDevolucaoId: agencia2.id });
 
-        const checkin1 = await Checkin.create({
-            dataCheckin: formatDateTime(plusDays(2), "08:10"),
-            quilometragemCheckin: 25000.00,
-            cnhCondutor: cliente1.cnh,
-            cnhValidade: cliente1.validadeCnh,
-            reservaId: reserva1.id,
-            veiculoId: veiculo2.id,
-            funcionarioId: func1.id
-        });
-        const checkin2 = await Checkin.create({
-            dataCheckin: formatDateTime(plusDays(3), "09:40"),
-            quilometragemCheckin: 1600.00,
-            cnhCondutor: cliente2.cnh,
-            cnhValidade: cliente2.validadeCnh,
-            reservaId: reserva2.id,
-            veiculoId: veiculo1.id,
-            funcionarioId: func2.id
-        });
-        const checkin3 = await Checkin.create({
-            dataCheckin: formatDateTime(plusDays(4), "10:20"),
-            quilometragemCheckin: 31200.00,
-            cnhCondutor: cliente3.cnh,
-            cnhValidade: cliente3.validadeCnh,
-            reservaId: reserva3.id,
-            veiculoId: veiculo3.id,
-            funcionarioId: func3.id
-        });
-        const checkin4 = await Checkin.create({
-            dataCheckin: formatDateTime(plusDays(5), "08:00"),
-            quilometragemCheckin: 40300.00,
-            cnhCondutor: cliente4.cnh,
-            cnhValidade: cliente4.validadeCnh,
-            reservaId: reserva4.id,
-            veiculoId: veiculo4.id,
-            funcionarioId: func4.id
-        });
+        // ─── RESERVAS PENDENTES (testes de check-in) ────────────────────────────
+        // reserva7: cliente2 (sem multas), catHatch, datas 2030-02-01→08 (estáticas)
+        //   → testa: check-in válido | CNH errada | veículo não disponível | veículo categoria errada | conflito de período
+        const reserva7 = await Reserva.create({ dataRetirada: "2030-02-01 08:00:00", dataDevolucao: "2030-02-08 18:00:00", valorDiaria: 100.00, quantidadeDias: 7, valorSeguro: 0.00, valorFinal: 630.00, status: "Pendente", clienteId: cliente2.id, categoriaVeiculoId: catHatch.id, funcionarioId: func1.id, agenciaRetiradaId: agencia1.id, agenciaDevolucaoId: agencia2.id });
+        // reserva8: cliente1 (Multa Pendente), catSUV, datas 2030-03-01→05 → testa RN cliente com débitos pendentes
+        const reserva8 = await Reserva.create({ dataRetirada: "2030-03-01 08:00:00", dataDevolucao: "2030-03-05 18:00:00", valorDiaria: 350.00, quantidadeDias: 4, valorSeguro: 0.00, valorFinal: 1260.00, status: "Pendente", clienteId: cliente1.id, categoriaVeiculoId: catSUV.id,   funcionarioId: func1.id, agenciaRetiradaId: agencia1.id, agenciaDevolucaoId: agencia1.id });
 
-        const avaria1 = await Avaria.create({
-            nome: "Arranhão na porta",
-            valor: 350.00
-        });
-        const avaria2 = await Avaria.create({
-            nome: "Parachoque trincado",
-            valor: 900.00
-        });
-        const avaria3 = await Avaria.create({
-            nome: "Retrovisor quebrado",
-            valor: 450.00
-        });
-        const avaria4 = await Avaria.create({
-            nome: "Lanterna traseira queimada",
-            valor: 180.00
-        });
+        // ─── RESERVAS COM CHECKIN ATIVO (sem checkout — testes de checkout) ─────
+        // reserva9: cliente3, catSedan → para testes de quilometragem/data inválidas no checkout (checkin7)
+        const reserva9  = await Reserva.create({ dataRetirada: "2026-01-10 08:00:00", dataDevolucao: "2026-01-20 18:00:00", valorDiaria: 220.00, quantidadeDias: 10, valorSeguro: 0.00, valorFinal: 1936.00, status: "Pendente", clienteId: cliente3.id, categoriaVeiculoId: catSedan.id, funcionarioId: func3.id, agenciaRetiradaId: agencia3.id, agenciaDevolucaoId: agencia3.id });
+        // reserva10: cliente5 (>3 avarias históricas), catSUV → para testar taxa de inspeção (checkin8)
+        const reserva10 = await Reserva.create({ dataRetirada: "2026-04-01 08:00:00", dataDevolucao: "2026-04-10 18:00:00", valorDiaria: 350.00, quantidadeDias:  9, valorSeguro: 0.00, valorFinal: 2677.50, status: "Pendente", clienteId: cliente5.id, categoriaVeiculoId: catSUV.id,   funcionarioId: func2.id, agenciaRetiradaId: agencia2.id, agenciaDevolucaoId: agencia2.id });
 
-        const checkout1 = await Checkout.create({
-            dataCheckout: formatDateTime(plusDays(6), "17:30"),
-            quilometragemCheckout: 25400.00,
-            nivelCombustivel: "Médio",
-            condicaoPneus: "Bom",
-            condicaoPalhetas: "Boas",
-            limpoInternamente: false,
-            limpoExternamente: true,
-            checkinId: checkin1.id,
-            funcionarioId: func2.id
-        });
-        const checkout2 = await Checkout.create({
-            dataCheckout: formatDateTime(plusDays(7), "16:45"),
-            quilometragemCheckout: 1880.00,
-            nivelCombustivel: "Alto",
-            condicaoPneus: "Regular",
-            condicaoPalhetas: "Boas",
-            limpoInternamente: true,
-            limpoExternamente: true,
-            checkinId: checkin2.id,
-            funcionarioId: func1.id
-        });
-        const checkout3 = await Checkout.create({
-            dataCheckout: formatDateTime(plusDays(9), "15:10"),
-            quilometragemCheckout: 31800.00,
-            nivelCombustivel: "Baixo",
-            condicaoPneus: "Ruim",
-            condicaoPalhetas: "Ressecadas",
-            limpoInternamente: false,
-            limpoExternamente: false,
-            checkinId: checkin3.id,
-            funcionarioId: func4.id
-        });
-        const checkout4 = await Checkout.create({
-            dataCheckout: formatDateTime(plusDays(8), "14:50"),
-            quilometragemCheckout: 40900.00,
-            nivelCombustivel: "Vazio",
-            condicaoPneus: "Furado",
-            condicaoPalhetas: "Quebradas",
-            limpoInternamente: true,
-            limpoExternamente: false,
-            checkinId: checkin4.id,
-            funcionarioId: func3.id
-        });
+        // ─── CHECKINS HISTÓRICOS ────────────────────────────────────────────────
+        const checkin1 = await Checkin.create({ dataCheckin: fmt(plusDays(-30), "08:10"), quilometragemCheckin: 25000.00, cnhCondutor: cliente1.cnh, cnhValidade: cliente1.validadeCnh, reservaId: reserva1.id, veiculoId: veiculo2.id, funcionarioId: func1.id });
+        const checkin2 = await Checkin.create({ dataCheckin: fmt(plusDays(-28), "09:40"), quilometragemCheckin:  1600.00, cnhCondutor: cliente2.cnh, cnhValidade: cliente2.validadeCnh, reservaId: reserva2.id, veiculoId: veiculo1.id, funcionarioId: func2.id });
+        const checkin3 = await Checkin.create({ dataCheckin: fmt(plusDays(-25), "10:20"), quilometragemCheckin: 31200.00, cnhCondutor: cliente3.cnh, cnhValidade: cliente3.validadeCnh, reservaId: reserva3.id, veiculoId: veiculo3.id, funcionarioId: func3.id });
+        const checkin4 = await Checkin.create({ dataCheckin: fmt(plusDays(-22), "08:00"), quilometragemCheckin: 40300.00, cnhCondutor: cliente4.cnh, cnhValidade: cliente4.validadeCnh, reservaId: reserva4.id, veiculoId: veiculo4.id, funcionarioId: func4.id });
+        // checkins 5 e 6: histórico de avarias do cliente5
+        const checkin5 = await Checkin.create({ dataCheckin: fmt(plusDays(-40), "08:10"), quilometragemCheckin:  1500.50, cnhCondutor: cliente5.cnh, cnhValidade: cliente5.validadeCnh, reservaId: reserva5.id, veiculoId: veiculo1.id, funcionarioId: func1.id });
+        const checkin6 = await Checkin.create({ dataCheckin: fmt(plusDays(-20), "08:10"), quilometragemCheckin: 25000.00, cnhCondutor: cliente5.cnh, cnhValidade: cliente5.validadeCnh, reservaId: reserva6.id, veiculoId: veiculo2.id, funcionarioId: func2.id });
+
+        // ─── CHECKINS ATIVOS (sem checkout) ─────────────────────────────────────
+        // checkin7: reserva9 (cliente3, catSedan), dataCheckin=2026-01-10, quilometragem=50000
+        //   → testa checkout com quilometragem inválida e data anterior ao check-in
+        const checkin7 = await Checkin.create({ dataCheckin: "2026-01-10 08:00:00", quilometragemCheckin: 50000.00, cnhCondutor: cliente3.cnh, cnhValidade: cliente3.validadeCnh, reservaId: reserva9.id,  veiculoId: veiculo3.id, funcionarioId: func3.id });
+        // checkin8: reserva10 (cliente5 com >3 avarias), dataCheckin=2026-04-01, quilometragem=25000
+        //   → testa checkout válido com taxa de inspeção = R$ 150,00
+        const checkin8 = await Checkin.create({ dataCheckin: "2026-04-01 08:00:00", quilometragemCheckin: 25000.00, cnhCondutor: cliente5.cnh, cnhValidade: cliente5.validadeCnh, reservaId: reserva10.id, veiculoId: veiculo2.id, funcionarioId: func2.id });
+
+        // Atualizar status dos veículos e reservas referentes aos checkins ativos
+        await veiculo3.update({ status: "Reservado" });
+        await reserva9.update({ status: "Confirmada" });
+        await veiculo2.update({ status: "Reservado" });
+        await reserva10.update({ status: "Confirmada" });
+
+        // ─── AVARIAS ────────────────────────────────────────────────────────────
+        const avaria1 = await Avaria.create({ nome: "Arranhão na porta",          valor: 350.00 });
+        const avaria2 = await Avaria.create({ nome: "Parachoque trincado",        valor: 900.00 });
+        const avaria3 = await Avaria.create({ nome: "Retrovisor quebrado",        valor: 450.00 });
+        const avaria4 = await Avaria.create({ nome: "Lanterna traseira queimada", valor: 180.00 });
+        const avaria5 = await Avaria.create({ nome: "Vidro lateral trincado",     valor: 600.00 });
+
+        // ─── CHECKOUTS HISTÓRICOS ───────────────────────────────────────────────
+        const checkout1 = await Checkout.create({ dataCheckout: fmt(plusDays(-26), "17:30"), quilometragemCheckout: 25400.00, nivelCombustivel: "Médio", condicaoPneus: "Bom",    condicaoPalhetas: "Boas",       limpoInternamente: false, limpoExternamente: true,  taxaInspecao: 0, checkinId: checkin1.id, funcionarioId: func2.id });
+        const checkout2 = await Checkout.create({ dataCheckout: fmt(plusDays(-24), "16:45"), quilometragemCheckout:  1880.00, nivelCombustivel: "Alto",  condicaoPneus: "Regular", condicaoPalhetas: "Boas",       limpoInternamente: true,  limpoExternamente: true,  taxaInspecao: 0, checkinId: checkin2.id, funcionarioId: func1.id });
+        const checkout3 = await Checkout.create({ dataCheckout: fmt(plusDays(-20), "15:10"), quilometragemCheckout: 31800.00, nivelCombustivel: "Baixo", condicaoPneus: "Ruim",    condicaoPalhetas: "Ressecadas", limpoInternamente: false, limpoExternamente: false, taxaInspecao: 0, checkinId: checkin3.id, funcionarioId: func4.id });
+        const checkout4 = await Checkout.create({ dataCheckout: fmt(plusDays(-19), "14:50"), quilometragemCheckout: 40900.00, nivelCombustivel: "Vazio", condicaoPneus: "Furado",  condicaoPalhetas: "Quebradas",  limpoInternamente: true,  limpoExternamente: false, taxaInspecao: 0, checkinId: checkin4.id, funcionarioId: func3.id });
+        // checkouts 5 e 6: 2 avarias cada → cliente5 acumula 4 avarias → taxa de inspeção aplica no checkin8
+        const checkout5 = await Checkout.create({ dataCheckout: fmt(plusDays(-35), "17:00"), quilometragemCheckout:  2000.00, nivelCombustivel: "Médio", condicaoPneus: "Bom",    condicaoPalhetas: "Boas",       limpoInternamente: true,  limpoExternamente: true,  taxaInspecao: 0, checkinId: checkin5.id, funcionarioId: func1.id });
+        const checkout6 = await Checkout.create({ dataCheckout: fmt(plusDays(-15), "17:00"), quilometragemCheckout: 25800.00, nivelCombustivel: "Médio", condicaoPneus: "Bom",    condicaoPalhetas: "Boas",       limpoInternamente: true,  limpoExternamente: true,  taxaInspecao: 0, checkinId: checkin6.id, funcionarioId: func2.id });
 
         await checkout1.addAvarias([avaria1]);
         await checkout2.addAvarias([avaria2]);
         await checkout3.addAvarias([avaria3]);
         await checkout4.addAvarias([avaria4]);
+        await checkout5.addAvarias([avaria1, avaria2]);
+        await checkout6.addAvarias([avaria3, avaria4]);
 
-        await Multa.create({
-            valor: 195.23,
-            dataEmissao: "2024-03-20",
-            descricao: "Excesso de velocidade na rodovia",
-            status: "Pendente",
-            clienteId: cliente1.id
-        });
-        await Multa.create({
-            valor: 320.00,
-            dataEmissao: "2024-02-11",
-            descricao: "Avanço de sinal vermelho",
-            status: "Paga",
-            clienteId: cliente2.id
-        });
-        await Multa.create({
-            valor: 88.50,
-            dataEmissao: "2023-12-05",
-            descricao: "Estacionamento irregular",
-            status: "Paga",
-            clienteId: cliente3.id
-        });
-        await Multa.create({
-            valor: 540.90,
-            dataEmissao: "2024-01-17",
-            descricao: "Ultrapassagem em local proibido",
-            status: "Pendente",
-            clienteId: cliente4.id
-        });
+        // ─── MULTAS ─────────────────────────────────────────────────────────────
+        // cliente1 e cliente4 têm Pendente → bloqueiam check-in
+        await Multa.create({ valor: 195.23, dataEmissao: "2024-03-20", descricao: "Excesso de velocidade na rodovia",     status: "Pendente", clienteId: cliente1.id });
+        await Multa.create({ valor: 320.00, dataEmissao: "2024-02-11", descricao: "Avanço de sinal vermelho",             status: "Paga",     clienteId: cliente2.id });
+        await Multa.create({ valor:  88.50, dataEmissao: "2023-12-05", descricao: "Estacionamento irregular",             status: "Paga",     clienteId: cliente3.id });
+        await Multa.create({ valor: 540.90, dataEmissao: "2024-01-17", descricao: "Ultrapassagem em local proibido",      status: "Pendente", clienteId: cliente4.id });
+        await Multa.create({ valor: 150.00, dataEmissao: "2024-06-10", descricao: "Velocidade excessiva em zona escolar", status: "Paga",     clienteId: cliente5.id });
+
     })();
 }
 

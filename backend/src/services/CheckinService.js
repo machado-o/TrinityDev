@@ -8,6 +8,23 @@ import { Multa } from "../models/Multa.js";
 import { Funcionario } from "../models/Funcionario.js";
 import { validarModel } from "./_validarModel.js";
 
+// Regra: reserva deve estar com status Pendente para permitir check-in
+function validarStatusReserva(reserva, erros) {
+  if (reserva.status !== 'Pendente') erros.push("Só é possível realizar check-in em reservas com status Pendente!");
+}
+
+// Regra: CNH informada deve corresponder exatamente à CNH cadastrada no cliente da reserva
+function validarCnhCondutor(cnhCondutor, reserva, erros) {
+  if (cnhCondutor !== reserva.cliente.cnh) erros.push("A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!");
+}
+
+// Regra: cliente com multas pendentes não pode realizar check-in
+async function validarDebitosPendentesCliente(clienteId, erros) {
+  const debitosPendentes = await Multa.count({ where: { clienteId, status: "Pendente" } });
+  if (debitosPendentes > 0) erros.push("O cliente possui débitos pendentes e não pode realizar o check-in!");
+}
+
+// Regra: se não há veículo disponível na categoria, realiza upgrade gratuito para a próxima categoria com veículo disponível
 async function buscarVeiculoUpgrade(categoriaVeiculoId) {
   const categoriasSuperiores = await CategoriaVeiculo.findAll({
     where: { id: { [Op.gt]: categoriaVeiculoId } },
@@ -22,6 +39,7 @@ async function buscarVeiculoUpgrade(categoriaVeiculoId) {
   return null;
 }
 
+// Regra: veículo selecionado deve estar disponível e pertencer à categoria da reserva
 async function validarVeiculoSolicitado(reserva, veiculoId) {
   const erros = [];
 
@@ -41,6 +59,7 @@ async function validarVeiculoSolicitado(reserva, veiculoId) {
   return { veiculoFinalId: veiculoId, erros };
 }
 
+// Regra: resolve qual veículo será utilizado — usa o solicitado ou realiza upgrade automático se a categoria estiver sem disponibilidade
 async function resolverVeiculoParaCheckin(reserva, veiculoId) {
   const veiculosNaCategoria = await Veiculo.findAll({
     where: { categoriaVeiculoId: reserva.categoriaVeiculoId, status: "Disponível" },
@@ -53,6 +72,24 @@ async function resolverVeiculoParaCheckin(reserva, veiculoId) {
   }
 
   return validarVeiculoSolicitado(reserva, veiculoId);
+}
+
+// Orquestra todas as validações de negócio para create e update
+async function verificarRegrasDeNegocio({ cnhCondutor, reserva, veiculoId, isUpdate, erros }) {
+  if (!isUpdate) {
+    validarStatusReserva(reserva, erros);
+    await validarDebitosPendentesCliente(reserva.clienteId, erros);
+  }
+
+  if (cnhCondutor !== undefined) validarCnhCondutor(cnhCondutor, reserva, erros);
+
+  if (!isUpdate) {
+    const { veiculoFinalId, erros: errosVeiculo } = await resolverVeiculoParaCheckin(reserva, veiculoId);
+    erros.push(...errosVeiculo);
+    return veiculoFinalId;
+  }
+
+  return veiculoId ?? null;
 }
 
 class CheckinService {
@@ -75,22 +112,12 @@ class CheckinService {
       Funcionario.findByPk(funcionarioId),
     ]);
 
-    if (!reserva) {
-      erros.push("Reserva não encontrada!");
-    } else {
-      if (reserva.status !== 'Pendente') erros.push("Só é possível realizar check-in em reservas com status Pendente!");
-      if (cnhCondutor !== reserva.cliente.cnh) erros.push("A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!");
-      const debitosPendentes = await Multa.count({ where: { clienteId: reserva.clienteId, status: "Pendente" } });
-      if (debitosPendentes > 0) erros.push("O cliente possui débitos pendentes e não pode realizar o check-in!");
-    }
-
+    if (!reserva) erros.push("Reserva não encontrada!");
     if (!funcionario) erros.push("Funcionário não encontrado!");
 
     let veiculoFinalId = veiculoId;
     if (reserva) {
-      const { veiculoFinalId: idResolvido, erros: errosVeiculo } = await resolverVeiculoParaCheckin(reserva, veiculoId);
-      erros.push(...errosVeiculo);
-      if (idResolvido) veiculoFinalId = idResolvido;
+      veiculoFinalId = await verificarRegrasDeNegocio({ cnhCondutor, reserva, veiculoId, isUpdate: false, erros }) ?? veiculoFinalId;
     }
 
     erros.push(...await validarModel(Checkin.build({ dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, reservaId, veiculoId: veiculoFinalId, funcionarioId })));
@@ -118,11 +145,18 @@ class CheckinService {
     const obj = await Checkin.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Checkin não encontrado!";
 
+    const erros = [];
+
+    if (cnhCondutor !== undefined) {
+      const reserva = await Reserva.findByPk(reservaId ?? obj.reservaId, { include: { all: true } });
+      if (reserva) await verificarRegrasDeNegocio({ cnhCondutor, reserva, isUpdate: true, erros });
+    }
+
     const patch = { dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, reservaId, veiculoId, funcionarioId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
 
-    const erros = await validarModel(obj);
+    erros.push(...await validarModel(obj));
     if (erros.length > 0) throw erros.join(" ");
 
     await obj.save({ validate: false });
