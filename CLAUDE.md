@@ -16,7 +16,7 @@ This starts the Node.js app on port 3000, PostgreSQL on 5432, and pgAdmin on por
 
 **Development without Docker:**
 ```bash
-npm run dev
+cd backend && npm run dev
 ```
 Uses `nodemon` to watch for changes. Server runs on port 3333.
 
@@ -27,15 +27,15 @@ There are no test scripts configured.
 The app is a REST API using **Express + Sequelize ORM** with ES Modules (`"type": "module"` in package.json).
 
 **Layer structure (Controller → Service → Model):**
-- `src/routes.js` — registers all routes; each entity gets 5 standard CRUD endpoints
-- `src/controllers/` — thin controllers that call the corresponding service and pass errors to `next`
-- `src/services/` — business logic layer; all queries use `{ include: { all: true, nested: true } }` to return fully populated objects
-- `src/models/` — Sequelize models with `static init(sequelize)` and `static associate(models)` methods
-- `src/_middleware/error-handler.js` — global error handler; differentiates string errors (thrown manually as business rule violations), Sequelize validation errors, FK constraint errors, and unique constraint errors. String errors ending in `"não encontrado!"` or `"não encontrada!"` return 404; others return 400. `SequelizeUniqueConstraintError` uses the model's own message via `err.errors[0].message`.
+- `backend/src/routes.js` — registers all routes; each entity gets 5 standard CRUD endpoints
+- `backend/src/controllers/` — thin controllers that call the corresponding service and pass errors to `next`
+- `backend/src/services/` — business logic layer; all queries use `{ include: { all: true, nested: true } }` to return fully populated objects
+- `backend/src/models/` — Sequelize models with `static init(sequelize)` and `static associate(models)` methods
+- `backend/src/_middleware/error-handler.js` — global error handler; differentiates string errors (thrown manually as business rule violations), Sequelize validation errors, FK constraint errors, and unique constraint errors. String errors ending in `"não encontrado!"` or `"não encontrada!"` return 404; others return 400. `SequelizeUniqueConstraintError` uses the model's own message via `err.errors[0].message`.
 
 **Database setup:**
-- `src/config/database-config.js` — exports `databaseConfig`; has commented-out SQLite config for local testing and a production Postgres config
-- `src/config/database-connection.js` — instantiates Sequelize, calls `init` and `associate` on every model, then runs `databaseInserts()` which does `sequelize.sync({ force: true })` and seeds the database on every startup
+- `backend/src/config/database-config.js` — exports `databaseConfig`; has commented-out SQLite config for local testing and a production Postgres config
+- `backend/src/config/database-connection.js` — instantiates Sequelize, calls `init` and `associate` on every model, then runs `databaseInserts()` which does `sequelize.sync({ force: true })` and seeds the database on every startup
 
 > **Important:** `sync({ force: true })` drops and recreates all tables on every server restart. The database is always re-seeded from `database-connection.js`.
 
@@ -59,11 +59,11 @@ Key entities and their relationships:
 ## Adding a New Entity
 
 Follow the pattern already established:
-1. Create `src/models/EntityName.js` with `static init(sequelize)` and `static associate(models)`
-2. Create `src/services/EntityNameService.js` with `findAll`, `findByPk`, `create`, `update`, `delete`
-3. Create `src/controllers/EntityNameController.js` (delegates to service, passes errors to `next`)
-4. Register model in `database-connection.js` (both `init` and `associate` calls)
-5. Add routes in `src/routes.js`
+1. Create `backend/src/models/EntityName.js` with `static init(sequelize)` and `static associate(models)`
+2. Create `backend/src/services/EntityNameService.js` with `findAll`, `findByPk`, `create`, `update`, `delete`
+3. Create `backend/src/controllers/EntityNameController.js` (delegates to service, passes errors to `next`)
+4. Register model in `backend/src/config/database-connection.js` (both `init` and `associate` calls)
+5. Add routes in `backend/src/routes.js`
 
 ## Business Rules (implemented in Services)
 

@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: ./backend
     volumes:
-      - .:/app
-      - node_modules_data:/app/node_modules 
+      - ./backend:/app
+      - node_modules_data:/app/node_modules
     ports:
       - "3000:3000"
     environment:
