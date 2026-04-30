@@ -70,20 +70,21 @@ Follow the pattern already established:
 **ReservaService.create():**
 - `dataRetirada` must not be in the past (validated here, not in the model)
 - Both `agenciaRetirada` and `agenciaDevolucao` must have `status = 'Ativa'`
-- Conflicting reservations for the same client are blocked
+- Conflicting reservations for the same client are blocked — queries `Reserva` with date overlap filter
 - `valorDiaria`, `quantidadeDias`, `valorSeguro`, and `valorFinal` are **calculated by the service** from `CategoriaVeiculo` and `Seguro` — never accepted from the request body
-- Automatic discount applied if `quantidadeDias >= agencia.limiteDiasDesconto`
+- **Rule 1 — Discount:** `calcularValoresFinanceiros` is async and queries `Agencia` via JOIN with its `reservasRetirada` (filtered to `status = 'Concluída'`). Discount (`percentualDesconto`) is applied only if `quantidadeDias >= limiteDiasDesconto` AND the agency has at least 2 concluded reservations in its history (proven operational capacity).
 
 **CheckinService.create():**
 - `cnhCondutor` must match `reserva.cliente.cnh` exactly
-- Blocked if client has pending multas (`status = 'Pendente'`)
-- If no vehicle available in requested category, client gets a free category upgrade (next category by ID with an available vehicle)
+- **Rule 2 — Pending debts:** Blocked if client has any multas with `status = 'Pendente'` — queries `Multa.count()`
+- **Rule 1 — Vehicle upgrade:** Queries `Veiculo.findAll()` for available vehicles in the requested category. If none found, queries `CategoriaVeiculo` for superior categories and picks the first with an available vehicle. If no upgrade is possible, blocks check-in.
 - After creating: vehicle status → `'Reservado'`; reserva status → `'Confirmada'`
 
 **CheckoutService.create():**
 - `quilometragemCheckout` must be greater than `checkin.quilometragemCheckin`
-- Clients with more than 3 avarias across previous rentals get a R$ 150.00 inspection fee (`taxaInspecao`)
-- After creating: vehicle status → `'Disponível'`; reserva status → `'Concluída'`
+- **Rule 1 — Odometer history:** Queries `MAX(quilometragemCheckout)` via JOIN `Checkout → Checkin` filtered by `veiculoId`. The new reading cannot be less than the maximum ever registered for that vehicle across all historical checkouts. Uses `raw: true` and `subQuery: false` to ensure correct aggregate SQL generation.
+- After creating: `veiculo.quilometragem` is updated to `quilometragemCheckout`; vehicle status → `'Disponível'`; reserva status → `'Concluída'`
+- **Rule 2 — Inspection fee:** Queries all checkins linked to the client's reservations, then finds all their checkouts and sums the avarias. If total > 3, applies `taxaInspecao = R$ 150.00`.
 
 **FuncionarioService:**
 - `senha` is excluded from all read queries (`findAll`, `findByPk`) — never returned in responses

@@ -31,7 +31,7 @@ class FuncionarioService {
   static async update(req) {
     const { id } = req.params;
     const { nome, cpf, cargo, dataNascimento, telefone, email, senha, agenciaId } = req.body;
-
+    
     const obj = await Funcionario.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Funcionário não encontrado!";
 
@@ -65,7 +65,6 @@ class FuncionarioService {
       throw "Não é possível remover este funcionário pois está vinculado a outros registros.";
     }
   }
-
 }
 
 export { FuncionarioService };

@@ -10,19 +10,33 @@ import { validarModel } from "./_validarModel.js";
 
 const TAXA_INSPECAO = 150.00;
 
-// Regra: quilometragem de devolução deve ser maior que a do check-in
-function validarQuilometragem(quilometragemCheckout, checkin, erros) {
-  if (parseFloat(quilometragemCheckout) <= parseFloat(checkin.quilometragemCheckin))
+// Regra 1: quilometragem de devolução deve ser maior que a do check-in e não inferior à maior já registrada para o veículo
+async function validarQuilometragem(quilometragemCheckout, checkin, erros) {
+  if (parseFloat(quilometragemCheckout) <= parseFloat(checkin.quilometragemCheckin)) {
     erros.push("A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!");
+    return;
+  }
+
+  // MAX via JOIN Checkout → Checkin: garante que o odômetro nunca regride em toda a história do veículo
+  const resultado = await Checkout.findOne({
+    attributes: [[sequelize.fn('MAX', sequelize.col('quilometragemCheckout')), 'maxQuilometragem']],
+    include: [{
+      model: Checkin,
+      as: 'checkin',
+      required: true,
+      where: { veiculoId: checkin.veiculoId },
+      attributes: [],
+    }],
+    raw: true,
+    subQuery: false,
+  });
+
+  const maxQuilometragem = resultado?.maxQuilometragem;
+  if (maxQuilometragem != null && parseFloat(quilometragemCheckout) < parseFloat(maxQuilometragem))
+    erros.push("A quilometragem de devolução não pode ser inferior à maior quilometragem já registrada para este veículo!");
 }
 
-// Regra: data de devolução não pode ser anterior à data do check-in
-function validarDataCheckout(dataCheckout, checkin, erros) {
-  if (new Date(dataCheckout) < new Date(checkin.dataCheckin))
-    erros.push("A data de devolução não pode ser anterior à data do check-in!");
-}
-
-// Regra: clientes com mais de 3 avarias em aluguéis anteriores pagam taxa de inspeção de R$ 150,00
+// Regra 2: clientes com mais de 3 avarias em aluguéis anteriores pagam taxa de inspeção de R$ 150,00
 async function calcularTaxaInspecao(clienteId) {
   const checkinsDoCliente = await Checkin.findAll({
     include: [{ model: Reserva, as: "reserva", required: true, where: { clienteId }, attributes: [] }],
@@ -41,6 +55,12 @@ async function calcularTaxaInspecao(clienteId) {
   return totalAvarias > 3 ? TAXA_INSPECAO : 0;
 }
 
+// Regra: data de devolução não pode ser anterior à data do check-in
+function validarDataCheckout(dataCheckout, checkin, erros) {
+  if (new Date(dataCheckout) < new Date(checkin.dataCheckin))
+    erros.push("A data de devolução não pode ser anterior à data do check-in!");
+}
+
 // Orquestra todas as validações de negócio para create e update
 async function verificarRegrasDeNegocio({ dataCheckout, quilometragemCheckout, checkinId, obj, erros }) {
   const checkin = checkinId ? await Checkin.findByPk(checkinId) : obj;
@@ -50,7 +70,7 @@ async function verificarRegrasDeNegocio({ dataCheckout, quilometragemCheckout, c
     return;
   }
 
-  if (quilometragemCheckout !== undefined) validarQuilometragem(quilometragemCheckout, checkin, erros);
+  if (quilometragemCheckout !== undefined) await validarQuilometragem(quilometragemCheckout, checkin, erros);
   if (dataCheckout !== undefined) validarDataCheckout(dataCheckout, checkin, erros);
 }
 
@@ -93,6 +113,7 @@ class CheckoutService {
       if (avariaIds) await obj.setAvarias(avariaIds, { transaction: t });
 
       const veiculo = await Veiculo.findByPk(checkin.veiculoId, { transaction: t });
+      veiculo.quilometragem = quilometragemCheckout;
       veiculo.status = 'Disponível';
       await veiculo.save({ transaction: t });
 
@@ -147,7 +168,6 @@ class CheckoutService {
       throw "Não é possível remover este checkout pois ele está vinculado a um checkin!";
     }
   }
-
 }
 
 export { CheckoutService };

@@ -14,65 +14,18 @@ class ClienteService {
   }
 
   static async create(req) {
-    const {
-      nome,
-      cpf,
-      dataNascimento,
-      telefone,
-      email,
-      cnh,
-      categoriaCnh,
-      validadeCnh,
-      endereco,
-    } = req.body;
-
-    const obj = await Cliente.create({
-      nome,
-      cpf,
-      dataNascimento,
-      telefone,
-      email,
-      cnh,
-      categoriaCnh,
-      validadeCnh,
-      endereco,
-    });
-
+    const { nome, cpf, dataNascimento, telefone, email, cnh, categoriaCnh, validadeCnh, endereco } = req.body;
+    const obj = await Cliente.create({ nome, cpf, dataNascimento, telefone, email, cnh, categoriaCnh, validadeCnh, endereco });
     return await Cliente.findByPk(obj.id, { include: { all: true } });
   }
 
   static async update(req) {
     const { id } = req.params;
-    const {
-      nome,
-      cpf,
-      dataNascimento,
-      telefone,
-      email,
-      cnh,
-      categoriaCnh,
-      validadeCnh,
-      endereco,
-    } = req.body;
-
-    const obj = await Cliente.findByPk(id, { include: { all: true } });
-    if (obj == null) throw "Cliente não encontrado!";
-
-    const patch = {
-      nome,
-      cpf,
-      dataNascimento,
-      telefone,
-      email,
-      cnh,
-      categoriaCnh,
-      validadeCnh,
-      endereco,
-    };
-    Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
+    const { nome, cpf, dataNascimento, telefone, email, cnh, categoriaCnh, validadeCnh, endereco } = req.body;
+    const obj = await Cliente.findByPk(id, { include: { all: true } }); if (obj == null) throw "Cliente não encontrado!";
+    const patch = { nome, cpf, dataNascimento, telefone, email, cnh, categoriaCnh, validadeCnh, endereco }; Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
     await obj.save();
-
     return await Cliente.findByPk(obj.id, { include: { all: true } });
   }
 
@@ -87,7 +40,6 @@ class ClienteService {
       throw "Não é possível remover este cliente pois está vinculado a outros registros.";
     }
   }
-
 }
 
 export { ClienteService };

@@ -42,7 +42,6 @@ class AgenciaService {
       throw "Não é possível remover esta Agência pois ela está vinculada a reservas";
     }
   }
-
 }
 
 export { AgenciaService };

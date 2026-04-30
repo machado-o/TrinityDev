@@ -30,12 +30,12 @@ Sistema de Aluguel de Veiculos
 
 ### Regras de Negócio (2 p/ cada processo):
 
-1. Reserva: Reservas com quantidade de dias igual ou superior ao limite configurado pelo Gerente têm desconto automático aplicado sobre o valor total.
-2. Reserva: O sistema deve bloquear a criação de reservas para clientes com reservas conflitantes.
-3. Check-in: Caso não haja veículos disponíveis da categoria escolhida, o cliente ganha um "upgrade" de categoria gratuitamente.
-4. Check-in: Caso constem débitos pendentes de locações anteriores no histórico do cliente, o sistema deve bloquear a liberação do novo veículo.
-5. Check-out: A quilometragem do carro deve ser maior à última quilometragem já registrada do veículo.
-6. Check-out: Cliente com mais de 3 avarias registradas em locações anteriores, tem taxa de inspeção aplicada.
+1. Reserva: O desconto automático sobre o valor total é aplicado quando a quantidade de dias atinge o limite configurado pela agência — mas somente se a agência já possui ao menos 2 reservas concluídas em seu histórico, comprovando sua capacidade operacional.
+2. Reserva: O sistema bloqueia a criação de reservas para clientes que já possuem outra reserva ativa (não cancelada e não concluída) cujo período se sobreponha ao solicitado.
+1. Check-in: Caso não haja veículos disponíveis na categoria solicitada, o sistema busca automaticamente um veículo de categoria superior e realiza o upgrade gratuitamente para o cliente.
+2. Check-in: O sistema bloqueia o check-in de clientes que possuam multas com status "Pendente" em seu histórico.
+1. Check-out: A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o checkout, o odômetro do veículo é atualizado.
+2. Check-out: Clientes com mais de 3 avarias acumuladas em checkouts anteriores têm uma taxa de inspeção de R$ 150,00 aplicada automaticamente ao checkout.
 
 ### Relatórios:
 
@@ -45,18 +45,18 @@ Totalização: Quantidade e valor de reservas realizadas por um funcionário.
 2. Reservas por categoria de veículo em um período informado. Filtros: Categoria de Veículo e Data.
 Totalização: Quantidade e valor de reservas de uma categoria de veículo.
 
-3. Check-ins realizados por agência em um período informado. Filtros: Agência e Data.
+1. Check-ins realizados por agência em um período informado. Filtros: Agência e Data.
 Totalização: Quantidade de check-ins de uma agência.
 > Possível adição: cliente com mais check-ins nessa agência.
 
-4. Check-ins agrupados por veículo em um período informado. Filtros: Veículo e Data.
+2. Check-ins agrupados por veículo em um período informado. Filtros: Veículo e Data.
 Totalização: Quantidade de check-ins de um veículo.
 > Possível adição: funcionário com mais check-ins desse veículo.
 
-5. Check-outs com avarias registradas agrupadas por veículo em um período informado. Filtros: Veículo e Data.
+1. Check-outs com avarias registradas agrupadas por veículo em um período informado. Filtros: Veículo e Data.
 Totalização: Quantidade e valor de avarias de um veículo.
 
-6. Check-outs com multas aplicadas a clientes em um período. Filtros: Cliente e Data.
+2. Check-outs com multas aplicadas a clientes em um período. Filtros: Cliente e Data.
 Totalização: Quantidade e valor de multas de um cliente.
 
 # Visão Geral
@@ -417,7 +417,7 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 }
 ```
 
-> `valorDiaria`, `quantidadeDias`, `valorSeguro` e `valorFinal` são **calculados automaticamente** pelo sistema a partir da categoria, seguro e datas informados. Desconto automático é aplicado se `quantidadeDias >= limiteDiasDesconto` da agência de retirada.
+> `valorDiaria`, `quantidadeDias`, `valorSeguro` e `valorFinal` são **calculados automaticamente** pelo sistema a partir da categoria, seguro e datas informados. Desconto automático é aplicado se `quantidadeDias >= limiteDiasDesconto` da agência de retirada **e** a agência possui ao menos 2 reservas concluídas em seu histórico.
 
 `status` (somente leitura): `"Pendente"` → `"Confirmada"` (após check-in) → `"Concluída"` (após check-out) | `"Cancelada"`
 
@@ -479,4 +479,4 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 
 `nivelCombustivel`: `"Alto"` | `"Médio"` | `"Baixo"` | `"Vazio"` — `condicaoPneus`: `"Bom"` | `"Regular"` | `"Ruim"` | `"Furado"` — `condicaoPalhetas`: `"Boas"` | `"Ressecadas"` | `"Quebradas"` | `"Ausentes"` — `avariaIds` é opcional.
 
-> A quilometragem deve ser maior que a registrada no check-in. Clientes com mais de 3 avarias em locações anteriores recebem taxa de inspeção de R$ 150,00. Após o check-out, o veículo volta para `"Disponível"` e a reserva vai para `"Concluída"`.
+> A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o check-out, o odômetro do veículo é atualizado, o status volta para `"Disponível"` e a reserva vai para `"Concluída"`. Clientes com mais de 3 avarias em locações anteriores recebem taxa de inspeção de R$ 150,00.

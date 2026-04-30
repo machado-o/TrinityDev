@@ -42,7 +42,6 @@ class MultaService {
       throw "Não é possível remover esta multa pois ela está vinculada a um cliente!";
     }
   }
-
 }
 
 export { MultaService };

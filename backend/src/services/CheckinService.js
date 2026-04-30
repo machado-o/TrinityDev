@@ -8,38 +8,21 @@ import { Multa } from "../models/Multa.js";
 import { Funcionario } from "../models/Funcionario.js";
 import { validarModel } from "./_validarModel.js";
 
-// Regra: reserva deve estar com status Pendente para permitir check-in
-function validarStatusReserva(reserva, erros) {
-  if (reserva.status !== 'Pendente') erros.push("Só é possível realizar check-in em reservas com status Pendente!");
-}
-
-// Regra: CNH informada deve corresponder exatamente à CNH cadastrada no cliente da reserva
-function validarCnhCondutor(cnhCondutor, reserva, erros) {
-  if (cnhCondutor !== reserva.cliente.cnh) erros.push("A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!");
-}
-
-// Regra: cliente com multas pendentes não pode realizar check-in
-async function validarDebitosPendentesCliente(clienteId, erros) {
-  const debitosPendentes = await Multa.count({ where: { clienteId, status: "Pendente" } });
-  if (debitosPendentes > 0) erros.push("O cliente possui débitos pendentes e não pode realizar o check-in!");
-}
-
-// Regra: se não há veículo disponível na categoria, realiza upgrade gratuito para a próxima categoria com veículo disponível
-async function buscarVeiculoUpgrade(categoriaVeiculoId) {
-  const categoriasSuperiores = await CategoriaVeiculo.findAll({
-    where: { id: { [Op.gt]: categoriaVeiculoId } },
-    order: [["id", "ASC"]],
+// Regra 1.1: resolve qual veículo será utilizado — usa o solicitado ou realiza upgrade automático se a categoria estiver sem disponibilidade
+async function resolverVeiculoParaCheckin(reserva, veiculoId) {
+  const veiculosNaCategoria = await Veiculo.findAll({
+    where: { categoriaVeiculoId: reserva.categoriaVeiculoId, status: "Disponível" },
   });
-
-  for (const cat of categoriasSuperiores) {
-    const veiculo = await Veiculo.findOne({ where: { categoriaVeiculoId: cat.id, status: "Disponível" } });
-    if (veiculo) return veiculo.id;
+  
+  if (veiculosNaCategoria.length === 0) {
+    const veiculoFinalId = await buscarVeiculoUpgrade(reserva.categoriaVeiculoId);
+    const erros = veiculoFinalId ? [] : ["Não há veículos disponíveis para esta reserva e não foi possível realizar upgrade de categoria!"];
+    return { veiculoFinalId, erros };
   }
-
-  return null;
+  return validarVeiculoSolicitado(reserva, veiculoId);
 }
 
-// Regra: veículo selecionado deve estar disponível e pertencer à categoria da reserva
+// Regra 1.2: veículo selecionado deve estar disponível e pertencer à categoria da reserva
 async function validarVeiculoSolicitado(reserva, veiculoId) {
   const erros = [];
 
@@ -59,19 +42,35 @@ async function validarVeiculoSolicitado(reserva, veiculoId) {
   return { veiculoFinalId: veiculoId, erros };
 }
 
-// Regra: resolve qual veículo será utilizado — usa o solicitado ou realiza upgrade automático se a categoria estiver sem disponibilidade
-async function resolverVeiculoParaCheckin(reserva, veiculoId) {
-  const veiculosNaCategoria = await Veiculo.findAll({
-    where: { categoriaVeiculoId: reserva.categoriaVeiculoId, status: "Disponível" },
+// Regra 1.3: se não há veículo disponível na categoria, realiza upgrade gratuito para a próxima categoria com veículo disponível
+async function buscarVeiculoUpgrade(categoriaVeiculoId) {
+  const categoriasSuperiores = await CategoriaVeiculo.findAll({
+    where: { id: { [Op.gt]: categoriaVeiculoId } },
+    order: [["id", "ASC"]],
   });
 
-  if (veiculosNaCategoria.length === 0) {
-    const veiculoFinalId = await buscarVeiculoUpgrade(reserva.categoriaVeiculoId);
-    const erros = veiculoFinalId ? [] : ["Não há veículos disponíveis para esta reserva e não foi possível realizar upgrade de categoria!"];
-    return { veiculoFinalId, erros };
+  for (const cat of categoriasSuperiores) {
+    const veiculo = await Veiculo.findOne({ where: { categoriaVeiculoId: cat.id, status: "Disponível" } });
+    if (veiculo) return veiculo.id;
   }
 
-  return validarVeiculoSolicitado(reserva, veiculoId);
+  return null;
+}
+
+// Regra 2: cliente com multas pendentes não pode realizar check-in
+async function validarDebitosPendentesCliente(clienteId, erros) {
+  const debitosPendentes = await Multa.count({ where: { clienteId, status: "Pendente" } });
+  if (debitosPendentes > 0) erros.push("O cliente possui débitos pendentes e não pode realizar o check-in!");
+}
+
+// Regra: reserva deve estar com status Pendente para permitir check-in
+function validarStatusReserva(reserva, erros) {
+  if (reserva.status !== 'Pendente') erros.push("Só é possível realizar check-in em reservas com status Pendente!");
+}
+
+// Regra: CNH informada deve corresponder exatamente à CNH cadastrada no cliente da reserva
+function validarCnhCondutor(cnhCondutor, reserva, erros) {
+  if (cnhCondutor !== reserva.cliente.cnh) erros.push("A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!");
 }
 
 // Orquestra todas as validações de negócio para create e update
@@ -88,7 +87,6 @@ async function verificarRegrasDeNegocio({ cnhCondutor, reserva, veiculoId, isUpd
     erros.push(...errosVeiculo);
     return veiculoFinalId;
   }
-
   return veiculoId ?? null;
 }
 
@@ -174,7 +172,6 @@ class CheckinService {
       throw "Não é possível remover este checkin pois está vinculado a outros registros.";
     }
   }
-
 }
 
 export { CheckinService };

@@ -42,7 +42,6 @@ class AvariaService {
       throw "Não é possível remover esta avaria pois ela está vinculada a um checkout!";
     }
   }
-
 }
 
 export { AvariaService };

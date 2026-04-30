@@ -42,7 +42,6 @@ class CoberturaService {
       throw "Não é possível remover esta cobertura pois ela está vinculada a um seguro!";
     }
   }
-
 }
 
 export { CoberturaService };

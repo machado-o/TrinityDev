@@ -49,7 +49,6 @@ class SeguroService {
       throw "Não é possível remover este seguro pois ele está vinculado a reservas!";
     }
   }
-
 }
 
 export { SeguroService };

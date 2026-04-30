@@ -7,6 +7,62 @@ import { Cliente } from "../models/Cliente.js";
 import { Funcionario } from "../models/Funcionario.js";
 import { validarModel } from "./_validarModel.js";
 
+// Regra 1: desconto aplicado apenas por agências com histórico operacional comprovado (mínimo 2 reservas concluídas)
+async function calcularValoresFinanceiros({ agenciaRetiradaId, categoria, seguro, dataRetirada, dataDevolucao }) {
+  const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
+  const valorDiaria = categoria ? parseFloat(categoria.valorDiaria) : null;
+  const valorDiariaSeguro = seguro ? parseFloat(seguro.valorDiariaAdicional) : 0;
+  const diasValidos = isNaN(quantidadeDias) ? 0 : quantidadeDias;
+  const valorSeguro = parseFloat((valorDiariaSeguro * diasValidos).toFixed(2));
+
+  let valorFinal = valorDiaria !== null
+    ? parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2))
+    : null;
+
+  if (valorFinal !== null && agenciaRetiradaId) {
+    // JOIN Agencia → reservas concluídas: valida histórico operacional antes de aplicar o desconto
+    const agencia = await Agencia.findOne({
+      where: { id: agenciaRetiradaId },
+      include: [{
+        model: Reserva,
+        as: 'reservasRetirada',
+        required: false,
+        where: { status: 'Concluída' },
+        attributes: ['id'],
+      }],
+    });
+
+    if (agencia) {
+      const reservasConcluidas = agencia.reservasRetirada.length;
+      const limite = agencia.limiteDiasDesconto;
+      const percentualDesconto = parseFloat(agencia.percentualDesconto);
+
+      if (reservasConcluidas >= 2 && quantidadeDias >= limite) {
+        const desconto = valorFinal * (percentualDesconto / 100);
+        valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
+      }
+    }
+  }
+
+  return { quantidadeDias, valorDiaria, valorSeguro, valorFinal };
+}
+
+// Regra 2: cliente não pode ter reserva ativa conflitante no mesmo período
+async function validarConflitoReservaCliente(clienteId, dataRetirada, dataDevolucao, erros, excludeId = null) {
+  const where = {
+    clienteId,
+    status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
+    [Op.and]: [
+      { dataRetirada: { [Op.lt]: dataDevolucao } },
+      { dataDevolucao: { [Op.gt]: dataRetirada } },
+    ],
+  };
+  if (excludeId) where.id = { [Op.ne]: excludeId };
+
+  const conflito = await Reserva.findOne({ where });
+  if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
+}
+
 // Regra: data de retirada não pode ser no passado
 function validarDataRetirada(dataRetirada, erros) {
   if (new Date(dataRetirada) < new Date()) erros.push("A data de retirada não pode ser no passado!");
@@ -24,43 +80,6 @@ function validarAgenciaDevolucao(agenciaDevolucao, erros) {
   else if (agenciaDevolucao.status === 'Inativa') erros.push("A agência de devolução está inativa e não pode receber reservas!");
 }
 
-// Regra: cliente não pode ter reserva ativa conflitante no mesmo período
-async function validarConflitoReservaCliente(clienteId, dataRetirada, dataDevolucao, erros, excludeId = null) {
-  const where = {
-    clienteId,
-    status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
-    [Op.and]: [
-      { dataRetirada: { [Op.lt]: dataDevolucao } },
-      { dataDevolucao: { [Op.gt]: dataRetirada } },
-    ],
-  };
-  if (excludeId) where.id = { [Op.ne]: excludeId };
-
-  const conflito = await Reserva.findOne({ where });
-  if (conflito) erros.push("O cliente já possui uma reserva no período solicitado!");
-}
-
-// Regra: valores financeiros são calculados pelo sistema (diária, dias, seguro, desconto)
-function calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada }) {
-  const quantidadeDias = Math.ceil((new Date(dataDevolucao) - new Date(dataRetirada)) / (1000 * 60 * 60 * 24));
-  const valorDiaria = categoria ? parseFloat(categoria.valorDiaria) : null;
-  const valorDiariaSeguro = seguro ? parseFloat(seguro.valorDiariaAdicional) : 0;
-  const diasValidos = isNaN(quantidadeDias) ? 0 : quantidadeDias;
-  const valorSeguro = parseFloat((valorDiariaSeguro * diasValidos).toFixed(2));
-
-  let valorFinal = valorDiaria !== null
-    ? parseFloat(((valorDiaria + valorDiariaSeguro) * quantidadeDias).toFixed(2))
-    : null;
-
-  // Regra: desconto automático aplicado quando quantidade de dias >= limite da agência
-  if (valorFinal !== null && agenciaRetirada && quantidadeDias >= agenciaRetirada.limiteDiasDesconto) {
-    const desconto = valorFinal * (parseFloat(agenciaRetirada.percentualDesconto) / 100);
-    valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
-  }
-
-  return { quantidadeDias, valorDiaria, valorSeguro, valorFinal };
-}
-
 // Orquestra todas as validações de negócio para create e update
 async function verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId, agenciaRetiradaId, agenciaDevolucaoId, reservaId, erros }) {
   if (dataRetirada) validarDataRetirada(dataRetirada, erros);
@@ -76,8 +95,6 @@ async function verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId
   if (clienteId && dataRetirada && dataDevolucao) {
     await validarConflitoReservaCliente(clienteId, dataRetirada, dataDevolucao, erros, reservaId ?? null);
   }
-
-  return { agenciaRetirada };
 }
 
 class ReservaService {
@@ -111,9 +128,9 @@ class ReservaService {
       if (!seguro) erros.push("Seguro não encontrado!");
     }
 
-    const { agenciaRetirada } = await verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId, agenciaRetiradaId, agenciaDevolucaoId, erros });
+    await verificarRegrasDeNegocio({ dataRetirada, dataDevolucao, clienteId, agenciaRetiradaId, agenciaDevolucaoId, erros });
 
-    const { quantidadeDias, valorDiaria, valorSeguro, valorFinal } = calcularValoresFinanceiros({ categoria, seguro, dataRetirada, dataDevolucao, agenciaRetirada });
+    const { quantidadeDias, valorDiaria, valorSeguro, valorFinal } = await calcularValoresFinanceiros({ agenciaRetiradaId, categoria, seguro, dataRetirada, dataDevolucao });
 
     erros.push(...await validarModel(Reserva.build({ dataRetirada, dataDevolucao })));
 
@@ -172,7 +189,6 @@ class ReservaService {
       throw "Não é possível remover esta reserva pois está vinculada a outros registros.";
     }
   }
-
 }
 
 export { ReservaService };
