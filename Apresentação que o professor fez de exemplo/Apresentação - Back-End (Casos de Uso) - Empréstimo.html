@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<!-- saved from url=(0102)https://ravarmes.github.io/curso-les/codigos_explicacoes/scv-backend-node-sequelize-aula03_slides.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação - Back-End (Casos de Uso) - Empréstimo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .header-msg {
+            background-color: #1e293b;
+            color: #f8fafc;
+            width: 100%;
+            text-align: center;
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* Container do slideshow */
+        .presentation-container {
+            width: 100%;
+            max-width: 1280px;
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Cada slide ocupa 100% e fica oculto por padrão */
+        .slide {
+            background-color: #ffffff;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* Decoração Superior */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #0f6b5f 0%, #34d399 100%);
+            z-index: 10;
+            border-radius: 12px 12px 0 0;
+        }
+
+        /* Navegação */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 0.8rem 0;
+            flex-shrink: 0;
+            background: #cbd5e1;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .nav-bar button {
+            background: #0f6b5f;
+            color: #fff;
+            border: none;
+            padding: 0.55rem 1.4rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-bar button:hover {
+            background: #0a5249;
+        }
+
+        .nav-bar button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .nav-bar .nav-indicator {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #334155;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Controles de fonte */
+        .font-controls {
+            position: fixed;
+            top: 0.5rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            z-index: 100;
+        }
+
+        .font-controls button {
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .font-controls button:hover {
+            background: #0f6b5f;
+        }
+
+        .font-controls span {
+            color: #f8fafc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        /* Cabeçalho do Slide */
+        .slide-header {
+            padding: 1.2rem 3rem 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .title-group h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slide-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #cbd5e1;
+        }
+
+        /* Estilos do Badge de Processo */
+        .badge-processo {
+            display: inline-flex;
+            align-items: center;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid #bae6fd;
+            vertical-align: middle;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* Corpo do Slide */
+        .slide-body {
+            padding: 1.2rem 3rem 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        /* Capa */
+        .slide-cover {
+            background: radial-gradient(circle at top right, #f8fafc 0%, #e2e8f0 100%);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 3rem 3rem;
+        }
+
+        .slide-cover h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #0f6b5f;
+            margin: 0 0 0.8rem 0;
+        }
+
+        .slide-cover p.domain {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 0 0 1.5rem 0;
+        }
+
+        /* Mini-mundo box */
+        .miniworld {
+            text-align: left;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            color: #334155;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .miniworld p {
+            margin: 0.5rem 0;
+        }
+
+        .miniworld ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .miniworld li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Layout Grid 2 Colunas */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .col-left,
+        .col-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        /* Data box */
+        .data-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.2rem;
+            overflow-y: auto;
+        }
+
+        .data-box h3 {
+            margin: 0 0 0.8rem 0;
+            color: #0f6b5f;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 0.45rem 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.82rem;
+            background-color: #f1f5f9;
+        }
+
+        .data-table td {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        /* Imagem box */
+        .er-image-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .er-image-box h3 {
+            margin: 0 0 0.6rem 0;
+            color: #0f6b5f;
+            font-size: 1.05rem;
+        }
+
+        .er-image-box img {
+            max-width: 100%;
+            max-height: 300px;
+            height: auto;
+            border-radius: 8px;
+            cursor: zoom-in;
+            transition: opacity 0.2s;
+        }
+
+        .er-image-box img:hover {
+            opacity: 0.85;
+        }
+
+        .event-excerpt {
+            margin: 0.6rem 0 1rem;
+            padding: 0.7rem 0.9rem;
+            background: #ecfeff;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0ea5e9;
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .event-excerpt strong {
+            color: #0c4a6e;
+        }
+
+        /* Formatação de Código - Tema Claro */
+        pre {
+            background-color: #f8fafc;
+            color: #0f172a;
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0.5rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        /* Cores de Destaque no Código */
+        .code-highlight-transaction {
+            color: #b45309;
+            font-weight: bold;
+            background: #fef3c7;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .code-highlight-method {
+            color: #0369a1;
+            font-weight: bold;
+            background: #e0f2fe;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .code-highlight-rule {
+            color: #047857;
+            font-weight: bold;
+            background: #d1fae5;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        /* Cores de Destaque - Slide 2 (Fluxo de Transação) */
+        .code-highlight-tx-start {
+            color: #1e3a8a;
+            font-weight: bold;
+            background: #dbeafe;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .code-highlight-tx-success-light {
+            color: #064e3b;
+            font-weight: bold;
+            background: #ecfdf5;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #a7f3d0;
+        }
+
+        .code-highlight-tx-success-dark {
+            color: #064e3b;
+            font-weight: bold;
+            background: #d1fae5;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #6ee7b7;
+        }
+
+        .code-highlight-tx-error {
+            color: #7f1d1d;
+            font-weight: bold;
+            background: #fee2e2;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+        }
+
+        .code-highlight-tx-neutral {
+            color: #334155;
+            font-weight: bold;
+            background: #f1f5f9;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Cores de Destaque - Slide 3 (Regras de Negócio) */
+        .code-highlight-rule-1 {
+            color: #0369a1;
+            font-weight: bold;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .code-highlight-rule-2 {
+            color: #047857;
+            font-weight: bold;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .code-highlight-rule-3 {
+            color: #b91c1c;
+            font-weight: bold;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        /* Controles de Lupa/Zoom */
+        .code-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .zoom-btn {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .zoom-btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.05);
+        }
+
+        /* Cards de Regras */
+        .rules-cards {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .rule-card {
+            border-radius: 10px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            color: #0f172a;
+            font-weight: 700;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .rule-card-1 {
+            background-color: #f0f9ff;
+            border-color: #bae6fd;
+        }
+
+        .rule-card-2 {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .rule-card-3 {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        /* Lightbox para Imagens (Estilos que estavam faltando) */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.85);
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 92vw;
+            max-height: 92vh;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Lightbox (Código) */
+        .code-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(248, 250, 252, 0.95);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .code-lightbox.open {
+            display: flex;
+        }
+
+        .code-lightbox pre {
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            font-size: 1.1rem;
+            padding: 2.5rem;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: #334155;
+            font-size: 3rem;
+            cursor: pointer;
+            font-weight: 700;
+            line-height: 1;
+            z-index: 10001;
+            transition: color 0.2s;
+        }
+
+        .lightbox-close:hover {
+            color: #ef4444;
+        }
+
+        @media print {
+            body {
+                background: white;
+                overflow: visible;
+                height: auto;
+            }
+
+            .header-msg,
+            .nav-bar,
+            .font-controls,
+            .zoom-btn {
+                display: none;
+            }
+
+            .presentation-container {
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .slide {
+                display: flex !important;
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                page-break-after: always;
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header-msg">
+        Use os botões ◀ ▶ ou as setas do teclado para navegar entre os slides.
+        <div class="font-controls">
+            <button onclick="changeFontSize(-1)" title="Diminuir fonte">A−</button>
+            <span id="fontSizeLabel">100%</span>
+            <button onclick="changeFontSize(1)" title="Aumentar fonte">A+</button>
+        </div>
+    </div>
+
+    <div class="presentation-container">
+
+        <!-- ==================== SLIDE 1: Tema e Processos ==================== -->
+        <div class="slide slide-cover active" data-slide="1">
+            <h1>Videolocadora</h1>
+            <p class="domain">Atividade 09: Implementar - Back-End (Casos de Uso)</p>
+
+            <div class="miniworld">
+                <p><strong>Tema:</strong> Videolocadora</p>
+                <p>O sistema contempla os seguintes processos principais:</p>
+                <ul>
+                    <li><strong>Empréstimo:</strong> registro do empréstimo de fitas, vinculado a um pagamento
+                        obrigatório (sem uso de créditos).</li>
+                    <li><strong>Reserva:</strong> permite ao cliente reservar fitas, podendo haver restrições caso não
+                        efetive reservas com frequência.</li>
+                    <li><strong>Devolução:</strong> registro da devolução das fitas; atrasos geram multa e suspensão do
+                        cliente até a regularização.</li>
+                    <li><strong>Pagamento de multa:</strong> cálculo automático de valores (incluindo multas e
+                        descontos) e registro manual do pagamento, necessário para liberar novos empréstimos ou remover
+                        pendências.</li>
+                </ul>
+                <p style="margin-top: 1rem; color: #0f6b5f;"><strong>Foco da Apresentação:</strong> Processo de
+                    Empréstimo de Fitas.</p>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 2: Processo de Empréstimo ==================== -->
+        <div class="slide" data-slide="2">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Visão Geral do Processo <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">01</div>
+            </div>
+            <div class="slide-body">
+                <p class="event-excerpt"><strong>Detalhes do Empréstimo:</strong> O empréstimo pode conter vários itens,
+                    e cada item corresponde a uma fita. O registro principal associa o cliente à data do empréstimo e
+                    valor total, enquanto a tabela detalhe relaciona as fitas específicas e os prazos.</p>
+
+                <div class="grid-layout">
+                    <div class="col-left">
+                        <div class="data-box">
+                            <h3>📋 Tabela: emprestimos</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>id</th>
+                                        <th>data</th>
+                                        <th>valor</th>
+                                        <th>cliente_id</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2026-04-10</td>
+                                        <td>15.0</td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>2026-04-13</td>
+                                        <td>10.0</td>
+                                        <td>2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-right">
+                        <div class="data-box">
+                            <h3>📋 Tabela: itens_de_emprestimo</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>valor</th>
+                                        <th>entrega</th>
+                                        <th>emprestimo_id</th>
+                                        <th>fita_id</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>5.0</td>
+                                        <td>2026-04-11</td>
+                                        <td>1</td>
+                                        <td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10.0</td>
+                                        <td>2026-04-12</td>
+                                        <td>1</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10.0</td>
+                                        <td>2026-04-16</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 3: Fluxo de Transação ==================== -->
+        <div class="slide" data-slide="3">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Fluxo de Transação <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">02</div>
+            </div>
+            <div class="slide-body">
+                <div class="grid-layout">
+                    <div class="col-left">
+                        <div class="er-image-box" style="height: 100%; justify-content: flex-start; padding-top: 1.5rem;">
+                            <h3 style="margin-bottom: 1rem;">🔄 Fluxo de Transação</h3>
+                            <img src="./Apresentação - Back-End (Casos de Uso) - Empréstimo_files/scv-backend-node-sequelize-aula03_slides.png" alt="Fluxo de Transação" onclick="openLightbox(this.src)" onerror="this.src=&#39;https://via.placeholder.com/500x350?text=Inserir+Imagem+do+Fluxo+de+Transacao&#39;">
+                        </div>
+                    </div>
+                    <div class="col-right">
+                        <div class="data-box" style="padding: 0; height: 100%; display: flex; flex-direction: column;">
+                            <h3 style="padding: 1rem 1rem 0; margin-bottom: 0;">💻 EmprestimoService.js (Create)</h3>
+                            <div class="code-container">
+                                <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-emprestimo&#39;)" title="Ampliar Código (Tela Cheia)">🔍 Zoom</button>
+                                <pre id="code-emprestimo" style="margin: 0; height: 100%; border: none;"><code>class EmprestimoService {
+  static async create(req) {
+    const { data, valor, cliente, itens } = req.body;
+    
+    // Validação
+    if (<span class="code-highlight-tx-neutral">await this.verificarRegrasDeNegocio(req)</span>) {
+      
+      // Início da Transação
+      <span class="code-highlight-tx-start">const t = await sequelize.transaction();</span>
+      
+      const obj = <span class="code-highlight-tx-success-light">await Emprestimo.create</span>(
+        { data, valor, clienteId: cliente.id }, 
+        { transaction: t }
+      );
+      
+      try {
+        await Promise.all(itens.map(item =&gt; 
+          <span class="code-highlight-tx-success-light">obj.createItem</span>({ ..., emprestimoId: obj.id, fitaId: item.fita.id }, { transaction: t })
+        ));
+        
+        await Promise.all(itens.map(async item =&gt; 
+          (<span class="code-highlight-tx-success-light">await Fita.findByPk(item.fita.id)).update</span>({ disponivel: 0 }, { transaction: t })
+        ));
+        
+        // Finaliza Transação
+        <span class="code-highlight-tx-success-dark">await t.commit();</span>
+        return await Emprestimo.findByPk(...);
+        
+      } catch (error) {
+        // Desfaz Transação
+        <span class="code-highlight-tx-error">await t.rollback();</span>
+        throw "Pelo menos uma das fitas não foi encontrada!";
+      }
+    }
+  }
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 4: Regras de Negócio ==================== -->
+        <div class="slide" data-slide="4">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Regras de Negócio <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">03</div>
+            </div>
+            <div class="slide-body">
+                <div class="grid-layout">
+                    <div class="col-left">
+                        <div class="er-image-box" style="height: 100%; border: none; background: transparent; padding: 0; justify-content: flex-start;">
+                            <h3 style="margin-bottom: 1.5rem; text-align: left; width: 100%;">📌 Regras de Negócio</h3>
+                            <div class="rules-cards" style="flex-direction: column;">
+                                <div class="rule-card rule-card-1">
+                                    <div style="font-size: 2rem; margin-bottom: 0.2rem;">👤</div>
+                                    Regra 1<br><span style="font-size: 0.9rem; font-weight: 500; color: #475569;">Cliente sem multas
+                                        pendentes</span>
+                                </div>
+                                <div class="rule-card rule-card-2">
+                                    <div style="font-size: 2rem; margin-bottom: 0.2rem;">📅</div>
+                                    Regra 2<br><span style="font-size: 0.9rem; font-weight: 500; color: #475569;">Fitas
+                                        sem reservas de outros clientes</span>
+                                </div>
+                                <div class="rule-card rule-card-3">
+                                    <div style="font-size: 2rem; margin-bottom: 0.2rem;">📼</div>
+                                    Regra 3<br><span style="font-size: 0.9rem; font-weight: 500; color: #475569;">Fitas
+                                        não danificadas (danificada = false)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-right">
+                        <div class="data-box" style="padding: 0; height: 100%; display: flex; flex-direction: column;">
+                            <h3 style="padding: 1rem 1rem 0; margin-bottom: 0;">💻 verificarRegrasDeNegocio()</h3>
+                            <div class="code-container">
+                                <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-regras&#39;)" title="Ampliar Código (Tela Cheia)">🔍 Zoom</button>
+                                <pre id="code-regras" style="margin: 0; font-size: 0.85rem; height: 100%; border: none;"><code>static async verificarRegrasDeNegocio(req) {
+  
+  // ==========================================
+  // Regra de Negócio 1
+  // ==========================================
+  const devedores = <span class="code-highlight-rule-1">await ClienteService.findDevedores();</span>
+  // ... lógica para checar se cliente está nos devedores
+  if (clienteDevedor) throw "Cliente deve multas!";
+  
+  // ==========================================
+  // Regra de Negócio 2
+  // ==========================================
+  for (let item of itens) {
+    const reserva = <span class="code-highlight-rule-2">await ReservaService.findByFitaStatusAndOutroClienteRN(item.fita.id, '0', cliente.id);</span>
+    if (reserva.length != 0) fitasReservadas = true;
+  }
+  if (fitasReservadas) throw "Fitas com reservas para outros clientes!";
+  
+  // ==========================================
+  // Regra de Negócio 3
+  // ==========================================
+  for (let item of itens) {
+    const fita = <span class="code-highlight-rule-3">await FitaService.findByIdAndDanificada(item.fita.id, true);</span>
+    if (fita.length != 0) fitasDanificadas = true;
+  }
+  if (fitasDanificadas) throw "Fitas danificadas selecionadas!";
+  
+  return (!clienteDevedor &amp;&amp; !fitasReservadas &amp;&amp; !fitasDanificadas);
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 5: Regra 1 SQL ==================== -->
+        <div class="slide" data-slide="5">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Implementação da Regra 1 <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">04</div>
+            </div>
+            <div class="slide-body">
+                <p class="event-excerpt"><strong>Regra de Negócio 1:</strong> Cliente sem multas não pagas. O método
+                    abaixo usa o Sequelize para executar uma consulta crua (Raw Query).</p>
+                <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-rn1&#39;)" style="color: #0f6b5f; text-decoration: underline; font-weight: bold; font-size: 0.95rem; display: inline-block; margin-top: 0.5rem; margin-bottom: 0.5rem;">📊
+                    Visualizar Tabelas do Banco de Dados</a>
+
+                <div class="data-box" style="margin-top: 1rem;">
+                    <h3>💻 ClienteService.js</h3>
+                    <pre><code>static async findDevedores() {
+    const objs = await sequelize.query(
+        "SELECT clientes.* FROM emprestimos INNER JOIN clientes ON emprestimos.cliente_id = clientes.id INNER JOIN multas ON emprestimos.id = multas.emprestimo_id WHERE multas.pago = false", 
+        { type: QueryTypes.SELECT }
+    );  
+    return objs;
+}</code></pre>
+                </div>
+
+                <div style="margin-top: 1.5rem; background: #f8fafc; border-left: 4px solid #0f6b5f; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-size: 1rem;">⚙️ SQL Resultante (SQL
+                        tradicional)</h4>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #475569;">O ORM processa o comando e
+                        executa nativamente o seguinte SQL no banco de dados:</p>
+                    <pre style="background: #ffffff; margin: 0; padding: 0.8rem; border: 1px solid #cbd5e1;"><code style="color: #0369a1; font-weight: 600;">SELECT clientes.* 
+FROM emprestimos 
+INNER JOIN clientes ON emprestimos.cliente_id = clientes.id 
+INNER JOIN multas ON emprestimos.id = multas.emprestimo_id 
+WHERE multas.pago = false;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 6: Regra 2 SQL ==================== -->
+        <div class="slide" data-slide="6">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Implementação da Regra 2 <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">05</div>
+            </div>
+            <div class="slide-body">
+                <p class="event-excerpt"><strong>Regra de Negócio 2:</strong> Fitas reservadas para outros clientes não
+                    podem ser
+                    emprestadas. A query injeta os parâmetros de forma segura no Sequelize.</p>
+                <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-rn2&#39;)" style="color: #0f6b5f; text-decoration: underline; font-weight: bold; font-size: 0.95rem; display: inline-block; margin-top: 0.5rem; margin-bottom: 0.5rem;">📊
+                    Visualizar Tabelas do Banco de Dados</a>
+
+                <div class="data-box" style="margin-top: 1rem;">
+                    <h3>💻 ReservaService.js</h3>
+                    <pre><code>static async findByFitaStatusAndOutroClienteRN(fitaId, status, clienteId) {
+    const objs = await sequelize.query(
+        "SELECT * FROM reservas WHERE reservas.fita_id = :fitaId AND reservas.status = :status AND reservas.cliente_id != :clienteId", 
+        { replacements: { fitaId: fitaId, status: status, clienteId: clienteId }, type: QueryTypes.SELECT }
+    );
+    return objs;
+}</code></pre>
+                </div>
+
+                <div style="margin-top: 1.5rem; background: #f8fafc; border-left: 4px solid #0f6b5f; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-size: 1rem;">⚙️ SQL Resultante (SQL
+                        tradicional)</h4>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #475569;">Após a injeção dos parâmetros
+                        (<em>:fitaId</em>, <em>:status</em> e <em>:clienteId</em>), o banco recebe o comando similar a:
+                    </p>
+                    <pre style="background: #ffffff; margin: 0; padding: 0.8rem; border: 1px solid #cbd5e1;"><code style="color: #0369a1; font-weight: 600;">SELECT * FROM reservas 
+WHERE reservas.fita_id = 1 AND reservas.status = '0' AND reservas.cliente_id != 1;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 7: Regra 3 SQL ==================== -->
+        <div class="slide" data-slide="7">
+            <div class="slide-header">
+                <div class="title-group">
+                    <h1>Implementação da Regra 3 <span class="badge-processo">📼 Processo: Empréstimo</span></h1>
+                </div>
+                <div class="slide-number">06</div>
+            </div>
+            <div class="slide-body">
+                <p class="event-excerpt"><strong>Regra de Negócio 3:</strong> Fitas danificadas não podem ser
+                    emprestadas. O framework ORM gera a consulta SQL pelo método <code>findAll</code>.</p>
+                <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-rn3&#39;)" style="color: #0f6b5f; text-decoration: underline; font-weight: bold; font-size: 0.95rem; display: inline-block; margin-top: 0.5rem; margin-bottom: 0.5rem;">📊
+                    Visualizar Tabelas do Banco de Dados</a>
+
+                <div class="data-box" style="margin-top: 1rem;">
+                    <h3>💻 FitaService.js</h3>
+                    <pre><code>static async findByIdAndDanificada(id, danificada) {
+    const objs = await Fita.findAll({ 
+        where: { id: id, danificada: danificada } 
+    });
+    return objs;
+}</code></pre>
+                </div>
+
+                <div style="margin-top: 1.5rem; background: #f8fafc; border-left: 4px solid #0f6b5f; padding: 1rem; border-radius: 4px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #0f172a; font-size: 1rem;">⚙️ SQL Resultante Gerado (SQL
+                        tradicional)</h4>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #475569;">A partir do objeto JavaScript o
+                        Sequelize escreve e despacha para o banco:</p>
+                    <pre style="background: #ffffff; margin: 0; padding: 0.8rem; border: 1px solid #cbd5e1;"><code style="color: #0369a1; font-weight: 600;">SELECT id, danificada, disponivel, created_at, updated_at, filme_id 
+FROM fitas 
+WHERE id = 1 AND danificada = 1;</code></pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lightbox de Imagem -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <img id="lightboxImg" src="https://ravarmes.github.io/curso-les/codigos_explicacoes/scv-backend-node-sequelize-aula03_slides.html" alt="Imagem ampliada">
+    </div>
+
+    <!-- Lightbox de Código (Tela Cheia) -->
+    <div class="code-lightbox" id="codeLightbox" onclick="closeCodeLightbox()">
+        <button class="lightbox-close" onclick="closeCodeLightbox()">×</button>
+        <pre onclick="event.stopPropagation()"><code id="lightboxCodeContent"></code></pre>
+    </div>
+
+    <!-- Templates para Tabelas (Regras de Negócio) -->
+    <template id="tables-rn1"></template>
+
+    <template id="tables-rn2"></template>
+
+    <template id="tables-rn3"></template>
+
+    <!-- Lightbox de Tabelas -->
+    <div class="code-lightbox" id="tableLightbox" onclick="closeTableLightbox()">
+        <button class="lightbox-close" onclick="closeTableLightbox()">×</button>
+        <div class="table-lightbox-content" id="tableLightboxContent" onclick="event.stopPropagation()" style="background: #f8fafc; padding: 2.5rem; border-radius: 12px; width: 90vw; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+        </div>
+    </div>
+
+    <!-- Barra de Navegação -->
+    <div class="nav-bar">
+        <button id="btnPrev" onclick="changeSlide(-1)" disabled="">◀ Anterior</button>
+        <span class="nav-indicator" id="navIndicator">1 / 7</span>
+        <button id="btnNext" onclick="changeSlide(1)">Próximo ▶</button>
+    </div>
+
+    <script>
+        // Font size control
+        let fontScale = 100;
+        const baseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        function changeFontSize(dir) {
+            fontScale = Math.max(70, Math.min(150, fontScale + dir * 10));
+            document.documentElement.style.fontSize = (baseFontSize * fontScale / 100) + 'px';
+            document.getElementById('fontSizeLabel').textContent = fontScale + '%';
+        }
+
+        let current = 1;
+        const total = document.querySelectorAll('.slide').length;
+
+        function showSlide(n) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.querySelector('[data-slide="' + n + '"]').classList.add('active');
+            document.getElementById('navIndicator').textContent = n + ' / ' + total;
+            document.getElementById('btnPrev').disabled = (n === 1);
+            document.getElementById('btnNext').disabled = (n === total);
+        }
+
+        function changeSlide(dir) {
+            const next = current + dir;
+            if (next >= 1 && next <= total) {
+                current = next;
+                showSlide(current);
+            }
+        }
+
+        // Lightboxes
+        function openLightbox(src) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.add('open');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('open');
+            document.getElementById('lightboxImg').src = '';
+        }
+
+        function openCodeLightbox(id) {
+            const codeHtml = document.getElementById(id).innerHTML;
+            document.getElementById('lightboxCodeContent').innerHTML = codeHtml;
+            document.getElementById('codeLightbox').classList.add('open');
+        }
+        function closeCodeLightbox() {
+            document.getElementById('codeLightbox').classList.remove('open');
+        }
+
+        function openTableLightbox(templateId) {
+            const content = document.getElementById(templateId).innerHTML;
+            document.getElementById('tableLightboxContent').innerHTML = content;
+            document.getElementById('tableLightbox').classList.add('open');
+        }
+        function closeTableLightbox() {
+            document.getElementById('tableLightbox').classList.remove('open');
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', function (e) {
+            if (document.getElementById('lightbox').classList.contains('open')) {
+                if (e.key === 'Escape') closeLightbox();
+                return;
+            }
+            if (document.getElementById('codeLightbox').classList.contains('open')) {
+                if (e.key === 'Escape') closeCodeLightbox();
+                return;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+
+        showSlide(1);
+    </script>
+
+
+
+</body></html>

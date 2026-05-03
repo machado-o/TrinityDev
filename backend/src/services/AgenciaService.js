@@ -39,7 +39,7 @@ class AgenciaService {
       await obj.destroy();
       return obj;
     } catch (error) {
-      throw "Não é possível remover esta Agência pois ela está vinculada a reservas";
+      throw "Não é possível remover esta Agência pois ela está vinculada a funcionários, veículos ou reservas.";
     }
   }
 }

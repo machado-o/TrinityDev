@@ -132,7 +132,7 @@ class ReservaService {
 
     const { quantidadeDias, valorDiaria, valorSeguro, valorFinal } = await calcularValoresFinanceiros({ agenciaRetiradaId, categoria, seguro, dataRetirada, dataDevolucao });
 
-    erros.push(...await validarModel(Reserva.build({ dataRetirada, dataDevolucao })));
+    erros.push(...await validarModel(Reserva.build({ dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal })));
 
     if (erros.length > 0) throw erros.join(" ");
 

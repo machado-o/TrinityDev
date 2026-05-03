@@ -19,7 +19,7 @@ async function validarQuilometragem(quilometragemCheckout, checkin, erros) {
 
   // MAX via JOIN Checkout → Checkin: garante que o odômetro nunca regride em toda a história do veículo
   const resultado = await Checkout.findOne({
-    attributes: [[sequelize.fn('MAX', sequelize.col('quilometragemCheckout')), 'maxQuilometragem']],
+    attributes: [[sequelize.fn('MAX', sequelize.col('quilometragem_checkout')), 'maxQuilometragem']],
     include: [{
       model: Checkin,
       as: 'checkin',
