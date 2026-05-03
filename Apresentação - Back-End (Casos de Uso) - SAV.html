@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação - Back-End (Casos de Uso) - SAV</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            overflow: hidden; height: 100vh;
+        }
+
+        .header-msg {
+            background-color: #1e293b; color: #f8fafc;
+            width: 100%; text-align: center;
+            padding: 0.6rem 1rem; font-size: 1rem; font-weight: 500; flex-shrink: 0;
+        }
+
+        .presentation-container {
+            width: 100%; max-width: 1280px;
+            flex: 1; min-height: 0;
+            position: relative; margin: 1rem auto; padding: 0 1rem;
+        }
+
+        .slide {
+            background-color: #ffffff; width: 100%; height: 100%;
+            border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: none; flex-direction: column;
+            border: 1px solid #e2e8f0; position: relative;
+        }
+        .slide.active { display: flex; }
+
+        .slide::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: linear-gradient(90deg, #0f6b5f 0%, #34d399 100%);
+            z-index: 10; border-radius: 12px 12px 0 0;
+        }
+
+        .nav-bar {
+            display: flex; justify-content: center; align-items: center;
+            gap: 1.2rem; padding: 0.8rem 0; flex-shrink: 0;
+            background: #cbd5e1; width: 100%; z-index: 100;
+        }
+        .nav-bar button {
+            background: #0f6b5f; color: #fff; border: none;
+            padding: 0.55rem 1.4rem; border-radius: 8px;
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .nav-bar button:hover { background: #0a5249; }
+        .nav-bar button:disabled { background: #94a3b8; cursor: not-allowed; }
+        .nav-bar .nav-indicator {
+            font-size: 1rem; font-weight: 700; color: #334155;
+            min-width: 80px; text-align: center;
+        }
+
+        .font-controls {
+            position: fixed; top: 0.5rem; right: 1rem;
+            display: flex; align-items: center; gap: 0.4rem; z-index: 100;
+        }
+        .font-controls button {
+            background: #334155; color: #f8fafc; border: none;
+            width: 32px; height: 32px; border-radius: 6px;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+        .font-controls button:hover { background: #0f6b5f; }
+        .font-controls span { color: #f8fafc; font-size: 0.8rem; font-weight: 600; min-width: 36px; text-align: center; }
+
+        .slide-header {
+            padding: 1.2rem 3rem 0.8rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .title-group { display: flex; align-items: center; }
+        .title-group h1 {
+            margin: 0; font-size: 1.8rem; font-weight: 800; color: #1e293b;
+            line-height: 1.2; display: flex; align-items: center; gap: 1rem;
+        }
+        .slide-number { font-size: 1.8rem; font-weight: 800; color: #cbd5e1; }
+
+        .badge-processo {
+            display: inline-flex; align-items: center;
+            background: #e0f2fe; color: #0369a1;
+            padding: 0.2rem 0.6rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; border: 1px solid #bae6fd;
+        }
+
+        .slide-body {
+            padding: 1.2rem 3rem 1.5rem; flex-grow: 1;
+            display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto;
+        }
+
+        .slide-cover {
+            background: radial-gradient(circle at top right, #f8fafc 0%, #e2e8f0 100%);
+            justify-content: center; align-items: center; text-align: center; padding: 3rem;
+        }
+        .slide-cover h1 { font-size: 3.2rem; font-weight: 800; color: #0f6b5f; margin: 0 0 0.8rem 0; }
+        .slide-cover p.domain { font-size: 1.6rem; font-weight: 600; color: #334155; margin: 0 0 1.5rem 0; }
+
+        .miniworld {
+            text-align: left; background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 12px; padding: 1.2rem 1.5rem; margin-top: 1rem;
+            font-size: 0.92rem; line-height: 1.7; color: #334155; width: 100%;
+        }
+        .miniworld p { margin: 0.5rem 0; }
+        .miniworld ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+        .miniworld li { margin-bottom: 0.5rem; }
+
+        .grid-layout {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1.5rem; height: 100%; min-height: 0;
+        }
+        .col-left, .col-right { display: flex; flex-direction: column; gap: 1rem; min-height: 0; }
+
+        .data-box {
+            background-color: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 12px; padding: 1.2rem; overflow-y: auto;
+        }
+        .data-box h3 { margin: 0 0 0.8rem 0; color: #0f6b5f; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        .data-table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem;
+            background: #fff; border: 1px solid #e2e8f0;
+        }
+        .data-table th, .data-table td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid #e2e8f0; }
+        .data-table th { color: #64748b; font-weight: 600; font-size: 0.82rem; background-color: #f1f5f9; }
+        .data-table td { color: #334155; font-weight: 500; }
+
+        .er-image-box {
+            background-color: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 12px; padding: 1rem; text-align: center;
+            flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .er-image-box h3 { margin: 0 0 0.6rem 0; color: #0f6b5f; font-size: 1.05rem; }
+
+        .event-excerpt {
+            margin: 0.6rem 0 1rem; padding: 0.7rem 0.9rem;
+            background: #ecfeff; border: 1px solid #bae6fd;
+            border-left: 4px solid #0ea5e9; border-radius: 8px;
+            color: #0f172a; font-size: 0.95rem; line-height: 1.5;
+        }
+        .event-excerpt strong { color: #0c4a6e; }
+
+        pre {
+            background-color: #f8fafc; color: #0f172a;
+            padding: 1.2rem; border-radius: 8px; overflow-x: auto;
+            font-size: 0.85rem; line-height: 1.5; margin: 0.5rem 0; border: 1px solid #e2e8f0;
+        }
+        code { font-family: 'Consolas', 'Monaco', monospace; }
+
+        .code-highlight-transaction { color: #b45309; font-weight: bold; background: #fef3c7; padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .code-highlight-method { color: #0369a1; font-weight: bold; background: #e0f2fe; padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .code-highlight-rule { color: #047857; font-weight: bold; background: #d1fae5; padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .code-highlight-tx-start { color: #1e3a8a; font-weight: bold; background: #dbeafe; padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid #bfdbfe; }
+        .code-highlight-tx-success-light { color: #064e3b; font-weight: bold; background: #ecfdf5; padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid #a7f3d0; }
+        .code-highlight-tx-success-dark { color: #064e3b; font-weight: bold; background: #d1fae5; padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid #6ee7b7; }
+        .code-highlight-tx-error { color: #7f1d1d; font-weight: bold; background: #fee2e2; padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid #fecaca; }
+        .code-highlight-tx-neutral { color: #334155; font-weight: bold; background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid #e2e8f0; }
+        .code-highlight-rule-1 { color: #0369a1; font-weight: bold; background: #f0f9ff; border: 1px solid #bae6fd; padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .code-highlight-rule-2 { color: #047857; font-weight: bold; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.1rem 0.3rem; border-radius: 4px; }
+        .code-highlight-rule-3 { color: #b91c1c; font-weight: bold; background: #fef2f2; border: 1px solid #fecaca; padding: 0.1rem 0.3rem; border-radius: 4px; }
+
+        .code-container { position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .zoom-btn {
+            position: absolute; top: 0.8rem; right: 0.8rem;
+            background: #e2e8f0; border: 1px solid #cbd5e1; color: #334155;
+            cursor: pointer; font-size: 0.9rem; font-weight: 600;
+            border-radius: 6px; padding: 0.4rem 0.8rem; transition: all 0.2s; z-index: 10;
+        }
+        .zoom-btn:hover { background: #cbd5e1; transform: scale(1.05); }
+
+        .rules-cards { display: flex; gap: 1rem; width: 100%; justify-content: center; }
+        .rule-card {
+            border-radius: 10px; padding: 1.2rem 1rem; text-align: center;
+            color: #0f172a; font-weight: 700; border: 2px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%;
+        }
+        .rule-card-1 { background-color: #f0f9ff; border-color: #bae6fd; }
+        .rule-card-2 { background-color: #f0fdf4; border-color: #bbf7d0; }
+        .rule-card-3 { background-color: #fef2f2; border-color: #fecaca; }
+        .rule-card-4 { background-color: #fffbeb; border-color: #fde68a; }
+
+        /* Step Flow */
+        .step-flow { display: flex; flex-direction: column; gap: 0.3rem; width: 100%; }
+        .step-box { padding: 0.45rem 0.8rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; border: 1px solid; }
+        .step-neutral { background: #f1f5f9; border-color: #e2e8f0; color: #334155; }
+        .step-begin  { background: #dbeafe; border-color: #bfdbfe; color: #1e3a8a; }
+        .step-ok     { background: #ecfdf5; border-color: #a7f3d0; color: #064e3b; }
+        .step-commit { background: #d1fae5; border-color: #6ee7b7; color: #064e3b; font-weight: 700; }
+        .step-error  { background: #fee2e2; border-color: #fecaca; color: #7f1d1d; }
+        .step-arrow  { padding: 0.1rem 0 0.1rem 1.2rem; font-size: 0.75rem; color: #94a3b8; }
+        .step-branch { padding: 0.05rem 0 0.05rem 2.5rem; font-size: 0.72rem; color: #ef4444; font-style: italic; }
+
+        .lightbox {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(15,23,42,0.85); justify-content: center; align-items: center; cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+
+        .code-lightbox {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(248,250,252,0.95); justify-content: center; align-items: center;
+        }
+        .code-lightbox.open { display: flex; }
+        .code-lightbox pre {
+            max-width: 90vw; max-height: 90vh; overflow: auto;
+            font-size: 1.1rem; padding: 2.5rem;
+            border: 2px solid #cbd5e1; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+            position: relative; background-color: #ffffff; color: #0f172a;
+        }
+        .lightbox-close {
+            position: absolute; top: 1.5rem; right: 2rem;
+            background: none; border: none; color: #334155;
+            font-size: 3rem; cursor: pointer; font-weight: 700; line-height: 1;
+            z-index: 10001; transition: color 0.2s;
+        }
+        .lightbox-close:hover { color: #ef4444; }
+
+        @media print {
+            body { background: white; overflow: visible; height: auto; }
+            .header-msg, .nav-bar, .font-controls, .zoom-btn { display: none; }
+            .presentation-container { margin: 0; max-width: 100%; width: 100%; }
+            .slide { display: flex !important; box-shadow: none; border: none; border-radius: 0; page-break-after: always; height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-msg">
+    Use os botões ◀ ▶ ou as setas do teclado para navegar entre os slides.
+    <div class="font-controls">
+        <button onclick="changeFontSize(-1)" title="Diminuir fonte">A−</button>
+        <span id="fontSizeLabel">100%</span>
+        <button onclick="changeFontSize(1)" title="Aumentar fonte">A+</button>
+    </div>
+</div>
+
+<div class="presentation-container">
+
+<!-- ==================== SLIDE 1: Capa ==================== -->
+<div class="slide slide-cover active" data-slide="1">
+    <h1>SAV</h1>
+    <p class="domain">Sistema de Aluguel de Veículos — Back-End (Casos de Uso)</p>
+    <div class="miniworld">
+        <p><strong>Tema:</strong> Gerenciamento de transações e regras de negócio</p>
+        <p>O sistema contempla os seguintes processos principais, cada um apresentado por um integrante do grupo:</p>
+        <ul>
+            <li><strong>Reserva:</strong> o cliente escolhe categoria de veículo, período e agências; o sistema calcula automaticamente os valores financeiros e aplica desconto quando a agência possui histórico operacional comprovado.</li>
+            <li><strong>Check-in:</strong> vincula a reserva a um veículo específico; o sistema valida CNH, débitos pendentes e disponibilidade — realizando upgrade automático de categoria quando necessário.</li>
+            <li><strong>Check-out:</strong> registra a devolução do veículo; valida quilometragem contra o histórico do veículo e aplica taxa de inspeção a clientes com mais de 3 avarias acumuladas.</li>
+        </ul>
+        <p style="margin-top: 1rem; color: #0f6b5f;"><strong>Stack:</strong> Node.js · Express · Sequelize ORM · PostgreSQL</p>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 2: Reserva – Visão Geral ==================== -->
+<div class="slide" data-slide="2">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Visão Geral do Processo <span class="badge-processo">🔖 Processo: Reserva</span></h1>
+        </div>
+        <div class="slide-number">01</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>Detalhes da Reserva:</strong> O cliente reserva uma categoria de veículo para um período determinado; os valores financeiros são <em>calculados pelo serviço</em> — nunca aceitos do corpo da requisição. A agência pode aplicar desconto se tiver histórico operacional comprovado (≥ 2 reservas concluídas).</p>
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="data-box">
+                    <h3>📋 Tabela: reservas</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>id</th><th>data_retirada</th><th>data_devolucao</th><th>valor_final</th><th>status</th><th>cliente_id</th><th>agencia_retirada_id</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>2026-04-03 08:00</td><td>2026-04-07 18:00</td><td>1980.00</td><td>Concluída</td><td>1</td><td>1</td></tr>
+                            <tr><td>2</td><td>2026-04-05 09:30</td><td>2026-04-09 17:30</td><td>432.00</td><td>Concluída</td><td>2</td><td>2</td></tr>
+                            <tr><td>5</td><td>2026-03-24 08:00</td><td>2026-03-29 18:00</td><td>500.00</td><td>Concluída</td><td>5</td><td>1</td></tr>
+                            <tr><td>9</td><td>2026-01-10 08:00</td><td>2026-01-20 18:00</td><td>1936.00</td><td>Confirmada</td><td>3</td><td>3</td></tr>
+                            <tr><td>11</td><td>2030-04-01 08:00</td><td>2030-04-05 18:00</td><td>280.00</td><td>Pendente</td><td>2</td><td>1</td></tr>
+                            <tr><td>12</td><td>2030-05-01 08:00</td><td>2030-05-05 18:00</td><td>400.00</td><td>Pendente</td><td>2</td><td>1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box">
+                    <h3>🏢 Tabela: agencias</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>id</th><th>nome</th><th>status</th><th>limite_dias_desconto</th><th>percentual_desconto</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Agência Cachoeiro</td><td>Ativa</td><td>3</td><td>10.00%</td></tr>
+                            <tr><td>2</td><td>Agência Vitória</td><td>Ativa</td><td>5</td><td>15.00%</td></tr>
+                            <tr><td>3</td><td>Agência Vila Velha</td><td>Ativa</td><td>7</td><td>12.00%</td></tr>
+                            <tr><td>4</td><td>Agência Serra</td><td>Inativa</td><td>7</td><td>10.00%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box">
+                    <h3>📊 Ciclo de Vida: campo <code>status</code></h3>
+                    <table class="data-table">
+                        <thead><tr><th>Status</th><th>Transição</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Pendente</strong></td><td>Estado inicial ao criar</td></tr>
+                            <tr><td><strong>Confirmada</strong></td><td>Após o check-in ser registrado</td></tr>
+                            <tr><td><strong>Concluída</strong></td><td>Após o check-out ser registrado</td></tr>
+                            <tr><td><strong>Cancelada</strong></td><td>Por operação manual</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 3: Reserva – Fluxo de Transação ==================== -->
+<div class="slide" data-slide="3">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Fluxo de Transação <span class="badge-processo">🔖 Processo: Reserva</span></h1>
+        </div>
+        <div class="slide-number">02</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;">
+                    <h3 style="margin-bottom:1rem;text-align:left;width:100%;">🔄 Fluxo de Execução</h3>
+                    <div class="step-flow">
+                        <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔍 Promise.all([cliente, funcionario, categoria])</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔎 verificarRegrasDeNegocio() — data, agências, conflito</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">💰 calcularValoresFinanceiros() — inclui desconto (RN1)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">✅ validarModel() — validações do modelo Sequelize</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-error">⚠️ erros.length &gt; 0 → throw erros.join(" ")</div>
+                        <div class="step-branch">← tratado pelo error-handler global (HTTP 400)</div>
+                        <div class="step-arrow">↓ caminho feliz</div>
+                        <div class="step-box step-ok">📝 Reserva.create({ valorDiaria, valorFinal, ... }) — INSERT único</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">🔄 Reserva.findByPk(obj.id, &#123; include: &#123; all: true &#125; &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-commit">📤 HTTP 201 — objeto completo com todas as associações</div>
+                    </div>
+                    <p style="margin-top:0.8rem;font-size:0.78rem;color:#64748b;text-align:left;width:100%;">
+                        ⚠️ <strong>Sem transação explícita:</strong> a criação de uma Reserva é uma operação atômica de INSERT único — sem necessidade de <code>sequelize.transaction()</code>.
+                    </p>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 ReservaService.js (create)</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-reserva-create&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-reserva-create" style="margin:0;height:100%;border:none;font-size:0.8rem;"><code>static async create(req) {
+  const { dataRetirada, dataDevolucao, clienteId,
+          categoriaVeiculoId, seguroId, funcionarioId,
+          agenciaRetiradaId, agenciaDevolucaoId } = req.body;
+  const erros = [];
+
+  const [cliente, funcionario, categoria] = await Promise.all([
+    Cliente.findByPk(clienteId),
+    Funcionario.findByPk(funcionarioId),
+    CategoriaVeiculo.findByPk(categoriaVeiculoId),
+  ]);
+  if (!cliente)     erros.push("Cliente não encontrado!");
+  if (!funcionario) erros.push("Funcionário não encontrado!");
+  if (!categoria)   erros.push("Categoria não encontrada!");
+
+  // Valida regras: data, agências, conflito de período
+  await <span class="code-highlight-method">verificarRegrasDeNegocio</span>({ dataRetirada, dataDevolucao,
+    clienteId, agenciaRetiradaId, agenciaDevolucaoId, erros });
+
+  // RN1: calcula valores — desconto incluso se agência qualificar
+  const { quantidadeDias, valorDiaria, valorSeguro, valorFinal }
+    = await <span class="code-highlight-rule">calcularValoresFinanceiros</span>({ agenciaRetiradaId,
+        categoria, seguro, dataRetirada, dataDevolucao });
+
+  erros.push(...await validarModel(Reserva.build({
+    dataRetirada, dataDevolucao, valorDiaria,
+    quantidadeDias, valorSeguro, valorFinal })));
+
+  if (erros.length &gt; 0) throw erros.join(" ");
+
+  // INSERT único — sem transação explícita
+  const obj = await <span class="code-highlight-transaction">Reserva.create</span>({
+    dataRetirada, dataDevolucao, valorDiaria, quantidadeDias,
+    valorSeguro, valorFinal, clienteId, categoriaVeiculoId,
+    funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId,
+  });
+  return await Reserva.findByPk(obj.id, { include: { all: true } });
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 4: Reserva – Regras de Negócio ==================== -->
+<div class="slide" data-slide="4">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Regras de Negócio <span class="badge-processo">🔖 Processo: Reserva</span></h1>
+        </div>
+        <div class="slide-number">03</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;border:none;background:transparent;padding:0;justify-content:flex-start;">
+                    <h3 style="margin-bottom:1.2rem;text-align:left;width:100%;">📌 Regras de Negócio</h3>
+                    <div class="rules-cards" style="flex-direction:column;">
+                        <div class="rule-card rule-card-1">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">💰</div>
+                            RN1 — Desconto por histórico<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Agência com ≥ 2 reservas concluídas e dias ≥ limite aplica percentual de desconto</span>
+                        </div>
+                        <div class="rule-card rule-card-2">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">📅</div>
+                            Data e Agências<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Retirada não pode ser no passado; agências devem ter status <em>Ativa</em></span>
+                        </div>
+                        <div class="rule-card rule-card-3">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">🚫</div>
+                            RN2 — Conflito de período<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Cliente não pode ter reserva ativa com sobreposição de datas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 verificarRegrasDeNegocio()</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-reserva-regras&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-reserva-regras" style="margin:0;height:100%;border:none;font-size:0.8rem;"><code>async function verificarRegrasDeNegocio({
+  dataRetirada, dataDevolucao, clienteId,
+  agenciaRetiradaId, agenciaDevolucaoId,
+  reservaId, erros
+}) {
+  // Data de retirada não pode ser no passado
+  if (dataRetirada)
+    <span class="code-highlight-rule-2">validarDataRetirada</span>(dataRetirada, erros);
+
+  // Agências devem existir e estar ativas
+  const [agenciaRetirada, agenciaDevolucao] = await Promise.all([
+    agenciaRetiradaId ? Agencia.findByPk(agenciaRetiradaId) : null,
+    agenciaDevolucaoId ? Agencia.findByPk(agenciaDevolucaoId) : null,
+  ]);
+  if (agenciaRetiradaId !== undefined)
+    <span class="code-highlight-rule-2">validarAgenciaRetirada</span>(agenciaRetirada, erros);
+  if (agenciaDevolucaoId !== undefined)
+    <span class="code-highlight-rule-2">validarAgenciaDevolucao</span>(agenciaDevolucao, erros);
+
+  // RN2: cliente sem reserva ativa conflitante no período
+  if (clienteId &amp;&amp; dataRetirada &amp;&amp; dataDevolucao)
+    await <span class="code-highlight-rule-3">validarConflitoReservaCliente</span>(
+      clienteId, dataRetirada, dataDevolucao,
+      erros, reservaId ?? null
+    );
+}
+
+// RN1 — implementada em calcularValoresFinanceiros():
+// agencia.reservasRetirada.length &gt;= 2
+//   &amp;&amp; quantidadeDias &gt;= agencia.limiteDiasDesconto
+// → valorFinal *= (1 - percentualDesconto / 100)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 5: Reserva – RN1 Desconto ==================== -->
+<div class="slide" data-slide="5">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN1 <span class="badge-processo">🔖 Processo: Reserva</span></h1>
+        </div>
+        <div class="slide-number">04</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN1 — Desconto por histórico operacional:</strong> A agência de retirada aplica percentual de desconto somente se possuir no mínimo 2 reservas <em>Concluídas</em> (histórico comprovado) <strong>e</strong> a quantidade de dias ≥ <code>limiteDiasDesconto</code>. Ex: agencia1 (limite=3 dias, 10% off) + reserva de 5 dias → R$ 500,00 × 0,90 = <strong>R$ 450,00</strong>.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-reserva-rn1&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="data-box">
+            <h3>💻 ReservaService.js — calcularValoresFinanceiros()</h3>
+            <pre><code>const agencia = await Agencia.findOne({
+  where: { id: agenciaRetiradaId },
+  include: [{
+    model: Reserva,
+    as: 'reservasRetirada',
+    required: false,
+    where: { status: 'Concluída' },  // JOIN filtra só as concluídas
+    attributes: ['id'],
+  }],
+});
+
+if (agencia) {
+  const reservasConcluidas = agencia.reservasRetirada.length;
+  if (reservasConcluidas &gt;= 2 &amp;&amp; quantidadeDias &gt;= agencia.limiteDiasDesconto) {
+    const desconto = valorFinal * (agencia.percentualDesconto / 100);
+    valorFinal = parseFloat((valorFinal - desconto).toFixed(2));
+  }
+}</code></pre>
+        </div>
+        <div style="margin-top:1rem;background:#f8fafc;border-left:4px solid #0f6b5f;padding:1rem;border-radius:4px;border:1px solid #e2e8f0;">
+            <h4 style="margin:0 0 0.5rem 0;color:#0f172a;font-size:1rem;">⚙️ SQL Resultante</h4>
+            <p style="margin:0 0 0.5rem 0;font-size:0.85rem;color:#475569;">LEFT JOIN filtra apenas as reservas Concluídas; o ORM conta o array <code>reservasRetirada.length</code> em JS:</p>
+            <pre style="background:#ffffff;margin:0;padding:0.8rem;border:1px solid #cbd5e1;"><code style="color:#0369a1;font-weight:600;">SELECT agencias.*
+FROM agencias
+LEFT JOIN reservas
+  ON reservas.agencia_retirada_id = agencias.id
+  AND reservas.status = 'Concluída'
+WHERE agencias.id = 1;
+-- agencia1: 3 reservas Concluídas (ids 1, 4, 5) → qualifica para desconto</code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 6: Reserva – RN2 Conflito ==================== -->
+<div class="slide" data-slide="6">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN2 <span class="badge-processo">🔖 Processo: Reserva</span></h1>
+        </div>
+        <div class="slide-number">05</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN2 — Conflito de período:</strong> Um cliente não pode ter duas reservas com datas sobrepostas e status ativo (não Cancelada nem Concluída). A sobreposição é detectada pela condição clássica de intervalos: <em>início A &lt; fim B</em> <strong>E</strong> <em>fim A &gt; início B</em>.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-reserva-rn2&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="data-box">
+            <h3>💻 ReservaService.js — validarConflitoReservaCliente()</h3>
+            <pre><code>async function validarConflitoReservaCliente(
+  clienteId, dataRetirada, dataDevolucao, erros, excludeId = null
+) {
+  const where = {
+    clienteId,
+    status: { [Op.notIn]: ['Cancelada', 'Concluída'] },
+    [Op.and]: [
+      { dataRetirada:   { [Op.lt]: dataDevolucao } },  // início da nova &lt; fim da existente
+      { dataDevolucao:  { [Op.gt]: dataRetirada  } },  // fim da nova  &gt; início da existente
+    ],
+  };
+  if (excludeId) where.id = { [Op.ne]: excludeId };   // ignora a própria reserva no update
+
+  const conflito = await Reserva.findOne({ where });
+  if (conflito)
+    erros.push("O cliente já possui uma reserva no período solicitado!");
+}</code></pre>
+        </div>
+        <div style="margin-top:1rem;background:#f8fafc;border-left:4px solid #0f6b5f;padding:1rem;border-radius:4px;border:1px solid #e2e8f0;">
+            <h4 style="margin:0 0 0.5rem 0;color:#0f172a;font-size:1rem;">⚙️ SQL Resultante</h4>
+            <p style="margin:0 0 0.5rem 0;font-size:0.85rem;color:#475569;">Tentativa de reserva para cliente 2 em 2030-04-03 → 2030-04-07 (conflita com reserva 11: 2030-04-01 → 2030-04-05):</p>
+            <pre style="background:#ffffff;margin:0;padding:0.8rem;border:1px solid #cbd5e1;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM reservas
+WHERE cliente_id = 2
+  AND status NOT IN ('Cancelada', 'Concluída')
+  AND data_retirada  &lt; '2030-04-07 18:00:00'
+  AND data_devolucao &gt; '2030-04-03 08:00:00'
+LIMIT 1;
+-- Retorna reserva id=11 → bloqueio: "O cliente já possui uma reserva no período solicitado!"</code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 7: Check-in – Visão Geral ==================== -->
+<div class="slide" data-slide="7">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Visão Geral do Processo <span class="badge-processo">✅ Processo: Check-in</span></h1>
+        </div>
+        <div class="slide-number">06</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>Detalhes do Check-in:</strong> Vincula a reserva a um veículo físico específico. Caso a categoria original não tenha veículos disponíveis, o sistema realiza <em>upgrade automático e gratuito</em> para a próxima categoria com disponibilidade. A operação envolve uma transação que atualiza também o status do veículo e da reserva.</p>
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="data-box">
+                    <h3>📋 Tabela: checkins</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>id</th><th>data_checkin</th><th>quilometragem_checkin</th><th>cnh_condutor</th><th>reserva_id</th><th>veiculo_id</th><th>funcionario_id</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>7</td><td>2026-01-10 08:00</td><td>50000.00</td><td>34567890123</td><td>9</td><td>5</td><td>3</td></tr>
+                            <tr><td>8</td><td>2026-04-01 08:00</td><td>25000.00</td><td>56789012345</td><td>10</td><td>4</td><td>2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box">
+                    <h3>🚗 Tabela: veiculos (seleção)</h3>
+                    <table class="data-table">
+                        <thead><tr><th>id</th><th>placa</th><th>modelo</th><th>status</th><th>categoria_veiculo_id</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>ECO1A11</td><td>Fiat Mobi</td><td>Reservado</td><td>1 — Econômico</td></tr>
+                            <tr><td>2</td><td>ECO2B22</td><td>Chevrolet Joy</td><td>Reservado</td><td>1 — Econômico</td></tr>
+                            <tr><td>3</td><td>ABC1D23</td><td>BYD Dolphin</td><td>Disponível</td><td>2 — Hatch</td></tr>
+                            <tr><td>4</td><td>XYZ9A87</td><td>Jeep Compass</td><td>Reservado</td><td>3 — SUV</td></tr>
+                            <tr><td>5</td><td>QWE2R34</td><td>Toyota Corolla</td><td>Reservado</td><td>4 — Sedan</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box">
+                    <h3>📊 Ciclo de Vida: campo <code>status</code> do veículo</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Status</th><th>Quando</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Disponível</strong></td><td>Estado inicial; aceita check-in</td></tr>
+                            <tr><td><strong>Reservado</strong></td><td>Após check-in registrado</td></tr>
+                            <tr><td><strong>Disponível</strong></td><td>Após check-out registrado</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box">
+                    <h3>🔖 Cenário de Upgrade Automático</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Categoria da Reserva</th><th>Veículos Disponíveis</th><th>Resultado</th></tr></thead>
+                        <tbody>
+                            <tr><td>catEconômico (id=1)</td><td>0 (ambos Reservados)</td><td>→ busca upgrade</td></tr>
+                            <tr><td>catHatch (id=2)</td><td>3 disponíveis</td><td>→ upgrade para id=3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box" style="background:#f0fdf4;border-color:#bbf7d0;">
+                    <h3 style="color:#047857;">📝 Pré-condições para Check-in</h3>
+                    <ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:#334155;line-height:1.8;">
+                        <li>Reserva com <strong>status = Pendente</strong></li>
+                        <li>CNH informada = CNH cadastrada no cliente</li>
+                        <li>Cliente sem multas <strong>Pendentes</strong></li>
+                        <li>Veículo disponível na categoria (ou upgrade)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 8: Check-in – Fluxo de Transação ==================== -->
+<div class="slide" data-slide="8">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Fluxo de Transação <span class="badge-processo">✅ Processo: Check-in</span></h1>
+        </div>
+        <div class="slide-number">07</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;">
+                    <h3 style="margin-bottom:1rem;text-align:left;width:100%;">🔄 Fluxo de Transação</h3>
+                    <div class="step-flow">
+                        <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔍 Promise.all([reserva, funcionario])</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔎 verificarRegrasDeNegocio() → resolve veiculoFinalId</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">✅ validarModel() — validações Sequelize</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-error">⚠️ erros.length &gt; 0 → throw erros.join(" ")</div>
+                        <div class="step-branch">← HTTP 400, nenhum dado alterado</div>
+                        <div class="step-arrow">↓ caminho feliz</div>
+                        <div class="step-box step-begin">🔄 BEGIN — sequelize.transaction(async (t) =&gt; &#123;</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">📝 Checkin.create(&#123; veiculoFinalId, ... &#125;, &#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">🚗 veiculo.status = 'Reservado' → veiculo.save(&#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">📋 reserva.status = 'Confirmada' → reserva.save(&#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-commit">✅ COMMIT automático (callback retorna sem erro)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-commit">📤 HTTP 201 — checkin com todas as associações</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 CheckinService.js (create)</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-checkin-create&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-checkin-create" style="margin:0;height:100%;border:none;font-size:0.78rem;"><code>static async create(req) {
+  const { dataCheckin, cnhCondutor, cnhValidade,
+          quilometragemCheckin, reservaId,
+          veiculoId, funcionarioId } = req.body;
+  const erros = [];
+
+  const [reserva, funcionario] = await Promise.all([
+    Reserva.findByPk(reservaId, { include: { all: true } }),
+    Funcionario.findByPk(funcionarioId),
+  ]);
+  if (!reserva)     erros.push("Reserva não encontrada!");
+  if (!funcionario) erros.push("Funcionário não encontrado!");
+
+  let veiculoFinalId = veiculoId;
+  if (reserva) {
+    veiculoFinalId = await <span class="code-highlight-method">verificarRegrasDeNegocio</span>(
+      { cnhCondutor, reserva, veiculoId, isUpdate: false, erros }
+    ) ?? veiculoFinalId;
+  }
+  if (erros.length &gt; 0) throw erros.join(" ");
+
+  return await <span class="code-highlight-tx-start">sequelize.transaction</span>(async (t) =&gt; {
+    const obj = await <span class="code-highlight-tx-success-light">Checkin.create</span>({
+      dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin,
+      reservaId, veiculoId: veiculoFinalId, funcionarioId
+    }, { transaction: t });
+
+    const veiculo = await Veiculo.findByPk(veiculoFinalId, { transaction: t });
+    <span class="code-highlight-tx-success-light">veiculo.status = 'Reservado'</span>;
+    await veiculo.save({ transaction: t });
+
+    <span class="code-highlight-tx-success-dark">reserva.status = 'Confirmada'</span>;
+    await reserva.save({ transaction: t });
+
+    return await Checkin.findByPk(obj.id,
+      { include: { all: true }, transaction: t });
+  }); // COMMIT automático
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 9: Check-in – Regras de Negócio ==================== -->
+<div class="slide" data-slide="9">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Regras de Negócio <span class="badge-processo">✅ Processo: Check-in</span></h1>
+        </div>
+        <div class="slide-number">08</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;border:none;background:transparent;padding:0;justify-content:flex-start;">
+                    <h3 style="margin-bottom:1.2rem;text-align:left;width:100%;">📌 Regras de Negócio</h3>
+                    <div class="rules-cards" style="flex-direction:column;">
+                        <div class="rule-card rule-card-1">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">🚗</div>
+                            RN1 — Resolução de veículo<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Busca disponibilidade na categoria; sem veículos → upgrade gratuito para próxima categoria com disponibilidade</span>
+                        </div>
+                        <div class="rule-card rule-card-2">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">🪪</div>
+                            Reserva e CNH<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Reserva deve estar <em>Pendente</em>; CNH do condutor deve corresponder exatamente ao cliente da reserva</span>
+                        </div>
+                        <div class="rule-card rule-card-3">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">⚠️</div>
+                            RN2 — Débitos pendentes<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Cliente com multas de status <em>Pendente</em> fica bloqueado de realizar check-in</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 verificarRegrasDeNegocio()</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-checkin-regras&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-checkin-regras" style="margin:0;height:100%;border:none;font-size:0.78rem;"><code>async function verificarRegrasDeNegocio({
+  cnhCondutor, reserva, veiculoId, isUpdate, erros
+}) {
+  if (!isUpdate) {
+    // Status da reserva deve ser Pendente
+    <span class="code-highlight-rule-2">validarStatusReserva</span>(reserva, erros);
+    // RN2: cliente sem débitos pendentes (multas)
+    await <span class="code-highlight-rule-3">validarDebitosPendentesCliente</span>(reserva.clienteId, erros);
+  }
+
+  // CNH informada deve corresponder ao cliente da reserva
+  if (cnhCondutor !== undefined)
+    <span class="code-highlight-rule-2">validarCnhCondutor</span>(cnhCondutor, reserva, erros);
+
+  if (!isUpdate) {
+    // RN1: resolve veículo disponível na categoria, ou upgrade automático
+    const { veiculoFinalId, erros: errosVeiculo }
+      = await <span class="code-highlight-rule-1">resolverVeiculoParaCheckin</span>(reserva, veiculoId);
+    erros.push(...errosVeiculo);
+    return veiculoFinalId;  // veiculoId final (pode ser de categoria superior)
+  }
+  return veiculoId ?? null;
+}
+
+function validarStatusReserva(reserva, erros) {
+  if (reserva.status !== 'Pendente')
+    erros.push("Só é possível realizar check-in em reservas com status Pendente!");
+}
+
+function validarCnhCondutor(cnhCondutor, reserva, erros) {
+  if (cnhCondutor !== reserva.cliente.cnh)
+    erros.push("A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!");
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 10: Check-in – RN1 Veículo / Upgrade ==================== -->
+<div class="slide" data-slide="10">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN1 <span class="badge-processo">✅ Processo: Check-in</span></h1>
+        </div>
+        <div class="slide-number">09</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN1 — Resolução de veículo com upgrade automático:</strong> Se não há veículos disponíveis na categoria da reserva, o sistema busca categorias superiores (id &gt; categoriaId) em ordem crescente e seleciona o primeiro veículo disponível. Reserva de catEconômico (id=1) → nenhum disponível → upgrade para catHatch (id=2) → veículo id=3 selecionado.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-checkin-rn1&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="grid-layout" style="height:auto;">
+            <div class="col-left">
+                <div class="data-box">
+                    <h3>💻 resolverVeiculoParaCheckin() + buscarVeiculoUpgrade()</h3>
+                    <pre style="font-size:0.78rem;"><code>async function resolverVeiculoParaCheckin(reserva, veiculoId) {
+  // SQL-1: busca veículos disponíveis na categoria da reserva
+  const veiculosNaCategoria = await Veiculo.findAll({
+    where: { categoriaVeiculoId: reserva.categoriaVeiculoId,
+             status: "Disponível" },
+  });
+  if (veiculosNaCategoria.length === 0) {
+    // SQL-2 + SQL-3: upgrade automático
+    const veiculoFinalId = await <span class="code-highlight-rule-1">buscarVeiculoUpgrade</span>(reserva.categoriaVeiculoId);
+    const erros = veiculoFinalId ? []
+      : ["Não há veículos disponíveis e não foi possível realizar upgrade!"];
+    return { veiculoFinalId, erros };
+  }
+  return validarVeiculoSolicitado(reserva, veiculoId);
+}
+
+async function buscarVeiculoUpgrade(categoriaVeiculoId) {
+  // SQL-2: categorias superiores em ordem crescente de id
+  const categoriasSuperiores = await CategoriaVeiculo.findAll({
+    where: { id: { [Op.gt]: categoriaVeiculoId } },
+    order: [["id", "ASC"]],
+  });
+  for (const cat of categoriasSuperiores) {
+    // SQL-3: primeiro veículo disponível em cada categoria superior
+    const veiculo = await Veiculo.findOne({
+      where: { categoriaVeiculoId: cat.id, status: "Disponível" }
+    });
+    if (veiculo) return veiculo.id;
+  }
+  return null; // nenhum upgrade possível
+}</code></pre>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box">
+                    <h3>⚙️ SQLs Resultantes (3 passos)</h3>
+                    <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 1:</strong> Verifica disponibilidade na categoria da reserva (catEconômico id=1):</p>
+                    <pre style="background:#fff;margin:0 0 0.8rem;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM veiculos
+WHERE categoria_veiculo_id = 1
+  AND status = 'Disponível';
+-- 0 linhas → aciona upgrade</code></pre>
+                    <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 2:</strong> Busca categorias superiores:</p>
+                    <pre style="background:#fff;margin:0 0 0.8rem;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM categoria_veiculos
+WHERE id &gt; 1
+ORDER BY id ASC;
+-- catHatch(2), catSUV(3), catSedan(4), catPicape(5)</code></pre>
+                    <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 3:</strong> Primeiro veículo disponível em catHatch (id=2):</p>
+                    <pre style="background:#fff;margin:0;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM veiculos
+WHERE categoria_veiculo_id = 2
+  AND status = 'Disponível'
+LIMIT 1;
+-- id=3 (BYD Dolphin) → upgrade realizado!</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 11: Check-in – RN2 Débitos ==================== -->
+<div class="slide" data-slide="11">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN2 <span class="badge-processo">✅ Processo: Check-in</span></h1>
+        </div>
+        <div class="slide-number">10</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN2 — Débitos pendentes:</strong> Qualquer multa com <code>status = 'Pendente'</code> vinculada ao cliente bloqueia completamente o check-in. Ex: cliente1 (Henrique) possui multa Pendente por "Excesso de velocidade" (R$ 195,23) → check-in negado até quitação.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-checkin-rn2&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="data-box" style="margin-top:0.5rem;">
+            <h3>💻 CheckinService.js — validarDebitosPendentesCliente()</h3>
+            <pre><code>// RN2: cliente com multas pendentes não pode realizar check-in
+async function validarDebitosPendentesCliente(clienteId, erros) {
+  const debitosPendentes = await Multa.count({
+    where: { clienteId, status: "Pendente" }
+  });
+  if (debitosPendentes &gt; 0)
+    erros.push("O cliente possui débitos pendentes e não pode realizar o check-in!");
+}</code></pre>
+        </div>
+        <div style="margin-top:1rem;background:#f8fafc;border-left:4px solid #0f6b5f;padding:1rem;border-radius:4px;border:1px solid #e2e8f0;">
+            <h4 style="margin:0 0 0.5rem 0;color:#0f172a;font-size:1rem;">⚙️ SQL Resultante</h4>
+            <p style="margin:0 0 0.5rem 0;font-size:0.85rem;color:#475569;">O Sequelize traduz <code>Multa.count(&#123; where &#125;)</code> para um <code>SELECT COUNT(*)</code>:</p>
+            <pre style="background:#ffffff;margin:0;padding:0.8rem;border:1px solid #cbd5e1;"><code style="color:#0369a1;font-weight:600;">SELECT COUNT(*) AS count
+FROM multas
+WHERE cliente_id = 1
+  AND status = 'Pendente';
+-- count = 1 (multa "Excesso de velocidade", R$ 195,23)
+-- → bloqueio: "O cliente possui débitos pendentes e não pode realizar o check-in!"</code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 12: Check-out – Visão Geral ==================== -->
+<div class="slide" data-slide="12">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Visão Geral do Processo <span class="badge-processo">📋 Processo: Check-out</span></h1>
+        </div>
+        <div class="slide-number">11</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>Detalhes do Check-out:</strong> Registra a devolução do veículo, valida a quilometragem contra o histórico do veículo e aplica taxa de inspeção de R$ 150,00 para clientes com mais de 3 avarias acumuladas em checkouts anteriores.</p>
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="data-box">
+                    <h3>📋 Tabela: checkouts (histórico de avarias)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>id</th><th>quilometragem_checkout</th><th>taxa_inspecao</th><th>nivel_combustivel</th><th>checkin_id</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>25400.00</td><td>0.00</td><td>Médio</td><td>1</td></tr>
+                            <tr><td>2</td><td>1880.00</td><td>0.00</td><td>Alto</td><td>2</td></tr>
+                            <tr><td>5</td><td>2000.00</td><td>0.00</td><td>Médio</td><td>5</td></tr>
+                            <tr><td>6</td><td>25800.00</td><td>0.00</td><td>Médio</td><td>6</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box">
+                    <h3>🔗 Tabela: checkout_avarias</h3>
+                    <table class="data-table">
+                        <thead><tr><th>checkout_id</th><th>avaria_id</th><th>avaria_nome</th></tr></thead>
+                        <tbody>
+                            <tr><td>5</td><td>1</td><td>Arranhão na porta</td></tr>
+                            <tr><td>5</td><td>2</td><td>Parachoque trincado</td></tr>
+                            <tr><td>6</td><td>3</td><td>Retrovisor quebrado</td></tr>
+                            <tr><td>6</td><td>4</td><td>Lanterna traseira queimada</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size:0.8rem;color:#64748b;margin:0.5rem 0 0;">Checkouts 5 e 6 pertencem a Lucas (cliente5): <strong>4 avarias totais</strong> → taxa de inspeção aplica no próximo checkout.</p>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box">
+                    <h3>📊 Efeitos do Check-out na base</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Entidade</th><th>Campo</th><th>Valor após checkout</th></tr></thead>
+                        <tbody>
+                            <tr><td>Veiculo</td><td>status</td><td>'Disponível'</td></tr>
+                            <tr><td>Veiculo</td><td>quilometragem</td><td>quilometragemCheckout</td></tr>
+                            <tr><td>Reserva</td><td>status</td><td>'Concluída'</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="data-box">
+                    <h3>🔖 Condições para Taxa de Inspeção</h3>
+                    <table class="data-table">
+                        <thead><tr><th>Total de avarias (histórico)</th><th>Taxa aplicada</th></tr></thead>
+                        <tbody>
+                            <tr><td>≤ 3 avarias</td><td>R$ 0,00</td></tr>
+                            <tr><td>&gt; 3 avarias</td><td>R$ 150,00</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="font-size:0.8rem;color:#64748b;margin:0.5rem 0 0;">Lucas (cliente5): checkout5 (2 avarias) + checkout6 (2 avarias) = 4 total → <strong>R$ 150,00</strong> no próximo checkout.</p>
+                </div>
+                <div class="data-box" style="background:#fef2f2;border-color:#fecaca;">
+                    <h3 style="color:#b91c1c;">📝 Pré-condições para Check-out</h3>
+                    <ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:#334155;line-height:1.8;">
+                        <li>Quilometragem &gt; quilometragem do check-in</li>
+                        <li>Quilometragem ≥ máximo histórico do veículo</li>
+                        <li>Data de devolução ≥ data do check-in</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 13: Check-out – Fluxo de Transação ==================== -->
+<div class="slide" data-slide="13">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Fluxo de Transação <span class="badge-processo">📋 Processo: Check-out</span></h1>
+        </div>
+        <div class="slide-number">12</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;">
+                    <h3 style="margin-bottom:1rem;text-align:left;width:100%;">🔄 Fluxo de Transação</h3>
+                    <div class="step-flow">
+                        <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔍 Promise.all([checkin, funcionario])</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">🔎 verificarRegrasDeNegocio() — quilometragem, data</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">💰 calcularTaxaInspecao(clienteId) — RN2</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-neutral">✅ validarModel() — validações Sequelize</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-error">⚠️ erros.length &gt; 0 → throw erros.join(" ")</div>
+                        <div class="step-branch">← HTTP 400, nenhum dado alterado</div>
+                        <div class="step-arrow">↓ caminho feliz</div>
+                        <div class="step-box step-begin">🔄 BEGIN — sequelize.transaction(async (t) =&gt; &#123;</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">📝 Checkout.create(&#123; taxaInspecao, ... &#125;, &#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">🔧 obj.setAvarias(avariaIds, &#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">🚗 veiculo.status = 'Disponível'; veiculo.quilometragem = ...</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-ok">📋 reserva.status = 'Concluída' → reserva.save(&#123; transaction: t &#125;)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-commit">✅ COMMIT automático (callback retorna sem erro)</div>
+                        <div class="step-arrow">↓</div>
+                        <div class="step-box step-commit">📤 HTTP 201 — checkout com todas as associações</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 CheckoutService.js (create)</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-checkout-create&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-checkout-create" style="margin:0;height:100%;border:none;font-size:0.75rem;"><code>static async create(req) {
+  const { dataCheckout, quilometragemCheckout, nivelCombustivel,
+          condicaoPneus, condicaoPalhetas, limpoInternamente,
+          limpoExternamente, observacoes,
+          checkinId, funcionarioId, avariaIds } = req.body;
+  const erros = [];
+
+  const [checkin, funcionario] = await Promise.all([
+    Checkin.findByPk(checkinId),
+    Funcionario.findByPk(funcionarioId),
+  ]);
+  if (!checkin)     erros.push("Check-in não encontrado!");
+  if (!funcionario) erros.push("Funcionário não encontrado!");
+
+  if (checkin)
+    await <span class="code-highlight-method">verificarRegrasDeNegocio</span>({ dataCheckout,
+      quilometragemCheckout, obj: checkin, erros });
+
+  if (erros.length &gt; 0) throw erros.join(" ");
+
+  const reserva = await Reserva.findByPk(checkin.reservaId);
+  // RN2: calcula taxa de inspeção ANTES de abrir a transação
+  const taxaInspecao = await <span class="code-highlight-rule">calcularTaxaInspecao</span>(reserva.clienteId);
+
+  return await <span class="code-highlight-tx-start">sequelize.transaction</span>(async (t) =&gt; {
+    const obj = await <span class="code-highlight-tx-success-light">Checkout.create</span>({
+      dataCheckout, quilometragemCheckout, nivelCombustivel,
+      condicaoPneus, condicaoPalhetas, limpoInternamente,
+      limpoExternamente, observacoes, checkinId,
+      funcionarioId, taxaInspecao
+    }, { transaction: t });
+
+    if (avariaIds) await <span class="code-highlight-tx-success-light">obj.setAvarias</span>(avariaIds, { transaction: t });
+
+    const veiculo = await Veiculo.findByPk(checkin.veiculoId, { transaction: t });
+    veiculo.quilometragem = quilometragemCheckout;
+    <span class="code-highlight-tx-success-light">veiculo.status = 'Disponível'</span>;
+    await veiculo.save({ transaction: t });
+
+    <span class="code-highlight-tx-success-dark">reserva.status = 'Concluída'</span>;
+    await reserva.save({ transaction: t });
+
+    return await Checkout.findByPk(obj.id,
+      { include: { all: true }, transaction: t });
+  }); // COMMIT automático
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 14: Check-out – Regras de Negócio ==================== -->
+<div class="slide" data-slide="14">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Regras de Negócio <span class="badge-processo">📋 Processo: Check-out</span></h1>
+        </div>
+        <div class="slide-number">13</div>
+    </div>
+    <div class="slide-body">
+        <div class="grid-layout">
+            <div class="col-left">
+                <div class="er-image-box" style="height:100%;border:none;background:transparent;padding:0;justify-content:flex-start;">
+                    <h3 style="margin-bottom:1.2rem;text-align:left;width:100%;">📌 Regras de Negócio</h3>
+                    <div class="rules-cards" style="flex-direction:column;">
+                        <div class="rule-card rule-card-1">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">🔢</div>
+                            RN1 — Quilometragem válida<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Deve ser maior que o check-in <strong>e</strong> maior ou igual ao máximo histórico já registrado para aquele veículo</span>
+                        </div>
+                        <div class="rule-card rule-card-2">
+                            <div style="font-size:2rem;margin-bottom:0.2rem;">🔍</div>
+                            RN2 — Taxa de inspeção<br>
+                            <span style="font-size:0.85rem;font-weight:500;color:#475569;">Clientes com mais de 3 avarias acumuladas em checkouts anteriores pagam <strong>R$ 150,00</strong> de taxa</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:1rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:0.8rem;width:100%;">
+                        <p style="margin:0;font-size:0.82rem;color:#1e3a8a;"><strong>📝 Nota — Data de devolução:</strong> validada em <code>validarDataCheckout()</code> dentro do orquestrador; a data não pode ser anterior ao <code>dataCheckin</code>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box" style="padding:0;height:100%;display:flex;flex-direction:column;">
+                    <h3 style="padding:1rem 1rem 0;margin-bottom:0;">💻 verificarRegrasDeNegocio()</h3>
+                    <div class="code-container">
+                        <button class="zoom-btn" onclick="openCodeLightbox(&#39;code-checkout-regras&#39;)" title="Ampliar">🔍 Zoom</button>
+                        <pre id="code-checkout-regras" style="margin:0;height:100%;border:none;font-size:0.78rem;"><code>async function verificarRegrasDeNegocio({
+  dataCheckout, quilometragemCheckout,
+  checkinId, obj, erros
+}) {
+  // Resolve o checkin (update passa checkinId, create passa obj)
+  const checkin = checkinId
+    ? await Checkin.findByPk(checkinId) : obj;
+
+  if (!checkin) {
+    erros.push("Check-in não encontrado!");
+    return;
+  }
+
+  // RN1: validação de quilometragem em 2 etapas
+  if (quilometragemCheckout !== undefined)
+    await <span class="code-highlight-rule-1">validarQuilometragem</span>(quilometragemCheckout, checkin, erros);
+
+  // Data de devolução não pode ser anterior ao check-in
+  if (dataCheckout !== undefined)
+    <span class="code-highlight-rule-2">validarDataCheckout</span>(dataCheckout, checkin, erros);
+}
+
+function validarDataCheckout(dataCheckout, checkin, erros) {
+  if (new Date(dataCheckout) &lt; new Date(checkin.dataCheckin))
+    erros.push("A data de devolução não pode ser anterior à data do check-in!");
+}
+
+// RN2 — calcularTaxaInspecao() chamada em create(), antes da transação:
+// totalAvarias = soma das avarias em todos os checkouts anteriores do cliente
+// totalAvarias &gt; 3 → taxaInspecao = R$ 150,00</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 15: Check-out – RN1 Quilometragem ==================== -->
+<div class="slide" data-slide="15">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN1 <span class="badge-processo">📋 Processo: Check-out</span></h1>
+        </div>
+        <div class="slide-number">14</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN1 — Validação de quilometragem em 2 etapas:</strong> (1) deve ser maior que a quilometragem do check-in correspondente; (2) deve ser maior ou igual ao <em>maior valor já registrado</em> para aquele veículo em toda a sua história de checkouts — garantindo que o odômetro nunca regride. Para checkin7 (veiculo_id=5, Toyota Corolla): quilometragem_checkin = 50.000 e máx histórico = 31.800 → qualquer valor &gt; 50.000 é aceito.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-checkout-rn1&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="data-box">
+            <h3>💻 CheckoutService.js — validarQuilometragem()</h3>
+            <pre><code>async function validarQuilometragem(quilometragemCheckout, checkin, erros) {
+  // Etapa 1: deve ser maior que a quilometragem do check-in
+  if (parseFloat(quilometragemCheckout) &lt;= parseFloat(checkin.quilometragemCheckin)) {
+    erros.push("A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!");
+    return;
+  }
+
+  // Etapa 2: não pode ser inferior ao maior valor histórico do veículo
+  // Usa raw: true e subQuery: false para geração correta do SQL com MAX + JOIN
+  const resultado = await Checkout.findOne({
+    attributes: [[sequelize.fn('MAX', sequelize.col('quilometragem_checkout')), 'maxQuilometragem']],
+    include: [{ model: Checkin, as: 'checkin', required: true,
+                where: { veiculoId: checkin.veiculoId }, attributes: [] }],
+    raw: true, subQuery: false,
+  });
+
+  const maxQuilometragem = resultado?.maxQuilometragem;
+  if (maxQuilometragem != null &amp;&amp; parseFloat(quilometragemCheckout) &lt; parseFloat(maxQuilometragem))
+    erros.push("A quilometragem de devolução não pode ser inferior à maior quilometragem já registrada para este veículo!");
+}</code></pre>
+        </div>
+        <div style="margin-top:1rem;background:#f8fafc;border-left:4px solid #0f6b5f;padding:1rem;border-radius:4px;border:1px solid #e2e8f0;">
+            <h4 style="margin:0 0 0.5rem 0;color:#0f172a;font-size:1rem;">⚙️ SQL Resultante — MAX via INNER JOIN</h4>
+            <p style="margin:0 0 0.5rem 0;font-size:0.85rem;color:#475569;">O <code>subQuery: false</code> força o Sequelize a gerar um JOIN direto com GROUP BY, garantindo que o MAX seja calculado corretamente:</p>
+            <pre style="background:#ffffff;margin:0;padding:0.8rem;border:1px solid #cbd5e1;"><code style="color:#0369a1;font-weight:600;">SELECT MAX(checkouts.quilometragem_checkout) AS max_quilometragem
+FROM checkouts
+INNER JOIN checkins ON checkouts.checkin_id = checkins.id
+WHERE checkins.veiculo_id = 5;
+-- veiculo_id=5 (Toyota Corolla): checkout3 registrou 31800 km
+-- max_quilometragem = 31800 → nova km deve ser ≥ 31800 (e > 50000 do checkin7)</code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SLIDE 16: Check-out – RN2 Taxa de Inspeção ==================== -->
+<div class="slide" data-slide="16">
+    <div class="slide-header">
+        <div class="title-group">
+            <h1>Implementação da RN2 <span class="badge-processo">📋 Processo: Check-out</span></h1>
+        </div>
+        <div class="slide-number">15</div>
+    </div>
+    <div class="slide-body">
+        <p class="event-excerpt"><strong>RN2 — Taxa de inspeção:</strong> Clientes com mais de 3 avarias acumuladas em todos os seus checkouts anteriores pagam R$ 150,00. Lucas (cliente5): checkout5 com 2 avarias + checkout6 com 2 avarias = <strong>4 avarias</strong> → taxa aplica no checkout do checkin8.</p>
+        <a href="javascript:void(0)" onclick="openTableLightbox(&#39;tables-checkout-rn2&#39;)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.95rem;display:inline-block;margin-bottom:0.5rem;">📊 Visualizar Tabelas do Banco de Dados</a>
+        <div class="grid-layout" style="height:auto;">
+            <div class="col-left">
+                <div class="data-box">
+                    <h3>💻 CheckoutService.js — calcularTaxaInspecao()</h3>
+                    <pre style="font-size:0.78rem;"><code>const TAXA_INSPECAO = 150.00;
+
+async function calcularTaxaInspecao(clienteId) {
+  // SQL-1: todos os checkins do cliente (via reserva)
+  const checkinsDoCliente = await Checkin.findAll({
+    include: [{ model: Reserva, as: "reserva",
+                required: true, where: { clienteId }, attributes: [] }],
+    attributes: ["id"],
+  });
+  const idsCheckins = checkinsDoCliente.map(c =&gt; c.id);
+  if (idsCheckins.length === 0) return 0;
+
+  // SQL-2: checkouts desses checkins, com suas avarias
+  const checkoutsAnteriores = await Checkout.findAll({
+    where: { checkinId: { [Op.in]: idsCheckins } },
+    include: [{ model: Avaria, as: "avarias" }],
+  });
+
+  // Soma total de avarias via JavaScript
+  const totalAvarias = checkoutsAnteriores
+    .reduce((total, co) =&gt; total + co.avarias.length, 0);
+
+  return totalAvarias &gt; 3 ? TAXA_INSPECAO : 0;
+}</code></pre>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="data-box">
+                    <h3>⚙️ SQLs Resultantes (2 passos)</h3>
+                    <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 1:</strong> Checkins de Lucas (cliente_id=5):</p>
+                    <pre style="background:#fff;margin:0 0 0.8rem;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT checkins.id
+FROM checkins
+INNER JOIN reservas ON checkins.reserva_id = reservas.id
+WHERE reservas.cliente_id = 5;
+-- Retorna ids: 5, 6, 8</code></pre>
+                    <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 2:</strong> Checkouts com avarias para esses checkins:</p>
+                    <pre style="background:#fff;margin:0 0 0.8rem;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT checkouts.id, avarias.id AS avaria_id
+FROM checkouts
+LEFT JOIN checkout_avarias
+  ON checkouts.id = checkout_avarias.checkout_id
+LEFT JOIN avarias
+  ON checkout_avarias.avaria_id = avarias.id
+WHERE checkouts.checkin_id IN (5, 6, 8);
+-- checkout5 → avaria1, avaria2
+-- checkout6 → avaria3, avaria4
+-- checkout8 → (sem checkout ainda)
+-- Total: 4 avarias → taxa_inspecao = R$ 150,00</code></pre>
+                    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:0.6rem 0.8rem;">
+                        <p style="margin:0;font-size:0.82rem;color:#92400e;"><strong>💡 Nota:</strong> o checkin8 aparece no SELECT mas ainda não tem checkout vinculado → contribui 0 avarias. A contagem final é feita em JavaScript pelo <code>.reduce()</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /presentation-container -->
+
+<!-- Lightbox de Imagem -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <img id="lightboxImg" src="" alt="Imagem ampliada">
+</div>
+
+<!-- Lightbox de Código (Tela Cheia) -->
+<div class="code-lightbox" id="codeLightbox" onclick="closeCodeLightbox()">
+    <button class="lightbox-close" onclick="closeCodeLightbox()">×</button>
+    <pre onclick="event.stopPropagation()"><code id="lightboxCodeContent"></code></pre>
+</div>
+
+<!-- Templates para Tabelas -->
+<template id="tables-reserva-rn1">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN1 Desconto</h3>
+    <div style="margin-bottom:1.2rem;">
+        <h4 style="margin:0 0 0.5rem;color:#334155;">agencias</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>nome</th><th>limite_dias_desconto</th><th>percentual_desconto</th><th>status</th></tr></thead>
+        <tbody><tr><td>1</td><td>Agência Cachoeiro</td><td>3</td><td>10.00%</td><td>Ativa</td></tr>
+        <tr><td>2</td><td>Agência Vitória</td><td>5</td><td>15.00%</td><td>Ativa</td></tr></tbody></table>
+    </div>
+    <div>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">reservas (agencia_retirada_id = 1, status = 'Concluída')</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>status</th><th>agencia_retirada_id</th><th>cliente_id</th></tr></thead>
+        <tbody><tr><td>1</td><td>Concluída</td><td>1</td><td>1</td></tr>
+        <tr><td>4</td><td>Concluída</td><td>1</td><td>4</td></tr>
+        <tr><td>5</td><td>Concluída</td><td>1</td><td>5</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">agencia1 tem 3 reservas Concluídas → ≥ 2 → qualifica para desconto</p>
+    </div>
+</template>
+
+<template id="tables-reserva-rn2">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN2 Conflito de Período</h3>
+    <div>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">reservas (cliente_id = 2, status ativo)</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>data_retirada</th><th>data_devolucao</th><th>status</th><th>cliente_id</th></tr></thead>
+        <tbody>
+        <tr><td>7</td><td>2030-02-01 08:00</td><td>2030-02-08 18:00</td><td>Pendente</td><td>2</td></tr>
+        <tr><td>11</td><td>2030-04-01 08:00</td><td>2030-04-05 18:00</td><td>Pendente</td><td>2</td></tr>
+        <tr><td>12</td><td>2030-05-01 08:00</td><td>2030-05-05 18:00</td><td>Pendente</td><td>2</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">Tentativa de nova reserva para cliente 2 em período que sobrepõe qualquer uma destas → bloqueio.</p>
+    </div>
+</template>
+
+<template id="tables-checkin-rn1">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN1 Veículo / Upgrade</h3>
+    <div style="margin-bottom:1.2rem;">
+        <h4 style="margin:0 0 0.5rem;color:#334155;">categoria_veiculos</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>nome</th><th>valor_diaria</th></tr></thead>
+        <tbody><tr><td>1</td><td>Econômico Compacto</td><td>70.00</td></tr>
+        <tr><td>2</td><td>Hatch Compacto</td><td>100.00</td></tr>
+        <tr><td>3</td><td>SUV Premium</td><td>350.00</td></tr></tbody></table>
+    </div>
+    <div>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">veiculos (categoria 1 e 2)</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>placa</th><th>modelo</th><th>status</th><th>categoria_veiculo_id</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>ECO1A11</td><td>Fiat Mobi</td><td>Reservado</td><td>1</td></tr>
+        <tr><td>2</td><td>ECO2B22</td><td>Chevrolet Joy</td><td>Reservado</td><td>1</td></tr>
+        <tr><td>3</td><td>ABC1D23</td><td>BYD Dolphin</td><td>Disponível</td><td>2</td></tr>
+        <tr><td>8</td><td>HAT6F66</td><td>Ford Ka</td><td>Disponível</td><td>2</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">catEconômico: 0 disponíveis → upgrade → catHatch: 2 disponíveis → seleciona id=3</p>
+    </div>
+</template>
+
+<template id="tables-checkin-rn2">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN2 Débitos Pendentes</h3>
+    <div>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">multas</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>valor</th><th>descricao</th><th>status</th><th>cliente_id</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>195.23</td><td>Excesso de velocidade na rodovia</td><td>Pendente</td><td>1</td></tr>
+        <tr><td>2</td><td>320.00</td><td>Avanço de sinal vermelho</td><td>Paga</td><td>2</td></tr>
+        <tr><td>3</td><td>88.50</td><td>Estacionamento irregular</td><td>Paga</td><td>3</td></tr>
+        <tr><td>4</td><td>540.90</td><td>Ultrapassagem em local proibido</td><td>Pendente</td><td>4</td></tr>
+        <tr><td>5</td><td>150.00</td><td>Velocidade excessiva em zona escolar</td><td>Paga</td><td>5</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">clientes 1 e 4 estão bloqueados (multas Pendentes). clientes 2, 3, 5 estão liberados.</p>
+    </div>
+</template>
+
+<template id="tables-checkout-rn1">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN1 Quilometragem</h3>
+    <div style="margin-bottom:1.2rem;">
+        <h4 style="margin:0 0 0.5rem;color:#334155;">checkins (veiculo_id = 5, Toyota Corolla)</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>data_checkin</th><th>quilometragem_checkin</th><th>veiculo_id</th></tr></thead>
+        <tbody>
+        <tr><td>3</td><td>2026-04-08 10:20</td><td>31200.00</td><td>5</td></tr>
+        <tr><td>7</td><td>2026-01-10 08:00</td><td>50000.00</td><td>5</td></tr></tbody></table>
+    </div>
+    <div>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">checkouts (via checkins do veiculo_id = 5)</h4>
+        <table class="data-table"><thead><tr><th>id</th><th>quilometragem_checkout</th><th>checkin_id</th></tr></thead>
+        <tbody><tr><td>3</td><td>31800.00</td><td>3</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">MAX quilometragem_checkout para veiculo_id=5 = 31800. Checkin7 registrou 50000. Portanto, o checkout deve ter quilometragem &gt; 50000 (e ≥ 31800).</p>
+    </div>
+</template>
+
+<template id="tables-checkout-rn2">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN2 Taxa de Inspeção</h3>
+    <div style="margin-bottom:1.2rem;">
+        <h4 style="margin:0 0 0.5rem;color:#334155;">checkins de Lucas (cliente_id = 5)</h4>
+        <table class="data-table"><thead><tr><th>checkin_id</th><th>reserva_id</th><th>cliente_id (via reserva)</th></tr></thead>
+        <tbody>
+        <tr><td>5</td><td>5</td><td>5</td></tr>
+        <tr><td>6</td><td>6</td><td>5</td></tr>
+        <tr><td>8</td><td>10</td><td>5</td></tr></tbody></table>
+    </div>
+    <div style="margin-bottom:1.2rem;">
+        <h4 style="margin:0 0 0.5rem;color:#334155;">checkout_avarias (checkins 5, 6)</h4>
+        <table class="data-table"><thead><tr><th>checkout_id</th><th>avaria_id</th><th>avaria_nome</th></tr></thead>
+        <tbody>
+        <tr><td>5</td><td>1</td><td>Arranhão na porta</td></tr>
+        <tr><td>5</td><td>2</td><td>Parachoque trincado</td></tr>
+        <tr><td>6</td><td>3</td><td>Retrovisor quebrado</td></tr>
+        <tr><td>6</td><td>4</td><td>Lanterna traseira queimada</td></tr></tbody></table>
+        <p style="font-size:0.82rem;color:#64748b;margin:0.5rem 0 0;">Total: 4 avarias &gt; 3 → <strong>taxa_inspecao = R$ 150,00</strong> no checkout do checkin8.</p>
+    </div>
+</template>
+
+<!-- Lightbox de Tabelas -->
+<div class="code-lightbox" id="tableLightbox" onclick="closeTableLightbox()">
+    <button class="lightbox-close" onclick="closeTableLightbox()">×</button>
+    <div id="tableLightboxContent" onclick="event.stopPropagation()"
+         style="background:#f8fafc;padding:2.5rem;border-radius:12px;width:90vw;max-width:800px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+    </div>
+</div>
+
+<!-- Barra de Navegação -->
+<div class="nav-bar">
+    <button id="btnPrev" onclick="changeSlide(-1)" disabled>◀ Anterior</button>
+    <span class="nav-indicator" id="navIndicator">1 / 16</span>
+    <button id="btnNext" onclick="changeSlide(1)">Próximo ▶</button>
+</div>
+
+<script>
+    let fontScale = 100;
+    const baseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    function changeFontSize(dir) {
+        fontScale = Math.max(70, Math.min(150, fontScale + dir * 10));
+        document.documentElement.style.fontSize = (baseFontSize * fontScale / 100) + 'px';
+        document.getElementById('fontSizeLabel').textContent = fontScale + '%';
+    }
+
+    let current = 1;
+    const total = document.querySelectorAll('.slide').length;
+
+    function showSlide(n) {
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        document.querySelector('[data-slide="' + n + '"]').classList.add('active');
+        document.getElementById('navIndicator').textContent = n + ' / ' + total;
+        document.getElementById('btnPrev').disabled = (n === 1);
+        document.getElementById('btnNext').disabled = (n === total);
+    }
+
+    function changeSlide(dir) {
+        const next = current + dir;
+        if (next >= 1 && next <= total) { current = next; showSlide(current); }
+    }
+
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('open');
+        document.getElementById('lightboxImg').src = '';
+    }
+
+    function openCodeLightbox(id) {
+        const codeHtml = document.getElementById(id).innerHTML;
+        document.getElementById('lightboxCodeContent').innerHTML = codeHtml;
+        document.getElementById('codeLightbox').classList.add('open');
+    }
+    function closeCodeLightbox() {
+        document.getElementById('codeLightbox').classList.remove('open');
+    }
+
+    function openTableLightbox(templateId) {
+        const content = document.getElementById(templateId).innerHTML;
+        document.getElementById('tableLightboxContent').innerHTML = content;
+        document.getElementById('tableLightbox').classList.add('open');
+    }
+    function closeTableLightbox() {
+        document.getElementById('tableLightbox').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (document.getElementById('lightbox').classList.contains('open')) {
+            if (e.key === 'Escape') closeLightbox(); return;
+        }
+        if (document.getElementById('codeLightbox').classList.contains('open')) {
+            if (e.key === 'Escape') closeCodeLightbox(); return;
+        }
+        if (document.getElementById('tableLightbox').classList.contains('open')) {
+            if (e.key === 'Escape') closeTableLightbox(); return;
+        }
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+        if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+    });
+
+    showSlide(1);
+</script>
+
+</body>
+</html>
