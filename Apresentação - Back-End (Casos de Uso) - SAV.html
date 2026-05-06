@@ -122,7 +122,7 @@
 
         .data-box {
             background-color: #f8fafc; border: 1px solid #e2e8f0;
-            border-radius: 12px; padding: 1.2rem; overflow-y: auto;
+            border-radius: 12px; padding: 1.2rem; overflow: auto;
         }
         .data-box h3 { margin: 0 0 0.8rem 0; color: #0f6b5f; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
 
@@ -246,6 +246,49 @@
         }
         .lightbox-close:hover { color: #ef4444; }
 
+        /* ── pre clicáveis (fora de .code-container) ── */
+        .slide pre:not(.code-container pre) {
+            transition: border-color 0.15s, box-shadow 0.15s;
+            cursor: zoom-in;
+        }
+        .slide pre:not(.code-container pre):hover {
+            border-color: #0f6b5f;
+            box-shadow: 0 0 0 2px rgba(15,107,95,0.15);
+        }
+
+        /* ── Tabelas clicáveis ── */
+        .data-box.has-table {
+            cursor: zoom-in;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+        .data-box.has-table:hover {
+            border-color: #0f6b5f;
+            box-shadow: 0 0 0 3px rgba(15,107,95,0.12);
+        }
+        .expand-hint {
+            display: block;
+            text-align: right;
+            font-size: 0.68rem;
+            color: #94a3b8;
+            margin-top: 0.35rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            transition: color 0.15s;
+            user-select: none;
+        }
+        .data-box.has-table:hover .expand-hint { color: #0f6b5f; }
+
+        /* Tabela dentro do modal expandido */
+        #tableLightboxContent .data-table {
+            font-size: 0.95rem;
+            width: 100%;
+        }
+        #tableLightboxContent .data-table th,
+        #tableLightboxContent .data-table td {
+            padding: 0.6rem 0.75rem;
+            white-space: nowrap;
+        }
+
         @media print {
             body { background: white; overflow: visible; height: auto; }
             .header-msg, .nav-bar, .font-controls, .zoom-btn { display: none; }
@@ -295,19 +338,22 @@
         <p class="event-excerpt"><strong>Detalhes da Reserva:</strong> O cliente reserva uma categoria de veículo para um período determinado; os valores financeiros são <em>calculados pelo serviço</em> — nunca aceitos do corpo da requisição. A agência pode aplicar desconto se tiver histórico operacional comprovado (≥ 2 reservas concluídas).</p>
         <div class="grid-layout">
             <div class="col-left">
-                <div class="data-box">
+                <div class="data-box" data-modal-template="table-reservas-full">
                     <h3>📋 Tabela: reservas</h3>
-                    <table class="data-table">
+                    <table class="data-table" style="font-size:0.72rem;">
                         <thead>
-                            <tr><th>id</th><th>data_retirada</th><th>data_devolucao</th><th>valor_final</th><th>status</th><th>cliente_id</th><th>agencia_retirada_id</th></tr>
+                            <tr>
+                                <th>id</th><th>retirada</th><th>devolução</th><th>vlr_final</th>
+                                <th>status</th><th>cli_id</th><th>seg_id</th><th>ag_ret</th><th>ag_dev</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <tr><td>1</td><td>2026-04-03 08:00</td><td>2026-04-07 18:00</td><td>1980.00</td><td>Concluída</td><td>1</td><td>1</td></tr>
-                            <tr><td>2</td><td>2026-04-05 09:30</td><td>2026-04-09 17:30</td><td>432.00</td><td>Concluída</td><td>2</td><td>2</td></tr>
-                            <tr><td>5</td><td>2026-03-24 08:00</td><td>2026-03-29 18:00</td><td>500.00</td><td>Concluída</td><td>5</td><td>1</td></tr>
-                            <tr><td>9</td><td>2026-01-10 08:00</td><td>2026-01-20 18:00</td><td>1936.00</td><td>Confirmada</td><td>3</td><td>3</td></tr>
-                            <tr><td>11</td><td>2030-04-01 08:00</td><td>2030-04-05 18:00</td><td>280.00</td><td>Pendente</td><td>2</td><td>1</td></tr>
-                            <tr><td>12</td><td>2030-05-01 08:00</td><td>2030-05-05 18:00</td><td>400.00</td><td>Pendente</td><td>2</td><td>1</td></tr>
+                            <tr><td>1</td><td>2026-04-03 08:00</td><td>2026-04-07 18:00</td><td>1980.00</td><td>Concluída</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                            <tr><td>2</td><td>2026-04-05 09:30</td><td>2026-04-09 17:30</td><td>432.00</td><td>Concluída</td><td>2</td><td>2</td><td>2</td><td>3</td></tr>
+                            <tr><td>5</td><td>2026-03-24 08:00</td><td>2026-03-29 18:00</td><td>500.00</td><td>Concluída</td><td>5</td><td>NULL</td><td>1</td><td>1</td></tr>
+                            <tr><td>9</td><td>2026-01-10 08:00</td><td>2026-01-20 18:00</td><td>1936.00</td><td>Confirmada</td><td>3</td><td>NULL</td><td>3</td><td>3</td></tr>
+                            <tr><td>11</td><td>2030-04-01 08:00</td><td>2030-04-05 18:00</td><td>280.00</td><td>Pendente</td><td>2</td><td>NULL</td><td>1</td><td>1</td></tr>
+                            <tr><td>12</td><td>2030-05-01 08:00</td><td>2030-05-05 18:00</td><td>400.00</td><td>Pendente</td><td>2</td><td>NULL</td><td>1</td><td>1</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -357,7 +403,7 @@
             <div class="col-left">
                 <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;overflow-y:auto;">
                     <h3 style="margin-bottom:0.6rem;text-align:left;width:100%;">🔄 Fluxo de Execução</h3>
-                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-reserva')" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
+                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-reserva', true)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
                     <div class="step-flow">
                         <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
                         <div class="step-arrow">↓</div>
@@ -627,28 +673,28 @@ LIMIT 1;
         <p class="event-excerpt"><strong>Detalhes do Check-in:</strong> Vincula a reserva a um veículo físico específico. Caso a categoria original não tenha veículos disponíveis, o sistema realiza <em>upgrade automático e gratuito</em> para a próxima categoria com disponibilidade. A operação envolve uma transação que atualiza também o status do veículo e da reserva.</p>
         <div class="grid-layout">
             <div class="col-left">
-                <div class="data-box">
+                <div class="data-box" data-modal-template="table-checkins-full">
                     <h3>📋 Tabela: checkins</h3>
-                    <table class="data-table">
+                    <table class="data-table" style="font-size:0.72rem;">
                         <thead>
-                            <tr><th>id</th><th>data_checkin</th><th>quilometragem_checkin</th><th>cnh_condutor</th><th>reserva_id</th><th>veiculo_id</th><th>funcionario_id</th></tr>
+                            <tr><th>id</th><th>data_checkin</th><th>quilom.</th><th>cnh_condutor</th><th>res_id</th><th>vei_id</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>7</td><td>2026-01-10 08:00</td><td>50000.00</td><td>34567890123</td><td>9</td><td>5</td><td>3</td></tr>
-                            <tr><td>8</td><td>2026-04-01 08:00</td><td>25000.00</td><td>56789012345</td><td>10</td><td>4</td><td>2</td></tr>
+                            <tr><td>7</td><td>2026-01-10 08:00</td><td>50000.00</td><td>34567890123</td><td>9</td><td>5</td></tr>
+                            <tr><td>8</td><td>2026-04-01 08:00</td><td>25000.00</td><td>56789012345</td><td>10</td><td>4</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="data-box">
+                <div class="data-box" data-modal-template="table-veiculos-full">
                     <h3>🚗 Tabela: veiculos (seleção)</h3>
-                    <table class="data-table">
-                        <thead><tr><th>id</th><th>placa</th><th>modelo</th><th>status</th><th>categoria_veiculo_id</th></tr></thead>
+                    <table class="data-table" style="font-size:0.72rem;">
+                        <thead><tr><th>id</th><th>placa</th><th>modelo</th><th>status</th><th>km</th><th>cat</th><th>ag</th></tr></thead>
                         <tbody>
-                            <tr><td>1</td><td>ECO1A11</td><td>Fiat Mobi</td><td>Reservado</td><td>1 — Econômico</td></tr>
-                            <tr><td>2</td><td>ECO2B22</td><td>Chevrolet Joy</td><td>Reservado</td><td>1 — Econômico</td></tr>
-                            <tr><td>3</td><td>ABC1D23</td><td>BYD Dolphin</td><td>Disponível</td><td>2 — Hatch</td></tr>
-                            <tr><td>4</td><td>XYZ9A87</td><td>Jeep Compass</td><td>Reservado</td><td>3 — SUV</td></tr>
-                            <tr><td>5</td><td>QWE2R34</td><td>Toyota Corolla</td><td>Reservado</td><td>4 — Sedan</td></tr>
+                            <tr><td>1</td><td>ECO1A11</td><td>Fiat Mobi</td><td>Reservado</td><td>32000.00</td><td>1—Eco</td><td>1</td></tr>
+                            <tr><td>2</td><td>ECO2B22</td><td>Chevrolet Joy</td><td>Reservado</td><td>45000.00</td><td>1—Eco</td><td>1</td></tr>
+                            <tr><td>3</td><td>ABC1D23</td><td>BYD Dolphin</td><td>Disponível</td><td>1500.50</td><td>2—Hatch</td><td>1</td></tr>
+                            <tr><td>4</td><td>XYZ9A87</td><td>Jeep Compass</td><td>Reservado</td><td>25000.00</td><td>3—SUV</td><td>2</td></tr>
+                            <tr><td>5</td><td>QWE2R34</td><td>Toyota Corolla</td><td>Reservado</td><td>31000.10</td><td>4—Sedan</td><td>3</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -702,7 +748,7 @@ LIMIT 1;
             <div class="col-left">
                 <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;overflow-y:auto;">
                     <h3 style="margin-bottom:0.6rem;text-align:left;width:100%;">🔄 Fluxo de Transação</h3>
-                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-checkin')" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
+                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-checkin', true)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
                     <div class="step-flow">
                         <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
                         <div class="step-arrow">↓</div>
@@ -929,7 +975,7 @@ WHERE categoria_veiculo_id = 1
                     <pre style="background:#fff;margin:0 0 0.8rem;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM categoria_veiculos
 WHERE id &gt; 1
 ORDER BY id ASC;
--- catHatch(2), catSUV(3), catSedan(4), catPicape(5)</code></pre>
+-- catHatch(2), catSUV(3), catSedan(4), catPicape(5), catExtra(6)</code></pre>
                     <p style="font-size:0.82rem;color:#475569;margin:0 0 0.5rem 0;"><strong>Passo 3:</strong> Primeiro veículo disponível em catHatch (id=2):</p>
                     <pre style="background:#fff;margin:0;padding:0.7rem;border:1px solid #cbd5e1;font-size:0.8rem;"><code style="color:#0369a1;font-weight:600;">SELECT * FROM veiculos
 WHERE categoria_veiculo_id = 2
@@ -989,32 +1035,34 @@ WHERE cliente_id = 1
         <p class="event-excerpt"><strong>Detalhes do Check-out:</strong> Registra a devolução do veículo, valida a quilometragem contra o histórico do veículo e aplica taxa de inspeção de R$ 150,00 para clientes com mais de 3 avarias acumuladas em checkouts anteriores.</p>
         <div class="grid-layout">
             <div class="col-left">
-                <div class="data-box">
+                <div class="data-box" data-modal-template="table-checkouts-full">
                     <h3>📋 Tabela: checkouts (histórico de avarias)</h3>
-                    <table class="data-table">
+                    <table class="data-table" style="font-size:0.72rem;">
                         <thead>
-                            <tr><th>id</th><th>quilometragem_checkout</th><th>taxa_inspecao</th><th>nivel_combustivel</th><th>checkin_id</th></tr>
+                            <tr><th>id</th><th>data</th><th>quilometragem</th><th>taxa</th><th>nível</th><th>ci_id</th><th>fn_id</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>1</td><td>25400.00</td><td>0.00</td><td>Médio</td><td>1</td></tr>
-                            <tr><td>2</td><td>1880.00</td><td>0.00</td><td>Alto</td><td>2</td></tr>
-                            <tr><td>5</td><td>2000.00</td><td>0.00</td><td>Médio</td><td>5</td></tr>
-                            <tr><td>6</td><td>25800.00</td><td>0.00</td><td>Médio</td><td>6</td></tr>
+                            <tr><td>1</td><td>2026-04-07 17:30</td><td>25400.00</td><td>0.00</td><td>Médio</td><td>1</td><td>2</td></tr>
+                            <tr><td>2</td><td>2026-04-09 16:45</td><td>1880.00</td><td>0.00</td><td>Alto</td><td>2</td><td>1</td></tr>
+                            <tr><td>5</td><td>2026-04-01 17:00</td><td>2000.00</td><td>0.00</td><td>Médio</td><td>5</td><td>1</td></tr>
+                            <tr><td>6</td><td>2026-04-21 17:00</td><td>25800.00</td><td>0.00</td><td>Médio</td><td>6</td><td>2</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="data-box">
-                    <h3>🔗 Tabela: checkout_avarias</h3>
+                    <h3>🔗 Tabela: checkout_avarias (seleção)</h3>
                     <table class="data-table">
                         <thead><tr><th>checkout_id</th><th>avaria_id</th><th>avaria_nome</th></tr></thead>
                         <tbody>
+                            <tr><td>1</td><td>1</td><td>Arranhão na porta</td></tr>
+                            <tr><td>2</td><td>2</td><td>Parachoque trincado</td></tr>
                             <tr><td>5</td><td>1</td><td>Arranhão na porta</td></tr>
                             <tr><td>5</td><td>2</td><td>Parachoque trincado</td></tr>
                             <tr><td>6</td><td>3</td><td>Retrovisor quebrado</td></tr>
                             <tr><td>6</td><td>4</td><td>Lanterna traseira queimada</td></tr>
                         </tbody>
                     </table>
-                    <p style="font-size:0.8rem;color:#64748b;margin:0.5rem 0 0;">Checkouts 5 e 6 pertencem a Lucas (cliente5): <strong>4 avarias totais</strong> → taxa de inspeção aplica no próximo checkout.</p>
+                    <p style="font-size:0.8rem;color:#64748b;margin:0.5rem 0 0;">Checkouts 5 e 6 pertencem a Lucas (cliente5): <strong>4 avarias totais</strong> → taxa de inspeção aplica no próximo checkout. <em>(Avarias de outros clientes: checkouts 3 e 4 omitidos.)</em></p>
                 </div>
             </div>
             <div class="col-right">
@@ -1066,7 +1114,7 @@ WHERE cliente_id = 1
             <div class="col-left">
                 <div class="er-image-box" style="height:100%;justify-content:flex-start;padding-top:1.2rem;overflow-y:auto;">
                     <h3 style="margin-bottom:0.6rem;text-align:left;width:100%;">🔄 Fluxo de Transação</h3>
-                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-checkout')" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
+                    <a href="javascript:void(0)" onclick="openTableLightbox('flow-checkout', true)" style="color:#0f6b5f;text-decoration:underline;font-weight:bold;font-size:0.88rem;display:inline-block;margin-bottom:0.8rem;width:100%;text-align:left;">📊 Visualizar Fluxo em Tabela</a>
                     <div class="step-flow">
                         <div class="step-box step-neutral">📦 req.body — campos da requisição</div>
                         <div class="step-arrow">↓</div>
@@ -1372,6 +1420,71 @@ WHERE checkouts.checkin_id IN (5, 6, 8);
 </div>
 
 <!-- Templates para Tabelas -->
+<template id="table-reservas-full">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📋 Tabela: reservas (todos os campos)</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>id</th><th>data_retirada</th><th>data_devolucao</th>
+                <th>vlr_diaria</th><th>qtd_dias</th><th>vlr_seguro</th><th>vlr_final</th>
+                <th>status</th><th>cliente_id</th><th>cat_veiculo_id</th>
+                <th>funcionario_id</th><th>seguro_id</th>
+                <th>ag_retirada_id</th><th>ag_devolucao_id</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>2026-04-03 08:00</td><td>2026-04-07 18:00</td><td>350.00</td><td>4</td><td>200.00</td><td>1980.00</td><td>Concluída</td><td>1</td><td>3</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+            <tr><td>2</td><td>2026-04-05 09:30</td><td>2026-04-09 17:30</td><td>100.00</td><td>4</td><td>80.00</td><td>432.00</td><td>Concluída</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td></tr>
+            <tr><td>5</td><td>2026-03-24 08:00</td><td>2026-03-29 18:00</td><td>100.00</td><td>5</td><td>0.00</td><td>500.00</td><td>Concluída</td><td>5</td><td>2</td><td>1</td><td>NULL</td><td>1</td><td>1</td></tr>
+            <tr><td>9</td><td>2026-01-10 08:00</td><td>2026-01-20 18:00</td><td>220.00</td><td>10</td><td>0.00</td><td>1936.00</td><td>Confirmada</td><td>3</td><td>4</td><td>3</td><td>NULL</td><td>3</td><td>3</td></tr>
+            <tr><td>11</td><td>2030-04-01 08:00</td><td>2030-04-05 18:00</td><td>70.00</td><td>4</td><td>0.00</td><td>280.00</td><td>Pendente</td><td>2</td><td>1</td><td>1</td><td>NULL</td><td>1</td><td>1</td></tr>
+            <tr><td>12</td><td>2030-05-01 08:00</td><td>2030-05-05 18:00</td><td>100.00</td><td>4</td><td>0.00</td><td>400.00</td><td>Pendente</td><td>2</td><td>2</td><td>1</td><td>NULL</td><td>1</td><td>1</td></tr>
+        </tbody>
+    </table>
+</template>
+
+<template id="table-checkins-full">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📋 Tabela: checkins (todos os campos)</h3>
+    <table class="data-table">
+        <thead>
+            <tr><th>id</th><th>data_checkin</th><th>quilometragem_checkin</th><th>cnh_condutor</th><th>cnh_validade</th><th>reserva_id</th><th>veiculo_id</th><th>funcionario_id</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>7</td><td>2026-01-10 08:00</td><td>50000.00</td><td>34567890123</td><td>2031-06-10</td><td>9</td><td>5</td><td>3</td></tr>
+            <tr><td>8</td><td>2026-04-01 08:00</td><td>25000.00</td><td>56789012345</td><td>2032-03-15</td><td>10</td><td>4</td><td>2</td></tr>
+        </tbody>
+    </table>
+</template>
+
+<template id="table-veiculos-full">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">🚗 Tabela: veiculos (seleção — todos os campos)</h3>
+    <table class="data-table">
+        <thead><tr><th>id</th><th>placa</th><th>modelo</th><th>status</th><th>quilometragem</th><th>cat_veiculo_id</th><th>agencia_id</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td>ECO1A11</td><td>Fiat Mobi</td><td>Reservado</td><td>32000.00</td><td>1 — Econômico</td><td>1</td></tr>
+            <tr><td>2</td><td>ECO2B22</td><td>Chevrolet Joy</td><td>Reservado</td><td>45000.00</td><td>1 — Econômico</td><td>1</td></tr>
+            <tr><td>3</td><td>ABC1D23</td><td>BYD Dolphin</td><td>Disponível</td><td>1500.50</td><td>2 — Hatch</td><td>1</td></tr>
+            <tr><td>4</td><td>XYZ9A87</td><td>Jeep Compass</td><td>Reservado</td><td>25000.00</td><td>3 — SUV</td><td>2</td></tr>
+            <tr><td>5</td><td>QWE2R34</td><td>Toyota Corolla</td><td>Reservado</td><td>31000.10</td><td>4 — Sedan</td><td>3</td></tr>
+        </tbody>
+    </table>
+</template>
+
+<template id="table-checkouts-full">
+    <h3 style="color:#0f6b5f;margin:0 0 1rem;">📋 Tabela: checkouts (todos os campos)</h3>
+    <table class="data-table">
+        <thead>
+            <tr><th>id</th><th>data_checkout</th><th>quilometragem_checkout</th><th>taxa_inspecao</th><th>nivel_combustivel</th><th>checkin_id</th><th>funcionario_id</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>2026-04-07 17:30</td><td>25400.00</td><td>0.00</td><td>Médio</td><td>1</td><td>2</td></tr>
+            <tr><td>2</td><td>2026-04-09 16:45</td><td>1880.00</td><td>0.00</td><td>Alto</td><td>2</td><td>1</td></tr>
+            <tr><td>5</td><td>2026-04-01 17:00</td><td>2000.00</td><td>0.00</td><td>Médio</td><td>5</td><td>1</td></tr>
+            <tr><td>6</td><td>2026-04-21 17:00</td><td>25800.00</td><td>0.00</td><td>Médio</td><td>6</td><td>2</td></tr>
+        </tbody>
+    </table>
+</template>
+
 <template id="tables-reserva-rn1">
     <h3 style="color:#0f6b5f;margin:0 0 1rem;">📊 Tabelas relevantes — RN1 Desconto</h3>
     <div style="margin-bottom:1.2rem;">
@@ -1529,7 +1642,7 @@ WHERE checkouts.checkin_id IN (5, 6, 8);
         <tr><td>8</td><td>10</td><td>5</td></tr></tbody></table>
     </div>
     <div style="margin-bottom:1.2rem;">
-        <h4 style="margin:0 0 0.5rem;color:#334155;">checkout_avarias (checkins 5, 6)</h4>
+        <h4 style="margin:0 0 0.5rem;color:#334155;">checkout_avarias (checkouts 5 e 6)</h4>
         <table class="data-table"><thead><tr><th>checkout_id</th><th>avaria_id</th><th>avaria_nome</th></tr></thead>
         <tbody>
         <tr><td>5</td><td>1</td><td>Arranhão na porta</td></tr>
@@ -1544,7 +1657,7 @@ WHERE checkouts.checkin_id IN (5, 6, 8);
 <div class="code-lightbox" id="tableLightbox" onclick="closeTableLightbox()">
     <button class="lightbox-close" onclick="closeTableLightbox()">×</button>
     <div id="tableLightboxContent" onclick="event.stopPropagation()"
-         style="background:#f8fafc;padding:2.5rem;border-radius:12px;width:92vw;max-width:1000px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+         style="background:#f8fafc;padding:2.5rem;border-radius:12px;width:92vw;max-width:1000px;max-height:90vh;overflow:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
     </div>
 </div>
 
@@ -1598,12 +1711,18 @@ WHERE checkouts.checkin_id IN (5, 6, 8);
         document.getElementById('codeLightbox').classList.remove('open');
     }
 
-    function openTableLightbox(templateId) {
+    function openTableLightbox(templateId, noScroll) {
         const content = document.getElementById(templateId).innerHTML;
-        document.getElementById('tableLightboxContent').innerHTML = content;
+        const box = document.getElementById('tableLightboxContent');
+        box.innerHTML = content;
+        box.style.maxHeight = noScroll ? '96vh' : '90vh';
+        box.style.maxWidth  = noScroll ? '98vw'  : '1000px';
         document.getElementById('tableLightbox').classList.add('open');
     }
     function closeTableLightbox() {
+        const box = document.getElementById('tableLightboxContent');
+        box.style.maxHeight = '90vh';
+        box.style.maxWidth  = '1000px';
         document.getElementById('tableLightbox').classList.remove('open');
     }
 
@@ -1622,6 +1741,49 @@ WHERE checkouts.checkin_id IN (5, 6, 8);
     });
 
     showSlide(1);
+
+    // Auto-zoom para <pre> fora de .code-container (slides de RN sem botão de zoom)
+    document.querySelectorAll('.slide pre').forEach(function(pre) {
+        if (pre.closest('.code-container')) return; // já tem botão de zoom
+        pre.addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('lightboxCodeContent').innerHTML = pre.innerHTML;
+            document.getElementById('codeLightbox').classList.add('open');
+        });
+    });
+
+    // Auto-conecta todas as data-box que contêm uma data-table ao modal de expansão.
+    // Se o box tiver data-modal-template="id", carrega esse <template> no modal (tabela completa).
+    // Caso contrário, clona as tabelas do próprio box.
+    document.querySelectorAll('.data-box').forEach(function(box) {
+        var table = box.querySelector('.data-table');
+        if (!table) return;
+
+        box.classList.add('has-table');
+
+        var hint = document.createElement('span');
+        hint.className = 'expand-hint';
+        hint.textContent = '⊕ clique para expandir';
+        box.appendChild(hint);
+
+        box.addEventListener('click', function() {
+            var templateId = box.getAttribute('data-modal-template');
+            var content;
+            if (templateId) {
+                var tmpl = document.getElementById(templateId);
+                content = tmpl ? tmpl.innerHTML : '';
+            } else {
+                var h3 = box.querySelector('h3');
+                var title = h3 ? h3.innerHTML : 'Tabela';
+                var tables = box.querySelectorAll('.data-table');
+                var tablesHTML = '';
+                tables.forEach(function(t) { tablesHTML += t.outerHTML; });
+                content = '<h3 style="color:#0f6b5f;margin:0 0 1rem;">' + title + '</h3>' + tablesHTML;
+            }
+            document.getElementById('tableLightboxContent').innerHTML = content;
+            document.getElementById('tableLightbox').classList.add('open');
+        });
+    });
 </script>
 
 </body>
