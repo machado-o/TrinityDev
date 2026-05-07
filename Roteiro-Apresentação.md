@@ -169,6 +169,17 @@
 
 ### Slide 13 — Fluxo de Transação ⏱ ~1 min
 
+Esse slide mostra a ordem das operações. Vou descer pelo fluxo da esquerda acompanhando as setas:
+As primeiras etapas são as validações, antes de qualquer escrita no banco:
+1. Pega os dados do formulário
+2. Busca o check-in e o funcionário ao mesmo tempo
+3. Valida a quilometragem e a data
+4. Se tiver qualquer erro → para tudo aqui e devolve HTTP 400. Se não tiver → segue
+
+Depois das validações, ainda fora da transação, acontece o ponto mais importante do slide:
+1. Busca a reserva usando o checkin.reservaId — porque é dentro da reserva que está o clienteId do cliente, que a gente precisa pra calcular a taxa na próxima etapa.
+2. Calcula a taxa de inspeção com calcularTaxaInspecao()
+
 💬 Detalhe importante: RN2 é calculada **antes** de abrir a transação
 
 A transação é um bloco de operações que o banco executa em conjunto. Se qualquer
