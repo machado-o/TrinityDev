@@ -159,9 +159,12 @@
 
 ### Slide 12 — Visão Geral ⏱ ~1 min
 
-💬 O que o check-out faz:
-- Registra a devolução: quilometragem final + avarias encontradas no veículo
-- Ao final: reserva vai para `Concluída`, veículo volta para `Disponível`, quilometragem do veículo é atualizada
+O check-out é o momento em que você devolve o carro na agência. O atendente anota quantos km o carro rodou, vê se voltou com alguma batida ou arranhão, e fecha o contrato. É exatamente isso que o sistema faz.
+Quando o check-out é registrado, três coisas acontecem no banco:
+
+A reserva muda para Concluída — o contrato acabou
+O veículo volta para Disponível — pode ser alugado de novo
+A quilometragem do veículo é atualizada com o valor que o carro marcava na devolução
 
 👉 Mostrar a tabela `checkouts` e a `checkout_avarias` — destacar que checkouts 5 e 6 (Lucas) têm 4 avarias no total
 
