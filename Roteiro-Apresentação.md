@@ -170,12 +170,18 @@
 ### Slide 13 — Fluxo de Transação ⏱ ~1 min
 
 💬 Detalhe importante: RN2 é calculada **antes** de abrir a transação
-- Calcula a taxa de inspeção com base no histórico do cliente
+
+A transação é um bloco de operações que o banco executa em conjunto. Se qualquer
+uma falhar, todas são desfeitas (é um tudo ou nada).
+
+Por que a taxa é calculada fora? Calcular a taxa `calcularTaxaInspecao()` exige duas consultas grandes no banco (JOIN em checkins + checkouts com avarias). Se a gente deixasse isso dentro da transação, o banco ficaria travado esperando essas consultas enquanto outras operações aguardam. Então o código calcula o número antes, guarda o resultado, e aí abre a transação só para as escritas — que são rápidas.
+
+Dentro da transação acontecem 4 coisas em sequência:
 - Só depois abre a transação com 4 escritas atômicas:
-  1. `Checkout.create()` (já com a taxa calculada)
-  2. `obj.setAvarias()` — vincula avarias (M:N)
-  3. `veiculo.quilometragem = quilometragemCheckout; veiculo.status = 'Disponível'` → `save()`
-  4. `reserva.status = 'Concluída'` → `save()`
+  1. Cria o registro do checkout (com a taxa já calculada) - `Checkout.create()`
+  2. Vincula as avarias a esse checkout - `obj.setAvarias()`
+  3. Atualiza o veículo (km nova + status Disponível) - `veiculo.quilometragem = quilometragemCheckout; veiculo.status = 'Disponível'` → `save()`
+  4. Atualiza a reserva (status Concluída) - `reserva.status = 'Concluída'` → `save()`
 
 👉 Clicar em "Visualizar Fluxo em Tabela" e destacar o passo 6 (cálculo da taxa fora da transação)
 
