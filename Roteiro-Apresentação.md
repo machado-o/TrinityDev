@@ -88,26 +88,25 @@
 
 ### Slide 7 — Visão Geral ⏱ ~1 min
 
-💬 O que o check-in faz:
-- Vincula a reserva a um **veículo físico específico**
-- Valida CNH, verifica débitos e encontra um veículo disponível
-- Ao final: reserva vai para `Confirmada`, veículo vai para `Reservado`
+Vou falar sobre o processo de Check-in. O objetivo é basicamente vincular uma reserva a um veículo físico.
 
-👉 Mostrar a tabela `checkins` (2 exemplos) e a tabela `veiculos` — apontar os status `Disponível` / `Reservado`
+A tabela checkins registra cada operação — campos como data_checkin, quilom., cnh_condutor e as chaves res_id e vei_id associando reserva e veículo.
+
+Na tabela veiculos, o campo status tem um ciclo de vida bem definido: começa como 'Disponível', vai para 'Reservado' após o check-in, e volta para 'Disponível' após o check-out.
+
+Para o check-in ser aceito, quatro pré-condições precisam ser satisfeitas: reserva com status = 'Pendente', CNH batendo com a do cliente, sem multas pendentes, e veículo disponível — ou upgrade automático."
 
 ---
 
 ### Slide 8 — Fluxo de Transação ⏱ ~1 min
 
-💬 Diferença importante em relação à reserva: **usa transação explícita**
-- Valida tudo antes de abrir a transação
-- Dentro da transação: 3 escritas atômicas
-  1. `Checkin.create()`
-  2. `veiculo.status = 'Reservado'` → `save()`
-  3. `reserva.status = 'Confirmada'` → `save()`
-- Se qualquer escrita falhar → ROLLBACK automático
+Aqui vou mostrar o CheckinService.js
 
-👉 Clicar em "Visualizar Fluxo em Tabela" e destacar as linhas coloridas de azul (BEGIN) e verde (COMMIT)
+Primeiro, usamos o Promise.all([reserva, funcionario]) para buscar os dois em paralelo. Se qualquer um não existir, o array erros é preenchido e lança um throw erros.join() com HTTP 400 — sem nem entrar no banco.
+
+Passando essa etapa, a gente chama o verificarRegrasDeNegocio(), que resolve qual veículo será usado.
+
+Aí entra o sequelize.transaction(): o Checkin.create() é executado, depois veiculo.status = 'Reservado' e reserva.status = 'Confirmada' — tudo dentro da mesma transação, com COMMIT automático ao final.
 
 ---
 
@@ -131,11 +130,15 @@
 
 ### Slide 10 — Implementação da RN1 (Upgrade) ⏱ ~1 min
 
-💬 Três SQLs em sequência:
-1. `SELECT * FROM veiculos WHERE categoria_veiculo_id = 1 AND status = 'Disponível'` → 0 linhas
-2. `SELECT * FROM categoria_veiculos WHERE id > 1 ORDER BY id ASC` → lista de categorias superiores
-3. Para cada categoria superior: `SELECT * FROM veiculos WHERE categoria_veiculo_id = N AND status = 'Disponível' LIMIT 1`
-   - Primeiro resultado encontrado → esse é o veículo do check-in (upgrade gratuito)
+Aqui o sistema executa três SQLs em sequência.
+
+O primeiro busca veículos disponíveis na categoria da reserva — categoria_veiculo_id = 1 com status = 'Disponível'. Retornou zero linhas, então aciona o upgrade.
+
+O segundo busca todas as categorias com ID maior que 1, em ordem crescente — essas são as categorias superiores disponíveis para upgrade.
+
+O terceiro percorre cada uma dessas categorias e faz um SELECT com LIMIT 1 — pega o primeiro veículo disponível que encontrar.
+
+Olhando pro exemplo aqui: catEconômico não tinha nenhum disponível, subiu para catHatch, e o veículo id=3 — o BYD Dolphin — foi selecionado. Upgrade feito, e de graça pro cliente.
 
 👉 Apontar para o exemplo: catEconômico sem disponíveis → upgrade para catHatch → veículo id=3 (BYD Dolphin)
 
@@ -143,13 +146,15 @@
 
 ### Slide 11 — Implementação da RN2 (Débitos) ⏱ ~1 min
 
-💬 Implementação mais simples do sistema:
-- `Multa.count({ where: { clienteId, status: 'Pendente' } })`
-- Um único `SELECT COUNT(*)` — não carrega os objetos de multa, só conta
-- `count > 0` → lança erro → middleware retorna 400
-- Exemplo: cliente1 (Henrique) tem 1 multa Pendente de R$ 195,23 → check-in bloqueado
+Agora, vamos pra Regra de negócio 2:
 
-👉 Mostrar o SQL resultante com o `COUNT(*)`
+A função faz um Multa.count() filtrando por clienteId e status: 'Pendente'. O Sequelize traduz isso pra um único SELECT COUNT(*) — nem carrega os objetos de multa, só conta.
+
+Se o resultado for maior que zero, lança o erro — e o middleware devolve um HTTP 400 pro cliente.
+
+Por exemplo: se o cliente tiver qualquer multa de avaria pendente de checkins anteriores, isso já é suficiente pra bloquear o check-in completamente — ele precisa quitar antes de seguir.
+
+E com isso fecho o processo: validações feitas, transação segura, status atualizados de forma atômica. (Ou seja, ou tudo salva, ou nada salva, por conta do rollback.)
 
 ---
 
