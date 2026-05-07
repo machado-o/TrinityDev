@@ -7,10 +7,9 @@
 
 ## CAPA (Slide 1) — ~1 min | Todos
 
-💬 Apresentar o sistema e dividir os processos:
-- SAV = sistema de aluguel de veículos para uso interno (atendentes e gestores)
-- Três processos: **Reserva**, **Check-in**, **Check-out** — um por integrante
-- Mostrar brevemente a stack: Node.js · Express · Sequelize · PostgreSQL
+O sistema que vamos apresentar hoje é o SAV — Sistema de Aluguel de Veículos. É um sistema de uso interno, voltado para atendentes e gestores de agências de locação — não para os clientes finais.
+
+A stack é Node.js com Express, Sequelize e PostgreSQL. A apresentação está dividida em três processos: Reserva, Check-in e Check-out — um por integrante. Eu vou cobrir o processo de Reserva, depois vem o Check-in, e fechamos com o Check-out.
 
 ---
 
@@ -20,9 +19,9 @@
 
 ### Slide 2 — Visão Geral ⏱ ~1 min
 
-💬 O que acontece numa reserva:
-- Atendente informa cliente, categoria do veículo, seguro e as **duas agências** (retirada e devolução)
-- **Valores financeiros são calculados pelo serviço** — o front-end não envia diária, quantidade de dias nem valor final
+Vou apresentar o processo de Reserva. No SAV, uma reserva é criada pelo atendente — ele informa o cliente, a categoria do veículo, o seguro e duas agências: a de retirada e a de devolução. Essas agências podem ser diferentes, o que permite o cliente pegar o carro numa cidade e devolver em outra.
+
+Um detalhe importante: o front-end não envia os valores. O serviço é que calcula tudo — a diária, a quantidade de dias e o valor final. Isso garante que os preços nunca sejam manipulados pela requisição.
 
 👉 Apontar para a tabela `reservas` e destacar que `ag_ret` e `ag_dev` podem ser agências diferentes (ex: reserva 2)
 
@@ -30,13 +29,13 @@
 
 ### Slide 3 — Fluxo de Transação ⏱ ~1 min
 
-💬 Ordem de execução no service:
-1. Busca paralela: cliente + funcionário + categoria (`Promise.all`)
-2. Valida regras de negócio: data, agências ativas, conflito de período
-3. Calcula valores financeiros (com possível desconto)
-4. Valida modelo Sequelize
-5. Se houver erro → lança string → middleware retorna 400
-6. Sem erro → `Reserva.create()` (INSERT único, sem transação explícita)
+Aqui vou mostrar o ReservaService.create().
+
+O serviço começa com um Promise.all buscando o cliente, o funcionário e a categoria ao mesmo tempo — em paralelo. Se qualquer um desses não existir, já para aqui e devolve um erro.
+
+Passando essa etapa, entra a verificação das regras de negócio: a data de retirada, o status das agências e o conflito de período. Se houver erro em qualquer uma dessas, o service lança uma string e o middleware retorna HTTP 400.
+
+Depois calcula os valores financeiros — com o possível desconto da RN1. Só então passa pela validação do modelo Sequelize e, se tudo estiver certo, executa o Reserva.create(). É um INSERT único, sem transação explícita, porque o service não faz mais de uma escrita.
 
 👉 Clicar em "Visualizar Fluxo em Tabela" para mostrar a tabela completa
 
@@ -44,27 +43,21 @@
 
 ### Slide 4 — Regras de Negócio ⏱ ~1 min
 
-💬 Três verificações antes de criar a reserva:
+O processo de reserva tem três verificações antes de criar o registro.
 
-- **Pré-condições** (validação simples):
-  - `dataRetirada` não pode ser no passado
-  - Ambas as agências devem ter `status = 'Ativa'`
+As duas primeiras são simples: a data de retirada não pode estar no passado, e as duas agências precisam ter status igual a Ativa. Se qualquer uma dessas falhar, o serviço nem segue em frente.
 
-- **RN1 — Desconto** (cálculo):
-  - Agência com ≥ 2 reservas concluídas **E** `quantidadeDias ≥ limiteDiasDesconto` → aplica desconto percentual no `valorFinal`
+Depois tem a RN1, o desconto. A lógica é: se a agência de retirada tem pelo menos 2 reservas concluídas no histórico e a reserva tem dias suficientes para atingir o limite configurado, aplica o desconto percentual no valor final.
 
-- **RN2 — Conflito de período** (bloqueio):
-  - Cliente não pode ter duas reservas com datas sobrepostas e status ativo
-  - Condição clássica de sobreposição de intervalos
+E a RN2 é o conflito de período — o sistema impede que o mesmo cliente tenha duas reservas com datas que se sobreponham e com status ativo. O clássico problema de sobreposição de intervalos.
 
 ---
 
 ### Slide 5 — Implementação da RN1 (Desconto) ⏱ ~1 min
 
-💬 Como o desconto é calculado:
-- O service faz `Agencia.findOne()` com **JOIN** em `reservasRetirada` filtrado por `status = 'Concluída'`
-- Conta o array retornado em JavaScript (`reservasRetirada.length`)
-- Se ≥ 2 reservas concluídas **E** `quantidadeDias ≥ limiteDiasDesconto` → `valorFinal *= (1 - percentual / 100)`
+O desconto depende de saber se a agência tem histórico suficiente — por isso o service faz um Agencia.findOne() com um JOIN em reservasRetirada, filtrando só as com status igual a Concluída.
+
+O resultado vem como um objeto Sequelize com o array reservasRetirada populado. O código conta o tamanho desse array em JavaScript: se tiver pelo menos 2, e se a quantidade de dias da reserva for maior ou igual ao limiteDiasDesconto da categoria, aplica o desconto. A fórmula é: valorFinal multiplicado por 1 menos o percentual dividido por 100.
 
 👉 Destacar o LEFT JOIN no SQL resultante que filtra só as reservas concluídas
 
@@ -72,11 +65,11 @@
 
 ### Slide 6 — Implementação da RN2 (Conflito de período) ⏱ ~1 min
 
-💬 Como o conflito de período é detectado:
-- `Reserva.findOne()` com filtro de sobreposição de datas:
-  - `dataRetirada < dataDevolucaoNova` **E** `dataDevolucao > dataRetiradaNova`
-- Exclui reservas com `status IN ('Cancelada', 'Concluída')` — só bloqueia se ativa
-- Se encontrar qualquer resultado → erro "O cliente já possui uma reserva no período solicitado!"
+Para detectar o conflito de período, o service faz um Reserva.findOne() com duas condições de data ao mesmo tempo.
+
+A lógica é a condição clássica de sobreposição de intervalos: a dataRetirada da reserva existente precisa ser anterior à dataDevolução da nova, E a dataDevolução da existente precisa ser posterior à dataRetirada da nova. Se as duas forem verdadeiras ao mesmo tempo, há sobreposição.
+
+O filtro exclui reservas com status Cancelada ou Concluída — só bloqueia se a reserva ainda está ativa. E se encontrar qualquer resultado, lança o erro "O cliente já possui uma reserva no período solicitado!".
 
 👉 Mostrar o SQL resultante e apontar o `LIMIT 1` — basta encontrar 1 conflito para bloquear
 

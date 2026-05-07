@@ -1,0 +1,50 @@
+========== SLIDE 1 — CAPA ==========
+
+O sistema que vamos apresentar hoje é o SAV — Sistema de Aluguel de Veículos. É um sistema de uso interno, voltado para atendentes e gestores de agências de locação — não para os clientes finais.
+
+A stack é Node.js com Express, Sequelize e PostgreSQL. A apresentação está dividida em três processos: Reserva, Check-in e Check-out — um por integrante. Eu vou cobrir o processo de Reserva, depois vem o Check-in, e fechamos com o Check-out.
+
+
+========== SLIDE 2 — VISÃO GERAL ==========
+
+Vou apresentar o processo de Reserva. No SAV, uma reserva é criada pelo atendente — ele informa o cliente, a categoria do veículo, o seguro e duas agências: a de retirada e a de devolução. Essas agências podem ser diferentes, o que permite o cliente pegar o carro numa cidade e devolver em outra.
+
+Um detalhe importante: o front-end não envia os valores. O serviço é que calcula tudo — a diária, a quantidade de dias e o valor final. Isso garante que os preços nunca sejam manipulados pela requisição.
+
+
+========== SLIDE 3 — FLUXO DE TRANSAÇÃO ==========
+
+Aqui vou mostrar o ReservaService.create().
+
+O serviço começa com um Promise.all buscando o cliente, o funcionário e a categoria ao mesmo tempo — em paralelo. Se qualquer um desses não existir, já para aqui e devolve um erro.
+
+Passando essa etapa, entra a verificação das regras de negócio: a data de retirada, o status das agências e o conflito de período. Se houver erro em qualquer uma dessas, o service lança uma string e o middleware retorna HTTP 400.
+
+Depois calcula os valores financeiros — com o possível desconto da RN1. Só então passa pela validação do modelo Sequelize e, se tudo estiver certo, executa o Reserva.create(). É um INSERT único, sem transação explícita, porque o service não faz mais de uma escrita.
+
+
+========== SLIDE 4 — REGRAS DE NEGÓCIO ==========
+
+O processo de reserva tem três verificações antes de criar o registro.
+
+As duas primeiras são simples: a data de retirada não pode estar no passado, e as duas agências precisam ter status igual a Ativa. Se qualquer uma dessas falhar, o serviço nem segue em frente.
+
+Depois tem a RN1, o desconto. A lógica é: se a agência de retirada tem pelo menos 2 reservas concluídas no histórico e a reserva tem dias suficientes para atingir o limite configurado, aplica o desconto percentual no valor final.
+
+E a RN2 é o conflito de período — o sistema impede que o mesmo cliente tenha duas reservas com datas que se sobreponham e com status ativo. O clássico problema de sobreposição de intervalos.
+
+
+========== SLIDE 5 — IMPLEMENTAÇÃO RN1 (DESCONTO) ==========
+
+O desconto depende de saber se a agência tem histórico suficiente — por isso o service faz um Agencia.findOne() com um JOIN em reservasRetirada, filtrando só as com status igual a Concluída.
+
+O resultado vem como um objeto Sequelize com o array reservasRetirada populado. O código conta o tamanho desse array em JavaScript: se tiver pelo menos 2, e se a quantidade de dias da reserva for maior ou igual ao limiteDiasDesconto da categoria, aplica o desconto. A fórmula é: valorFinal multiplicado por 1 menos o percentual dividido por 100.
+
+
+========== SLIDE 6 — IMPLEMENTAÇÃO RN2 (CONFLITO DE PERÍODO) ==========
+
+Para detectar o conflito de período, o service faz um Reserva.findOne() com duas condições de data ao mesmo tempo.
+
+A lógica é a condição clássica de sobreposição de intervalos: a dataRetirada da reserva existente precisa ser anterior à dataDevolução da nova, E a dataDevolução da existente precisa ser posterior à dataRetirada da nova. Se as duas forem verdadeiras ao mesmo tempo, há sobreposição.
+
+O filtro exclui reservas com status Cancelada ou Concluída — só bloqueia se a reserva ainda está ativa. E se encontrar qualquer resultado, lança o erro "O cliente já possui uma reserva no período solicitado!".
