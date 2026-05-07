@@ -215,21 +215,27 @@ Dentro da transação acontecem 4 coisas em sequência:
 
 ### Slide 15 — Implementação da RN1 (Quilometragem) ⏱ ~1 min
 
-💬 O desafio técnico: calcular o MAX via JOIN com Sequelize
-- `Checkout.findOne()` com `Sequelize.fn('MAX', ...)` e **JOIN** com `Checkin` filtrado por `veiculoId`
-- Parâmetros obrigatórios: `raw: true` e `subQuery: false` para gerar o SQL de agregação corretamente
-- Exemplo: veículo 5 (Toyota Corolla) → histórico máximo = 31.800 km · check-in 7 registrou 50.000 km → checkout deve ser > 50.000
+ O desafio aqui é buscar o maior km já registrado para um veículo específico. Isso exige uma consulta com `MAX()` no banco, cruzando a tabela de checkouts com a de checkins para saber de qual veículo estamos falando.
+Para fazer isso, o código usa `Checkout.findOne()` com `Sequelize.fn('MAX', ...)` — que é a forma do Sequelize de chamar uma função de agregação do banco, como o `MAX()` — junto com um `JOIN` na tabela de checkins filtrado pelo `veiculoId`.
+O Sequelize tem um comportamento estranho nesse caso e gera um SQL errado por padrão. Por isso o código usa dois parâmetros especiais:
 
-👉 Mostrar o SQL resultante com `MAX()` e `INNER JOIN checkins`
+1. `raw: true` — diz pro Sequelize devolver o resultado como dado puro, sem tentar montar objetos por cima
+2. `subQuery: false` — força ele a gerar um `JOIN` direto em vez de uma subquery aninhada, que quebraria o `MAX()`
+
+Juntos, esses dois parâmetros garantem que o SQL gerado seja o correto.
+O exemplo do slide: O Toyota Corolla já foi devolvido uma vez com 31.800 km. Depois, numa outra locação, o check-in registrou 50.000 km. Então o checkout dessa segunda locação precisa ser maior que 50.000 — a Etapa 1 já garante isso. A Etapa 2 só seria decisiva num cenário onde não há check-in anterior para comparar, mas existe um checkout antigo com km alta.
+
+👉 Mostrar o SQL resultante com MAX() e INNER JOIN checkins
 
 ---
 
 ### Slide 16 — Implementação da RN2 (Taxa de Inspeção) ⏱ ~1 min
+💬 O sistema precisa somar todas as avarias do cliente em todos os seus aluguéis anteriores. Ele faz isso em dois passos:
 
-💬 Dois SQLs + contagem em JavaScript:
-1. `SELECT checkins.id FROM checkins INNER JOIN reservas WHERE reservas.cliente_id = 5` → ids: 5, 6, 8
-2. `SELECT checkouts + avarias WHERE checkin_id IN (5, 6, 8)` → checkout5 (2 avarias) + checkout6 (2 avarias)
-3. `.reduce()` soma em JS: 4 avarias > 3 → `taxaInspecao = 150.00`
+Passo 1: Busca todos os check-ins que o cliente já fez, passando pela tabela de reservas — porque é lá que fica o cliente_id. Para o Lucas, retorna os ids 5, 6 e 8.
+Passo 2: Para esses check-ins, busca todos os checkouts e as avarias de cada um. O checkout 5 tinha 2 avarias, o checkout 6 tinha 2 avarias. O checkin 8 aparece na busca mas ainda não tem checkout — contribui zero.
+
+Passo 3: O código soma tudo em JavaScript com `.reduce(): 2 + 2 + 0 = 4` avarias. Como 4 > 3, cobra R$ 150,00.
 
 👉 Apontar que o checkin8 aparece na query mas ainda não tem checkout — contribui 0 avarias
 
