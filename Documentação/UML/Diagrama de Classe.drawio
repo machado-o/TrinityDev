@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Página-1" id="ZuOGBYpWXqG1TaRLJc5R">
-        <mxGraphModel dx="1808" dy="1426" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="281" dy="125" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -468,7 +468,7 @@
                 </mxCell>
                 <mxCell id="Cs3AwYpOF96hByKVAMix-268" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Cs3AwYpOF96hByKVAMix-267" connectable="0" vertex="1">
                     <mxGeometry x="-0.9523" y="1" relative="1" as="geometry">
-                        <mxPoint as="offset"/>
+                        <mxPoint x="-12" y="-5" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="Cs3AwYpOF96hByKVAMix-269" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Cs3AwYpOF96hByKVAMix-267" connectable="0" vertex="1">
@@ -522,7 +522,7 @@
                 </mxCell>
                 <mxCell id="Cs3AwYpOF96hByKVAMix-283" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Cs3AwYpOF96hByKVAMix-282" connectable="0" vertex="1">
                     <mxGeometry x="-0.7957" relative="1" as="geometry">
-                        <mxPoint as="offset"/>
+                        <mxPoint x="16" as="offset"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="Cs3AwYpOF96hByKVAMix-284" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="Cs3AwYpOF96hByKVAMix-282" connectable="0" vertex="1">
