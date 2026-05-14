@@ -12,6 +12,7 @@ import { MultaController } from './controllers/MultaController.js';
 import { ReservaController } from './controllers/ReservaController.js';
 import { SeguroController } from './controllers/SeguroController.js';
 import { VeiculoController } from './controllers/VeiculoController.js';
+import { RelatoriosController } from './controllers/RelatoriosController.js';
 
 const routes = express.Router();
 
@@ -98,5 +99,16 @@ routes.get("/veiculos/:id", VeiculoController.findByPk);
 routes.post("/veiculos", VeiculoController.create);
 routes.put("/veiculos/:id", VeiculoController.update);
 routes.delete("/veiculos/:id", VeiculoController.delete);
+
+// Relatórios
+// Henrique
+routes.get("/relatorios/reservas-por-funcionario",          RelatoriosController.findReservasPorFuncionario);
+routes.get("/relatorios/reservas-por-categoria",            RelatoriosController.findReservasPorCategoria);
+// Lorrayne
+routes.get("/relatorios/checkins-por-agencia",              RelatoriosController.findCheckinsPorAgencia);
+routes.get("/relatorios/checkins-por-veiculo",              RelatoriosController.findCheckinsPorVeiculo);
+// Julia
+routes.get("/relatorios/checkouts-avarias-por-veiculo",     RelatoriosController.findCheckoutsComAvariasPorVeiculo);
+routes.get("/relatorios/checkouts-multas-por-cliente",      RelatoriosController.findCheckoutsComMultasPorCliente);
 
 export default routes;

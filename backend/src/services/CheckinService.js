@@ -172,6 +172,18 @@ class CheckinService {
       throw "Não é possível remover este checkin pois está vinculado a outros registros.";
     }
   }
+
+  static async findByCliente(req) {
+    const { clienteId } = req.params;
+    const objs = await sequelize.query(
+      "SELECT * FROM emprestimos WHERE cliente_id = :clienteId", 
+      { 
+        replacements: { clienteId: clienteId }, 
+        type: QueryTypes.SELECT 
+      }
+    );
+    return objs;
+  }
 }
 
 export { CheckinService };

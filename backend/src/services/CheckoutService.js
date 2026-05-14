@@ -169,5 +169,4 @@ class CheckoutService {
     }
   }
 }
-
 export { CheckoutService };
