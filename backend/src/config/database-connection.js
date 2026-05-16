@@ -224,6 +224,22 @@ function databaseInserts() {
         await checkout5.addAvarias([avaria1, avaria2]);
         await checkout6.addAvarias([avaria3, avaria4]);
 
+        // ─── MULTAS DE AVARIA (geradas pelos checkouts históricos) ───────────────
+        // Fórmula: com seguro → min(totalAvarias, franquia); sem seguro → totalAvarias
+        // Todas Pagas pois são históricas e já foram quitadas
+        // checkout1: avaria1=350, seguroOuro.franquia=1500 → min(350,1500)=350
+        await Multa.create({ valor: 350.00, dataEmissao: fmt(plusDays(-26), "18:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente1.id, reservaId: reserva1.id });
+        // checkout2: avaria2=900, seguroBasico.franquia=4000 → min(900,4000)=900
+        await Multa.create({ valor: 900.00, dataEmissao: fmt(plusDays(-24), "17:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente2.id, reservaId: reserva2.id });
+        // checkout3: avaria3=450, seguroPrata.franquia=2500 → min(450,2500)=450
+        await Multa.create({ valor: 450.00, dataEmissao: fmt(plusDays(-20), "16:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente3.id, reservaId: reserva3.id });
+        // checkout4: avaria4=180, seguroPlus.franquia=1000 → min(180,1000)=180
+        await Multa.create({ valor: 180.00, dataEmissao: fmt(plusDays(-19), "15:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente4.id, reservaId: reserva4.id });
+        // checkout5: avaria1(350)+avaria2(900)=1250, sem seguro → 1250
+        await Multa.create({ valor: 1250.00, dataEmissao: fmt(plusDays(-35), "18:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente5.id, reservaId: reserva5.id });
+        // checkout6: avaria3(450)+avaria4(180)=630, sem seguro → 630
+        await Multa.create({ valor: 630.00, dataEmissao: fmt(plusDays(-15), "18:00"), descricao: "Avarias registradas no checkout não cobertas pelo seguro", status: "Paga", clienteId: cliente5.id, reservaId: reserva6.id });
+
         // ─── MULTAS ─────────────────────────────────────────────────────────────
         // cliente1 e cliente4 têm Pendente → bloqueiam check-in
         await Multa.create({ valor: 195.23, dataEmissao: "2024-03-20", descricao: "Excesso de velocidade na rodovia",     status: "Pendente", clienteId: cliente1.id });

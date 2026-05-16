@@ -6,6 +6,8 @@ import { Reserva } from "../models/Reserva.js";
 import { Avaria } from "../models/Avaria.js";
 import { Veiculo } from "../models/Veiculo.js";
 import { Funcionario } from "../models/Funcionario.js";
+import { Multa } from "../models/Multa.js";
+import { Seguro } from "../models/Seguro.js";
 import { validarModel } from "./_validarModel.js";
 
 const TAXA_INSPECAO = 150.00;
@@ -104,13 +106,31 @@ class CheckoutService {
 
     if (erros.length > 0) throw erros.join(" ");
 
-    const reserva = await Reserva.findByPk(checkin.reservaId);
+    const reserva = await Reserva.findByPk(checkin.reservaId, { include: [{ model: Seguro, as: 'seguro' }] });
     const taxaInspecao = await calcularTaxaInspecao(reserva.clienteId);
 
     return await sequelize.transaction(async (t) => {
       const obj = await Checkout.create({ dataCheckout, quilometragemCheckout, nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, checkinId, funcionarioId, taxaInspecao }, { transaction: t });
 
       if (avariaIds) await obj.setAvarias(avariaIds, { transaction: t });
+
+      if (avariaIds && avariaIds.length > 0) {
+        const avarias = await Avaria.findAll({ where: { id: avariaIds }, transaction: t });
+        const totalAvarias = avarias.reduce((sum, a) => sum + parseFloat(a.valor), 0);
+        if (totalAvarias > 0) {
+          const valorMulta = reserva.seguro
+            ? Math.min(totalAvarias, parseFloat(reserva.seguro.franquia))
+            : totalAvarias;
+          await Multa.create({
+            valor: valorMulta,
+            dataEmissao: new Date(),
+            descricao: "Avarias registradas no checkout não cobertas pelo seguro",
+            status: 'Pendente',
+            clienteId: reserva.clienteId,
+            reservaId: reserva.id,
+          }, { transaction: t });
+        }
+      }
 
       const veiculo = await Veiculo.findByPk(checkin.veiculoId, { transaction: t });
       veiculo.quilometragem = quilometragemCheckout;

@@ -29,7 +29,6 @@ class RelatoriosController {
   }
 
   // JULIA
-
   static async findCheckoutsComAvariasPorVeiculo(req, res, next) {
     RelatoriosService.findCheckoutsComAvariasPorVeiculo(req)
       .then(objs => res.json(objs))

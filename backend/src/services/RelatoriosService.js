@@ -43,7 +43,7 @@ class RelatoriosService {
   // 1. Reservas realizadas por funcionário em um período informado.
   // Filtros: Funcionário (opcional) e Data (obrigatório).
   // Totalização: Quantidade e valor de reservas realizadas por um funcionário.
-  
+
   static async findReservasPorFuncionario(req) {
     const { inicio, termino, funcionarioId } = req.query;
 
@@ -60,18 +60,18 @@ class RelatoriosService {
         f.cargo,
         a.nome                                                    AS "agenciaNome",
         COUNT(r.id)                                               AS "quantidadeReservas",
-        COALESCE(SUM(r."valorFinal"), 0)                          AS "valorTotal",
-        ROUND(COALESCE(AVG(r."valorFinal"), 0)::numeric, 2)       AS "valorMedio",
+        COALESCE(SUM(r.valor_final), 0)                           AS "valorTotal",
+        ROUND(COALESCE(AVG(r.valor_final), 0)::numeric, 2)        AS "valorMedio",
         COUNT(CASE WHEN r.status = 'Concluída'  THEN 1 END)       AS "reservasConcluidas",
         COUNT(CASE WHEN r.status = 'Cancelada'  THEN 1 END)       AS "reservasCanceladas",
         COUNT(CASE WHEN r.status = 'Pendente'   THEN 1 END)       AS "reservasPendentes",
         COUNT(CASE WHEN r.status = 'Confirmada' THEN 1 END)       AS "reservasConfirmadas",
         COUNT(*) OVER()                                           AS "totalRegistros"
       FROM reservas r
-      INNER JOIN funcionarios f ON r."funcionarioId" = f.id
-      INNER JOIN agencias a     ON f."agenciaId"     = a.id
-      WHERE r."dataRetirada" >= :inicio
-        AND r."dataRetirada" <= :termino
+      INNER JOIN funcionarios f ON r.funcionario_id = f.id
+      INNER JOIN agencias a     ON f.agencia_id     = a.id
+      WHERE r.data_retirada >= :inicio
+        AND r.data_retirada <= :termino
         ${filtroFuncionario}
       GROUP BY f.id, f.nome, f.cargo, a.nome
       ORDER BY "quantidadeReservas" DESC
@@ -102,22 +102,22 @@ class RelatoriosService {
       `SELECT
         cv.id                                                     AS "categoriaId",
         cv.nome                                                   AS "categoriaNome",
-        cv."tipoCarroceria",
-        cv."valorDiaria"                                          AS "valorDiariaCadastrado",
+        cv.tipo_carroceria                                        AS "tipoCarroceria",
+        cv.valor_diaria                                           AS "valorDiariaCadastrado",
         COUNT(r.id)                                               AS "quantidadeReservas",
-        COALESCE(SUM(r."valorFinal"), 0)                          AS "valorTotal",
-        ROUND(COALESCE(AVG(r."valorFinal"), 0)::numeric, 2)       AS "valorMedio",
-        COUNT(DISTINCT r."clienteId")                             AS "clientesUnicos",
-        COUNT(DISTINCT r."funcionarioId")                         AS "funcionariosQueReservaram",
+        COALESCE(SUM(r.valor_final), 0)                           AS "valorTotal",
+        ROUND(COALESCE(AVG(r.valor_final), 0)::numeric, 2)        AS "valorMedio",
+        COUNT(DISTINCT r.cliente_id)                              AS "clientesUnicos",
+        COUNT(DISTINCT r.funcionario_id)                          AS "funcionariosQueReservaram",
         COUNT(CASE WHEN r.status = 'Concluída' THEN 1 END)        AS "reservasConcluidas",
         COUNT(CASE WHEN r.status = 'Cancelada' THEN 1 END)        AS "reservasCanceladas",
         COUNT(*) OVER()                                           AS "totalRegistros"
       FROM reservas r
-      INNER JOIN "categoriasVeiculos" cv ON r."categoriaVeiculoId" = cv.id
-      WHERE r."dataRetirada" >= :inicio
-        AND r."dataRetirada" <= :termino
+      INNER JOIN "categoriasVeiculos" cv ON r.categoria_veiculo_id = cv.id
+      WHERE r.data_retirada >= :inicio
+        AND r.data_retirada <= :termino
         ${filtroCategoria}
-      GROUP BY cv.id, cv.nome, cv."tipoCarroceria", cv."valorDiaria"
+      GROUP BY cv.id, cv.nome, cv.tipo_carroceria, cv.valor_diaria
       ORDER BY "quantidadeReservas" DESC
       LIMIT :limite OFFSET :deslocamento`,
       {
@@ -152,27 +152,27 @@ class RelatoriosService {
         a.endereco,
         a.status                           AS "agenciaStatus",
         COUNT(ci.id)                       AS "quantidadeCheckins",
-        COUNT(DISTINCT r."clienteId")      AS "clientesUnicos",
-        COUNT(DISTINCT ci."veiculoId")     AS "veiculosUtilizados",
-        COUNT(DISTINCT ci."funcionarioId") AS "funcionariosEnvolvidos",
+        COUNT(DISTINCT r.cliente_id)       AS "clientesUnicos",
+        COUNT(DISTINCT ci.veiculo_id)      AS "veiculosUtilizados",
+        COUNT(DISTINCT ci.funcionario_id)  AS "funcionariosEnvolvidos",
         (
           SELECT cl.nome
           FROM clientes cl
-          INNER JOIN reservas r2  ON r2."clienteId" = cl.id
-          INNER JOIN checkins ci2 ON ci2."reservaId" = r2.id
-          WHERE r2."agenciaRetiradaId" = a.id
-            AND ci2."dataCheckin" >= :inicio
-            AND ci2."dataCheckin" <= :termino
+          INNER JOIN reservas r2  ON r2.cliente_id  = cl.id
+          INNER JOIN checkins ci2 ON ci2.reserva_id = r2.id
+          WHERE r2.agencia_retirada_id = a.id
+            AND ci2.data_checkin >= :inicio
+            AND ci2.data_checkin <= :termino
           GROUP BY cl.id, cl.nome
           ORDER BY COUNT(ci2.id) DESC
           LIMIT 1
         )                                  AS "clienteComMaisCheckins",
         COUNT(*) OVER()                    AS "totalRegistros"
       FROM checkins ci
-      INNER JOIN reservas r ON ci."reservaId"        = r.id
-      INNER JOIN agencias a ON r."agenciaRetiradaId" = a.id
-      WHERE ci."dataCheckin" >= :inicio
-        AND ci."dataCheckin" <= :termino
+      INNER JOIN reservas r ON ci.reserva_id        = r.id
+      INNER JOIN agencias a ON r.agencia_retirada_id = a.id
+      WHERE ci.data_checkin >= :inicio
+        AND ci.data_checkin <= :termino
         ${filtroAgencia}
       GROUP BY a.id, a.nome, a.endereco, a.status
       ORDER BY "quantidadeCheckins" DESC
@@ -205,32 +205,32 @@ class RelatoriosService {
         v.placa,
         v.marca,
         v.modelo,
-        v."anoFabricacao",
+        v.ano_fabricacao                                              AS "anoFabricacao",
         cv.nome                                                       AS "categoriaNome",
         COUNT(ci.id)                                                  AS "quantidadeCheckins",
-        ROUND(AVG(ci."quilometragemCheckin")::numeric, 2)             AS "quilometragemMediaCheckin",
-        MAX(ci."quilometragemCheckin")                                 AS "maiorQuilometragemCheckin",
-        COUNT(DISTINCT r."clienteId")                                 AS "clientesUnicos",
+        ROUND(AVG(ci.quilometragem_checkin)::numeric, 2)              AS "quilometragemMediaCheckin",
+        MAX(ci.quilometragem_checkin)                                  AS "maiorQuilometragemCheckin",
+        COUNT(DISTINCT r.cliente_id)                                  AS "clientesUnicos",
         (
           SELECT f.nome
           FROM funcionarios f
-          INNER JOIN checkins ci2 ON ci2."funcionarioId" = f.id
-          WHERE ci2."veiculoId" = v.id
-            AND ci2."dataCheckin" >= :inicio
-            AND ci2."dataCheckin" <= :termino
+          INNER JOIN checkins ci2 ON ci2.funcionario_id = f.id
+          WHERE ci2.veiculo_id = v.id
+            AND ci2.data_checkin >= :inicio
+            AND ci2.data_checkin <= :termino
           GROUP BY f.id, f.nome
           ORDER BY COUNT(ci2.id) DESC
           LIMIT 1
         )                                                             AS "funcionarioComMaisCheckins",
         COUNT(*) OVER()                                               AS "totalRegistros"
       FROM checkins ci
-      INNER JOIN veiculos v              ON ci."veiculoId"          = v.id
-      INNER JOIN "categoriasVeiculos" cv ON v."categoriaVeiculoId"  = cv.id
-      INNER JOIN reservas r              ON ci."reservaId"          = r.id
-      WHERE ci."dataCheckin" >= :inicio
-        AND ci."dataCheckin" <= :termino
+      INNER JOIN veiculos v              ON ci.veiculo_id          = v.id
+      INNER JOIN "categoriasVeiculos" cv ON v.categoria_veiculo_id = cv.id
+      INNER JOIN reservas r              ON ci.reserva_id          = r.id
+      WHERE ci.data_checkin >= :inicio
+        AND ci.data_checkin <= :termino
         ${filtroVeiculo}
-      GROUP BY v.id, v.placa, v.marca, v.modelo, v."anoFabricacao", cv.nome
+      GROUP BY v.id, v.placa, v.marca, v.modelo, v.ano_fabricacao, cv.nome
       ORDER BY "quantidadeCheckins" DESC
       LIMIT :limite OFFSET :deslocamento`,
       {
@@ -265,20 +265,20 @@ class RelatoriosService {
         v.modelo,
         cv.nome                                                   AS "categoriaNome",
         COUNT(DISTINCT co.id)                                     AS "quantidadeCheckouts",
-        COUNT(ca."avariaId")                                      AS "quantidadeAvarias",
+        COUNT(ca.avaria_id)                                       AS "quantidadeAvarias",
         COALESCE(SUM(av.valor), 0)                                AS "valorTotalAvarias",
         ROUND(COALESCE(AVG(av.valor), 0)::numeric, 2)             AS "valorMedioAvaria",
         MAX(av.valor)                                             AS "maiorValorAvaria",
         STRING_AGG(DISTINCT av.nome, ', ' ORDER BY av.nome)       AS "tiposAvarias",
         COUNT(*) OVER()                                           AS "totalRegistros"
       FROM checkouts co
-      INNER JOIN checkins ci             ON co."checkinId"           = ci.id
-      INNER JOIN veiculos v              ON ci."veiculoId"           = v.id
-      INNER JOIN "categoriasVeiculos" cv ON v."categoriaVeiculoId"   = cv.id
-      INNER JOIN checkout_avaria ca      ON ca."checkoutId"          = co.id
-      INNER JOIN avarias av              ON av.id                    = ca."avariaId"
-      WHERE co."dataCheckout" >= :inicio
-        AND co."dataCheckout" <= :termino
+      INNER JOIN checkins ci             ON co.checkin_id           = ci.id
+      INNER JOIN veiculos v              ON ci.veiculo_id           = v.id
+      INNER JOIN "categoriasVeiculos" cv ON v.categoria_veiculo_id  = cv.id
+      INNER JOIN checkout_avaria ca      ON ca.checkout_id          = co.id
+      INNER JOIN avarias av              ON av.id                   = ca.avaria_id
+      WHERE co.data_checkout >= :inicio
+        AND co.data_checkout <= :termino
         ${filtroVeiculo}
       GROUP BY v.id, v.placa, v.marca, v.modelo, cv.nome
       ORDER BY "quantidadeAvarias" DESC
@@ -316,15 +316,15 @@ class RelatoriosService {
         COUNT(CASE WHEN m.status = 'Pendente' THEN 1 END)                          AS "multasPendentes",
         COUNT(CASE WHEN m.status = 'Paga'     THEN 1 END)                          AS "multasPagas",
         COALESCE(SUM(CASE WHEN m.status = 'Pendente' THEN m.valor ELSE 0 END), 0)  AS "valorMultasPendentes",
-        COALESCE(SUM(co."taxaInspecao"), 0)                                         AS "totalTaxasInspecao",
+        COALESCE(SUM(co.taxa_inspecao), 0)                                          AS "totalTaxasInspecao",
         COUNT(*) OVER()                                                             AS "totalRegistros"
       FROM checkouts co
-      INNER JOIN checkins ci ON co."checkinId" = ci.id
-      INNER JOIN reservas r  ON ci."reservaId" = r.id
-      INNER JOIN clientes cl ON r."clienteId"  = cl.id
-      INNER JOIN multas m    ON m."reservaId"  = r.id
-      WHERE co."dataCheckout" >= :inicio
-        AND co."dataCheckout" <= :termino
+      INNER JOIN checkins ci ON co.checkin_id = ci.id
+      INNER JOIN reservas r  ON ci.reserva_id = r.id
+      INNER JOIN clientes cl ON r.cliente_id  = cl.id
+      INNER JOIN multas m    ON m.reserva_id  = r.id
+      WHERE co.data_checkout >= :inicio
+        AND co.data_checkout <= :termino
         ${filtroCliente}
       GROUP BY cl.id, cl.nome, cl.cpf, cl.email
       ORDER BY "valorTotalMultas" DESC

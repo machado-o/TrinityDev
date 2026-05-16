@@ -32,32 +32,25 @@ Sistema de Aluguel de Veiculos
 
 1. Reserva: O desconto automático sobre o valor total é aplicado quando a quantidade de dias atinge o limite configurado pela agência — mas somente se a agência já possui ao menos 2 reservas concluídas em seu histórico, comprovando sua capacidade operacional.
 2. Reserva: O sistema bloqueia a criação de reservas para clientes que já possuem outra reserva ativa (não cancelada e não concluída) cujo período se sobreponha ao solicitado.
-1. Check-in: Caso não haja veículos disponíveis na categoria solicitada, o sistema busca automaticamente um veículo de categoria superior e realiza o upgrade gratuitamente para o cliente.
-2. Check-in: O sistema bloqueia o check-in de clientes que possuam multas com status "Pendente" em seu histórico.
-1. Check-out: A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o checkout, o odômetro do veículo é atualizado.
-2. Check-out: Clientes com mais de 3 avarias acumuladas em checkouts anteriores têm uma taxa de inspeção de R$ 150,00 aplicada automaticamente ao checkout.
+3. Check-in: Caso não haja veículos disponíveis na categoria solicitada, o sistema busca automaticamente um veículo de categoria superior e realiza o upgrade gratuitamente para o cliente.
+4. Check-in: O sistema bloqueia o check-in de clientes que possuam multas com status "Pendente" em seu histórico.
+5. Check-out: A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o checkout, o odômetro do veículo é atualizado.
+6. Check-out: Clientes com mais de 3 avarias acumuladas em checkouts anteriores têm uma taxa de inspeção de R$ 150,00 aplicada automaticamente ao checkout.
 
 ### Relatórios:
 
-1. Reservas realizadas por funcionário em um período informado. Filtros: Funcionário e Data.
-Totalização: Quantidade e valor de reservas realizadas por um funcionário.
-
-2. Reservas por categoria de veículo em um período informado. Filtros: Categoria de Veículo e Data.
-Totalização: Quantidade e valor de reservas de uma categoria de veículo.
-
-1. Check-ins realizados por agência em um período informado. Filtros: Agência e Data.
-Totalização: Quantidade de check-ins de uma agência.
-> Possível adição: cliente com mais check-ins nessa agência.
-
-2. Check-ins agrupados por veículo em um período informado. Filtros: Veículo e Data.
-Totalização: Quantidade de check-ins de um veículo.
-> Possível adição: funcionário com mais check-ins desse veículo.
-
-1. Check-outs com avarias registradas agrupadas por veículo em um período informado. Filtros: Veículo e Data.
-Totalização: Quantidade e valor de avarias de um veículo.
-
-2. Check-outs com multas aplicadas a clientes em um período. Filtros: Cliente e Data.
-Totalização: Quantidade e valor de multas de um cliente.
+1. Reservas realizadas por funcionário em um período. Filtros: Funcionário e Data.
+   Totalização: Quantidade e valor de reservas realizadas por um funcionário.
+2. Reservas por categoria de veículo em um período. Filtros: Categoria de Veículo e Data.
+   Totalização: Quantidade e valor de reservas de uma categoria de veículo.
+3. Check-ins realizados por agência em um período. Filtros: Agência e Data.
+   Totalização: Quantidade de check-ins de uma agência.
+4. Check-ins agrupados por veículo em um período. Filtros: Veículo e Data.
+   Totalização: Quantidade de check-ins de um veículo.
+5. Check-outs com avarias registradas agrupadas por veículo em um período informado. Filtros: Veículo e Data.
+   Totalização: Quantidade e valor de avarias de um veículo.
+6. Check-outs com multas aplicadas a clientes em um período. Filtros: Cliente e Data.
+   Totalização: Quantidade e valor de multas de um cliente.
 
 # Visão Geral
 
@@ -121,11 +114,11 @@ docker compose up --build -d
 
 Isso sobe três serviços:
 
-| Serviço    | Endereço                  |
-|------------|---------------------------|
-| API        | http://localhost:3000     |
-| PostgreSQL  | localhost:5432            |
-| pgAdmin    | http://localhost:5050     |
+| Serviço   | Endereço             |
+| ---------- | --------------------- |
+| API        | http://localhost:3000 |
+| PostgreSQL | localhost:5432        |
+| pgAdmin    | http://localhost:5050 |
 
 Para parar:
 
@@ -151,6 +144,7 @@ O servidor sobe na porta `3333` com hot-reload via nodemon.
 Acesse `http://localhost:5050` e faça login com `admin@admin.com` / `admin`.
 
 Para conectar ao banco, registre um novo servidor com:
+
 - **Host:** `db`
 - **Port:** `5432`
 - **Database:** `sav_trinitydev`
@@ -169,15 +163,16 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 
 ## Agências — `/agencias`
 
-| Método | Rota           | Descrição              |
-|--------|----------------|------------------------|
-| GET    | /agencias      | Lista todas as agências |
-| GET    | /agencias/:id  | Busca agência por ID   |
-| POST   | /agencias      | Cria agência           |
-| PUT    | /agencias/:id  | Atualiza agência       |
-| DELETE | /agencias/:id  | Remove agência         |
+| Método | Rota          | Descrição              |
+| ------- | ------------- | ------------------------ |
+| GET     | /agencias     | Lista todas as agências |
+| GET     | /agencias/:id | Busca agência por ID    |
+| POST    | /agencias     | Cria agência            |
+| PUT     | /agencias/:id | Atualiza agência        |
+| DELETE  | /agencias/:id | Remove agência          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "Agência Centro",
@@ -189,21 +184,23 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "percentualDesconto": 10.00
 }
 ```
+
 `status`: `"Ativa"` | `"Inativa"`
 
 ---
 
 ## Funcionários — `/funcionarios`
 
-| Método | Rota               | Descrição                  |
-|--------|--------------------|----------------------------|
-| GET    | /funcionarios      | Lista todos os funcionários |
-| GET    | /funcionarios/:id  | Busca funcionário por ID   |
-| POST   | /funcionarios      | Cria funcionário           |
-| PUT    | /funcionarios/:id  | Atualiza funcionário       |
-| DELETE | /funcionarios/:id  | Remove funcionário         |
+| Método | Rota              | Descrição                  |
+| ------- | ----------------- | ---------------------------- |
+| GET     | /funcionarios     | Lista todos os funcionários |
+| GET     | /funcionarios/:id | Busca funcionário por ID    |
+| POST    | /funcionarios     | Cria funcionário            |
+| PUT     | /funcionarios/:id | Atualiza funcionário        |
+| DELETE  | /funcionarios/:id | Remove funcionário          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "Carlos Silva",
@@ -216,21 +213,23 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "agenciaId": 1
 }
 ```
+
 `cargo`: `"Gerente"` | `"Atendente"` — a senha é armazenada com hash bcrypt e **nunca retornada** nas consultas.
 
 ---
 
 ## Clientes — `/clientes`
 
-| Método | Rota          | Descrição              |
-|--------|---------------|------------------------|
-| GET    | /clientes     | Lista todos os clientes |
-| GET    | /clientes/:id | Busca cliente por ID   |
-| POST   | /clientes     | Cria cliente           |
-| PUT    | /clientes/:id | Atualiza cliente       |
-| DELETE | /clientes/:id | Remove cliente         |
+| Método | Rota          | Descrição             |
+| ------- | ------------- | ----------------------- |
+| GET     | /clientes     | Lista todos os clientes |
+| GET     | /clientes/:id | Busca cliente por ID    |
+| POST    | /clientes     | Cria cliente            |
+| PUT     | /clientes/:id | Atualiza cliente        |
+| DELETE  | /clientes/:id | Remove cliente          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "João Souza",
@@ -244,21 +243,23 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "endereco": "Av. Principal, 500"
 }
 ```
+
 `categoriaCnh`: `"A"` | `"B"` | `"AB"` | `"C"` | `"D"` | `"E"` | `"AC"` | `"AD"` | `"AE"`
 
 ---
 
 ## Categorias de Veículo — `/categoriasdeveiculos`
 
-| Método | Rota                       | Descrição                       |
-|--------|----------------------------|---------------------------------|
-| GET    | /categoriasdeveiculos      | Lista todas as categorias        |
-| GET    | /categoriasdeveiculos/:id  | Busca categoria por ID          |
-| POST   | /categoriasdeveiculos      | Cria categoria                  |
-| PUT    | /categoriasdeveiculos/:id  | Atualiza categoria              |
-| DELETE | /categoriasdeveiculos/:id  | Remove categoria                |
+| Método | Rota                      | Descrição               |
+| ------- | ------------------------- | ------------------------- |
+| GET     | /categoriasdeveiculos     | Lista todas as categorias |
+| GET     | /categoriasdeveiculos/:id | Busca categoria por ID    |
+| POST    | /categoriasdeveiculos     | Cria categoria            |
+| PUT     | /categoriasdeveiculos/:id | Atualiza categoria        |
+| DELETE  | /categoriasdeveiculos/:id | Remove categoria          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "SUV Premium",
@@ -271,21 +272,23 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "capacidade": 5
 }
 ```
+
 `tipoCarroceria`: `"Sedan"` | `"Hatch"` | `"SUV"` | `"Picape"` — `propulsao`: `"Elétrico"` | `"Híbrido"` | `"Combustão"` — `cambio`: `"Automático"` | `"Manual"`
 
 ---
 
 ## Veículos — `/veiculos`
 
-| Método | Rota          | Descrição             |
-|--------|---------------|-----------------------|
-| GET    | /veiculos     | Lista todos os veículos |
-| GET    | /veiculos/:id | Busca veículo por ID  |
-| POST   | /veiculos     | Cria veículo          |
-| PUT    | /veiculos/:id | Atualiza veículo      |
-| DELETE | /veiculos/:id | Remove veículo        |
+| Método | Rota          | Descrição              |
+| ------- | ------------- | ------------------------ |
+| GET     | /veiculos     | Lista todos os veículos |
+| GET     | /veiculos/:id | Busca veículo por ID    |
+| POST    | /veiculos     | Cria veículo            |
+| PUT     | /veiculos/:id | Atualiza veículo        |
+| DELETE  | /veiculos/:id | Remove veículo          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "placa": "ABC1D23",
@@ -300,6 +303,7 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "agenciaId": 1
 }
 ```
+
 `status`: `"Disponível"` | `"Reservado"` | `"Manutenção"` — `cor`: `"Branco"` | `"Preto"` | `"Cinza"` | `"Prata"` | `"Outra"`
 
 ---
@@ -307,14 +311,15 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 ## Seguros — `/seguros`
 
 | Método | Rota         | Descrição            |
-|--------|--------------|----------------------|
-| GET    | /seguros     | Lista todos os seguros |
-| GET    | /seguros/:id | Busca seguro por ID  |
-| POST   | /seguros     | Cria seguro          |
-| PUT    | /seguros/:id | Atualiza seguro      |
-| DELETE | /seguros/:id | Remove seguro        |
+| ------- | ------------ | ---------------------- |
+| GET     | /seguros     | Lista todos os seguros |
+| GET     | /seguros/:id | Busca seguro por ID    |
+| POST    | /seguros     | Cria seguro            |
+| PUT     | /seguros/:id | Atualiza seguro        |
+| DELETE  | /seguros/:id | Remove seguro          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "Plano Ouro",
@@ -330,14 +335,15 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 ## Coberturas — `/coberturas`
 
 | Método | Rota            | Descrição               |
-|--------|-----------------|-------------------------|
-| GET    | /coberturas     | Lista todas as coberturas |
-| GET    | /coberturas/:id | Busca cobertura por ID  |
-| POST   | /coberturas     | Cria cobertura          |
-| PUT    | /coberturas/:id | Atualiza cobertura      |
-| DELETE | /coberturas/:id | Remove cobertura        |
+| ------- | --------------- | ------------------------- |
+| GET     | /coberturas     | Lista todas as coberturas |
+| GET     | /coberturas/:id | Busca cobertura por ID    |
+| POST    | /coberturas     | Cria cobertura            |
+| PUT     | /coberturas/:id | Atualiza cobertura        |
+| DELETE  | /coberturas/:id | Remove cobertura          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "Colisão Total",
@@ -350,15 +356,16 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 
 ## Avarias — `/avarias`
 
-| Método | Rota          | Descrição            |
-|--------|---------------|----------------------|
-| GET    | /avarias      | Lista todas as avarias |
-| GET    | /avarias/:id  | Busca avaria por ID  |
-| POST   | /avarias      | Cria avaria          |
-| PUT    | /avarias/:id  | Atualiza avaria      |
-| DELETE | /avarias/:id  | Remove avaria        |
+| Método | Rota         | Descrição            |
+| ------- | ------------ | ---------------------- |
+| GET     | /avarias     | Lista todas as avarias |
+| GET     | /avarias/:id | Busca avaria por ID    |
+| POST    | /avarias     | Cria avaria            |
+| PUT     | /avarias/:id | Atualiza avaria        |
+| DELETE  | /avarias/:id | Remove avaria          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "nome": "Arranhão na porta",
@@ -371,14 +378,15 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 ## Multas — `/multas`
 
 | Método | Rota        | Descrição           |
-|--------|-------------|---------------------|
-| GET    | /multas     | Lista todas as multas |
-| GET    | /multas/:id | Busca multa por ID  |
-| POST   | /multas     | Cria multa          |
-| PUT    | /multas/:id | Atualiza multa      |
-| DELETE | /multas/:id | Remove multa        |
+| ------- | ----------- | --------------------- |
+| GET     | /multas     | Lista todas as multas |
+| GET     | /multas/:id | Busca multa por ID    |
+| POST    | /multas     | Cria multa            |
+| PUT     | /multas/:id | Atualiza multa        |
+| DELETE  | /multas/:id | Remove multa          |
 
 **Campos (POST/PUT):**
+
 ```json
 {
   "valor": 195.23,
@@ -389,21 +397,25 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
   "reservaId": 1
 }
 ```
+
 `status`: `"Pendente"` | `"Paga"` — `reservaId` é opcional.
+
+> Multas de avaria são **geradas automaticamente** pelo sistema no momento do check-out quando avarias são informadas. O valor é calculado como `min(soma das avarias, franquia do seguro)` quando há seguro, ou o valor total das avarias caso não haja. Multas manuais podem ser criadas para outros fins (ex.: infrações de trânsito).
 
 ---
 
 ## Reservas — `/reservas`
 
 | Método | Rota          | Descrição             |
-|--------|---------------|-----------------------|
-| GET    | /reservas     | Lista todas as reservas |
-| GET    | /reservas/:id | Busca reserva por ID  |
-| POST   | /reservas     | Cria reserva          |
-| PUT    | /reservas/:id | Atualiza reserva      |
-| DELETE | /reservas/:id | Remove reserva        |
+| ------- | ------------- | ----------------------- |
+| GET     | /reservas     | Lista todas as reservas |
+| GET     | /reservas/:id | Busca reserva por ID    |
+| POST    | /reservas     | Cria reserva            |
+| PUT     | /reservas/:id | Atualiza reserva        |
+| DELETE  | /reservas/:id | Remove reserva          |
 
 **Campos (POST):**
+
 ```json
 {
   "dataRetirada": "2026-05-10T08:00:00",
@@ -426,14 +438,15 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 ## Check-ins — `/checkins`
 
 | Método | Rota          | Descrição              |
-|--------|---------------|------------------------|
-| GET    | /checkins     | Lista todos os check-ins |
-| GET    | /checkins/:id | Busca check-in por ID  |
-| POST   | /checkins     | Cria check-in          |
-| PUT    | /checkins/:id | Atualiza check-in      |
-| DELETE | /checkins/:id | Remove check-in        |
+| ------- | ------------- | ------------------------ |
+| GET     | /checkins     | Lista todos os check-ins |
+| GET     | /checkins/:id | Busca check-in por ID    |
+| POST    | /checkins     | Cria check-in            |
+| PUT     | /checkins/:id | Atualiza check-in        |
+| DELETE  | /checkins/:id | Remove check-in          |
 
 **Campos (POST):**
+
 ```json
 {
   "dataCheckin": "2026-05-10T08:10:00",
@@ -453,14 +466,15 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 ## Check-outs — `/checkouts`
 
 | Método | Rota           | Descrição               |
-|--------|----------------|-------------------------|
-| GET    | /checkouts     | Lista todos os check-outs |
-| GET    | /checkouts/:id | Busca check-out por ID  |
-| POST   | /checkouts     | Cria check-out          |
-| PUT    | /checkouts/:id | Atualiza check-out      |
-| DELETE | /checkouts/:id | Remove check-out        |
+| ------- | -------------- | ------------------------- |
+| GET     | /checkouts     | Lista todos os check-outs |
+| GET     | /checkouts/:id | Busca check-out por ID    |
+| POST    | /checkouts     | Cria check-out            |
+| PUT     | /checkouts/:id | Atualiza check-out        |
+| DELETE  | /checkouts/:id | Remove check-out          |
 
 **Campos (POST):**
+
 ```json
 {
   "dataCheckout": "2026-05-15T17:30:00",
@@ -479,4 +493,43 @@ Todos os endpoints seguem o padrão REST. Respostas são em JSON. Erros retornam
 
 `nivelCombustivel`: `"Alto"` | `"Médio"` | `"Baixo"` | `"Vazio"` — `condicaoPneus`: `"Bom"` | `"Regular"` | `"Ruim"` | `"Furado"` — `condicaoPalhetas`: `"Boas"` | `"Ressecadas"` | `"Quebradas"` | `"Ausentes"` — `avariaIds` é opcional.
 
-> A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o check-out, o odômetro do veículo é atualizado, o status volta para `"Disponível"` e a reserva vai para `"Concluída"`. Clientes com mais de 3 avarias em locações anteriores recebem taxa de inspeção de R$ 150,00.
+> A quilometragem de devolução deve ser maior que a registrada no check-in e não pode ser inferior à maior quilometragem já registrada no histórico de checkouts daquele veículo. Após o check-out, o odômetro do veículo é atualizado, o status volta para `"Disponível"` e a reserva vai para `"Concluída"`. Clientes com mais de 3 avarias em locações anteriores recebem taxa de inspeção de R$ 150,00. Se avarias forem informadas, uma multa é gerada automaticamente com valor = `min(totalAvarias, franquia do seguro)` ou `totalAvarias` caso não haja seguro.
+
+---
+
+## Relatórios — `/relatorios`
+
+Todos os endpoints de relatório são somente leitura (GET). Requerem os parâmetros `inicio` e `termino` (datas no formato `YYYY-MM-DD`). Suportam paginação via `pagina` e `itensPorPagina` (padrão: 20, máximo: 100).
+
+**Formato de resposta:**
+```json
+{
+  "dados": [...],
+  "paginacao": { "pagina": 1, "itensPorPagina": 20, "total": 50, "totalPaginas": 3 }
+}
+```
+
+| Método | Rota                                          | Descrição                                         |
+| ------- | --------------------------------------------- | --------------------------------------------------- |
+| GET     | /relatorios/reservas/por-funcionario          | Reservas agrupadas por funcionário no período      |
+| GET     | /relatorios/reservas/por-categoria            | Reservas agrupadas por categoria de veículo        |
+| GET     | /relatorios/checkins/por-agencia              | Check-ins agrupados por agência no período         |
+| GET     | /relatorios/checkins/por-veiculo              | Check-ins agrupados por veículo no período         |
+| GET     | /relatorios/checkouts/avarias-por-veiculo     | Check-outs com avarias agrupados por veículo       |
+| GET     | /relatorios/checkouts/multas-por-cliente      | Check-outs com multas agrupados por cliente        |
+
+**Parâmetros de query:**
+
+| Endpoint                          | Obrigatórios        | Opcional           |
+| --------------------------------- | ------------------- | ------------------- |
+| reservas/por-funcionario          | `inicio`, `termino` | `funcionarioId`    |
+| reservas/por-categoria            | `inicio`, `termino` | `categoriaVeiculoId` |
+| checkins/por-agencia              | `inicio`, `termino` | `agenciaId`        |
+| checkins/por-veiculo              | `inicio`, `termino` | `veiculoId`        |
+| checkouts/avarias-por-veiculo     | `inicio`, `termino` | `veiculoId`        |
+| checkouts/multas-por-cliente      | `inicio`, `termino` | `clienteId`        |
+
+**Exemplo:**
+```
+GET /relatorios/reservas/por-funcionario?inicio=2026-04-01&termino=2026-05-16&funcionarioId=1&pagina=1&itensPorPagina=10
+```

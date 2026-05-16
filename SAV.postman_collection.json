@@ -2,533 +2,2703 @@
   "info": {
     "_postman_id": "sav-api-collection-2026",
     "name": "SAV - Sistema de Aluguel de Veículos",
-    "description": "Collection completa do SAV API.\n\nVariável `baseUrl`:\n- Docker (recomendado): http://localhost:3000\n- Dev (nodemon):       http://localhost:3333\n\nO banco é RESETADO a cada reinício do servidor.\n\n─── IDs do seed ───────────────────────────────\nAgências    : 1–5  (agencia4 = Inativa | agencia5 = sem vínculos → DELETE)\nFuncionários: 1–5  (func5 = sem vínculos → DELETE)\nClientes    : 1–6\n  • 1 Henrique  CNH 12345678901  Multa Pendente\n  • 2 Marina    CNH 23456789012  sem multas\n  • 3 Paulo     CNH 34567890123  sem multas — checkin7 ativo\n  • 4 Renata    CNH 45678901234  Multa Pendente\n  • 5 Lucas     CNH 56789012345  sem multas — 4 avarias históricas / checkin8 ativo\n  • 6 Beatriz   CNH 10203040506  sem multas e sem reservas → DELETE\nCategorias  : 1–6\n  • 1 Econômico Compacto  (valorDiaria R$70)\n  • 2 Hatch Compacto      (valorDiaria R$100)\n  • 3 SUV Premium         (valorDiaria R$350)\n  • 4 Sedan Executivo     (valorDiaria R$220)\n  • 5 Picape Utilitária   (valorDiaria R$280)\n  • 6 Esportivo Elétrico  (valorDiaria R$420) → sem veículos nem reservas → DELETE\nVeículos    : 1–8\n  • 1 Econômico  Reservado   → sem disponibilidade → aciona upgrade\n  • 2 Econômico  Reservado   → sem disponibilidade → aciona upgrade\n  • 3 Hatch      Disponível  → check-in válido / destino de upgrade\n  • 4 SUV        Reservado   (checkin8 ativo)\n  • 5 Sedan      Reservado   (checkin7 ativo)\n  • 6 Picape     Disponível\n  • 7 Hatch      Reservado   → testa veículo não disponível\n  • 8 Hatch      Disponível  → reserva de segurança catHatch\nSeguros     : 1–4 | Coberturas: 1–5  (cobExtra id=5 = sem seguros → DELETE) | Avarias: 1–6  (avaria6 = sem checkouts → DELETE)\nReservas    : 1–12\n  • 1–6   Concluídas (históricas)\n  • 7     Pendente — cliente2 / catHatch(2) / 2030-02-01→08  [testes de ERRO — reutilizável]\n  • 8     Pendente — cliente1 (multa!) / catSUV(3) / 2030-03-01→05\n  • 9     Confirmada — cliente3 / catSedan(4)\n  • 10    Confirmada — cliente5 / catSUV(3)\n  • 11    Pendente — cliente2 / catEconômico(1) / 2030-04-01→05  [upgrade automático]\n  • 12    Pendente — cliente2 / catHatch(2) / 2030-05-01→05  [check-in válido]\nCheckins    : 1–8\n  • 1–6  históricos (com checkout)\n  • 7    ativo — reserva9 / veiculo5(Sedan) / quilomCheckin=50000 / data=2026-01-10\n  • 8    ativo — reserva10 / veiculo4(SUV) / quilomCheckin=25000 / data=2026-04-01\nCheckouts   : 1–6  (históricos)\nMultas      : 1–5",
+    "description": "Collection completa do SAV API.\n\nVariável `baseUrl`:\n- Docker (recomendado): http://localhost:3000\n- Dev (nodemon):       http://localhost:3333\n\nO banco é RESETADO a cada reinício do servidor.\n\n─── IDs do seed ───────────────────────────────\nAgências    : 1–5  (agencia4 = Inativa | agencia5 = sem vínculos → DELETE)\nFuncionários: 1–5  (func5 = sem vínculos → DELETE)\nClientes    : 1–6\n  • 1 Henrique  CNH 12345678901  Multa Pendente\n  • 2 Marina    CNH 23456789012  sem multas\n  • 3 Paulo     CNH 34567890123  sem multas — checkin7 ativo\n  • 4 Renata    CNH 45678901234  Multa Pendente\n  • 5 Lucas     CNH 56789012345  sem multas — 4 avarias históricas / checkin8 ativo\n  • 6 Beatriz   CNH 10203040506  sem multas e sem reservas → DELETE\nCategorias  : 1–6\n  • 1 Econômico Compacto  (valorDiaria R$70)\n  • 2 Hatch Compacto      (valorDiaria R$100)\n  • 3 SUV Premium         (valorDiaria R$350)\n  • 4 Sedan Executivo     (valorDiaria R$220)\n  • 5 Picape Utilitária   (valorDiaria R$280)\n  • 6 Esportivo Elétrico  (valorDiaria R$420) → sem veículos nem reservas → DELETE\nVeículos    : 1–8\n  • 1 Econômico  Reservado   → sem disponibilidade → aciona upgrade\n  • 2 Econômico  Reservado   → sem disponibilidade → aciona upgrade\n  • 3 Hatch      Disponível  → check-in válido / destino de upgrade\n  • 4 SUV        Reservado   (checkin8 ativo)\n  • 5 Sedan      Reservado   (checkin7 ativo)\n  • 6 Picape     Disponível\n  • 7 Hatch      Reservado   → testa veículo não disponível\n  • 8 Hatch      Disponível  → reserva de segurança catHatch\nSeguros     : 1–4 | Coberturas: 1–5  (cobExtra id=5 = sem seguros → DELETE) | Avarias: 1–6  (avaria6 = sem checkouts → DELETE)\nReservas    : 1–12\n  • 1–6   Concluídas (históricas)\n  • 7     Pendente — cliente2 / catHatch(2) / 2030-02-01→08  [testes de ERRO — reutilizável]\n  • 8     Pendente — cliente1 (multa!) / catSUV(3) / 2030-03-01→05\n  • 9     Confirmada — cliente3 / catSedan(4)\n  • 10    Confirmada — cliente5 / catSUV(3)\n  • 11    Pendente — cliente2 / catEconômico(1) / 2030-04-01→05  [upgrade automático]\n  • 12    Pendente — cliente2 / catHatch(2) / 2030-05-01→05  [check-in válido]\nCheckins    : 1–8\n  • 1–6  históricos (com checkout)\n  • 7    ativo — reserva9 / veiculo5(Sedan) / quilomCheckin=50000 / data=2026-01-10\n  • 8    ativo — reserva10 / veiculo4(SUV) / quilomCheckin=25000 / data=2026-04-01\nCheckouts   : 1–6  (históricos)\nMultas      : 1–11\n  • 1–6   Avaria (Pagas — geradas pelos checkouts históricos, vinculadas às reservas)\n  • 7     Trânsito — cliente1 Pendente → bloqueia check-in  [PUT quitar = /multas/7]\n  • 8     Trânsito — cliente2 Paga\n  • 9     Trânsito — cliente3 Paga\n  • 10    Trânsito — cliente4 Pendente → bloqueia check-in\n  • 11    Trânsito — cliente5 Paga → DELETE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
   ],
   "item": [
     {
       "name": "Agência",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/agencias", "host": ["{{baseUrl}}"], "path": ["agencias"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/agencias/1", "host": ["{{baseUrl}}"], "path": ["agencias", "1"] } } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Agência Guarapari\",\n  \"cnpj\": \"11.222.333/0001-44\",\n  \"endereco\": \"Rua das Praias, 200, Guarapari\",\n  \"telefone\": \"(27) 3344-5566\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 5,\n  \"percentualDesconto\": 10.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/agencias", "host": ["{{baseUrl}}"], "path": ["agencias"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Agência Guarapari\",\n  \"cnpj\": \"11.222.333/0001-44\",\n  \"endereco\": \"Rua das Praias, 200, Guarapari\",\n  \"telefone\": \"(27) 3344-5566\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 5,\n  \"percentualDesconto\": 10.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"cnpj\": \"invalido\",\n  \"endereco\": \"\",\n  \"telefone\": \"99999\",\n  \"status\": \"Fechada\",\n  \"limiteDiasDesconto\": 0,\n  \"percentualDesconto\": 150\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/agencias", "host": ["{{baseUrl}}"], "path": ["agencias"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cnpj\": \"invalido\",\n  \"endereco\": \"\",\n  \"telefone\": \"99999\",\n  \"status\": \"Fechada\",\n  \"limiteDiasDesconto\": 0,\n  \"percentualDesconto\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias"
+              ]
+            },
             "description": "Erros esperados: nome vazio | cnpj inválido | endereco vazio | telefone inválido | status fora do ENUM | limiteDiasDesconto < 1 | percentualDesconto > 100"
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Agência Cachoeiro Atualizada\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 4,\n  \"percentualDesconto\": 12.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/agencias/1", "host": ["{{baseUrl}}"], "path": ["agencias", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Agência Cachoeiro Atualizada\",\n  \"status\": \"Ativa\",\n  \"limiteDiasDesconto\": 4,\n  \"percentualDesconto\": 12.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agencias/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/agencias/5", "host": ["{{baseUrl}}"], "path": ["agencias", "5"] }, "description": "Agência 5 (Linhares — Ativa). Sem funcionários, veículos ou reservas vinculados — deve remover com sucesso." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agencias/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "agencias",
+                "5"
+              ]
+            },
+            "description": "Agência 5 (Linhares — Ativa). Sem funcionários, veículos ou reservas vinculados — deve remover com sucesso."
+          }
+        }
       ]
     },
     {
       "name": "Avaria",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/avarias", "host": ["{{baseUrl}}"], "path": ["avarias"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/avarias/1", "host": ["{{baseUrl}}"], "path": ["avarias", "1"] } } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Vidro traseiro quebrado\",\n  \"valor\": 650.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/avarias", "host": ["{{baseUrl}}"], "path": ["avarias"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Vidro traseiro quebrado\",\n  \"valor\": 650.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"valor\": -50\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/avarias", "host": ["{{baseUrl}}"], "path": ["avarias"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valor\": -50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias"
+              ]
+            },
             "description": "Erros esperados: nome vazio | valor negativo"
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Arranhão profundo na porta\",\n  \"valor\": 420.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/avarias/1", "host": ["{{baseUrl}}"], "path": ["avarias", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Arranhão profundo na porta\",\n  \"valor\": 420.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/avarias/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/avarias/6", "host": ["{{baseUrl}}"], "path": ["avarias", "6"] }, "description": "Avaria 6 (Calota amassada). Sem checkouts vinculados — deve remover com sucesso. Avaria 5 é preservada pois é usada no POST Checkout válido (checkin8)." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avarias/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avarias",
+                "6"
+              ]
+            },
+            "description": "Avaria 6 (Calota amassada). Sem checkouts vinculados — deve remover com sucesso. Avaria 5 é preservada pois é usada no POST Checkout válido (checkin8)."
+          }
+        }
       ]
     },
     {
       "name": "Categoria de Veículo",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/categoriasdeveiculos", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/categoriasdeveiculos/2", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos", "2"] }, "description": "Categoria 2 = Hatch Compacto." } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos",
+                "2"
+              ]
+            },
+            "description": "Categoria 2 = Hatch Compacto."
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Minivan Familiar\",\n  \"valorDiaria\": 200.00,\n  \"tipoCarroceria\": \"Sedan\",\n  \"propulsao\": \"Combustão\",\n  \"cambio\": \"Automático\",\n  \"arCondicionado\": true,\n  \"capacidade\": 7\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/categoriasdeveiculos", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Minivan Familiar\",\n  \"valorDiaria\": 200.00,\n  \"tipoCarroceria\": \"Sedan\",\n  \"propulsao\": \"Combustão\",\n  \"cambio\": \"Automático\",\n  \"arCondicionado\": true,\n  \"capacidade\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"valorDiaria\": -100,\n  \"tipoCarroceria\": \"Caminhão\",\n  \"propulsao\": \"Gasolina\",\n  \"cambio\": \"CVT\",\n  \"arCondicionado\": null,\n  \"capacidade\": 0\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/categoriasdeveiculos", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valorDiaria\": -100,\n  \"tipoCarroceria\": \"Caminhão\",\n  \"propulsao\": \"Gasolina\",\n  \"cambio\": \"CVT\",\n  \"arCondicionado\": null,\n  \"capacidade\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Hatch Compacto Premium\",\n  \"valorDiaria\": 120.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/categoriasdeveiculos/2", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos", "2"] },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Hatch Compacto Premium\",\n  \"valorDiaria\": 120.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos",
+                "2"
+              ]
+            },
             "description": "Atualiza categoria 2 (Hatch Compacto)."
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/categoriasdeveiculos/6", "host": ["{{baseUrl}}"], "path": ["categoriasdeveiculos", "6"] }, "description": "Categoria 6 = Esportivo Elétrico. Sem veículos nem reservas vinculados — deve remover com sucesso." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoriasdeveiculos/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoriasdeveiculos",
+                "6"
+              ]
+            },
+            "description": "Categoria 6 = Esportivo Elétrico. Sem veículos nem reservas vinculados — deve remover com sucesso."
+          }
+        }
       ]
     },
     {
       "name": "Reserva",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/reservas/7", "host": ["{{baseUrl}}"], "path": ["reservas", "7"] } } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas",
+                "7"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido — com desconto automático)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-09 18:00:00\",\n  \"clienteId\": 3,\n  \"categoriaVeiculoId\": 5,\n  \"funcionarioId\": 3,\n  \"seguroId\": 2,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-09 18:00:00\",\n  \"clienteId\": 3,\n  \"categoriaVeiculoId\": 5,\n  \"funcionarioId\": 3,\n  \"seguroId\": 2,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Cliente 3 (Paulo) sem conflito e sem multas.\nCálculo: catPicape R$280/dia + seguroBasico R$20/dia = R$300/dia × 8 dias = R$2400.\nAgência 1: limiteDiasDesconto=3, 2 reservas concluídas → desconto 10% elegível.\n8 dias >= 3 → valorFinal = R$2400 × 0.90 = R$2160."
           }
         },
         {
           "name": "POST Criar (válido — sem desconto)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2030-07-01 08:00:00\",\n  \"dataDevolucao\": \"2030-07-04 18:00:00\",\n  \"clienteId\": 4,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 2,\n  \"agenciaRetiradaId\": 3,\n  \"agenciaDevolucaoId\": 3\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2030-07-01 08:00:00\",\n  \"dataDevolucao\": \"2030-07-04 18:00:00\",\n  \"clienteId\": 4,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 2,\n  \"agenciaRetiradaId\": 3,\n  \"agenciaDevolucaoId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Agência 3 tem apenas 1 reserva concluída em seu histórico → condição de 2 Concluídas não é atingida → desconto NÃO aplicado.\nCálculo: catHatch R$100/dia × 3 dias = R$300 (sem desconto, sem seguro)."
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2020-01-01 08:00:00\",\n  \"dataDevolucao\": \"2019-12-28 18:00:00\",\n  \"clienteId\": 9999,\n  \"categoriaVeiculoId\": 9999,\n  \"funcionarioId\": 9999,\n  \"agenciaRetiradaId\": 9999,\n  \"agenciaDevolucaoId\": 9999\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2020-01-01 08:00:00\",\n  \"dataDevolucao\": \"2019-12-28 18:00:00\",\n  \"clienteId\": 9999,\n  \"categoriaVeiculoId\": 9999,\n  \"funcionarioId\": 9999,\n  \"agenciaRetiradaId\": 9999,\n  \"agenciaDevolucaoId\": 9999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Erros simultâneos: dataRetirada no passado | IDs não encontrados | dataDevolucao < dataRetirada (validação de modelo)."
           }
         },
         {
           "name": "POST [RN] Bloqueio: data de retirada no passado",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2020-06-15 08:00:00\",\n  \"dataDevolucao\": \"2020-06-20 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2020-06-15 08:00:00\",\n  \"dataDevolucao\": \"2020-06-20 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Erro esperado (400): \"A data de retirada não pode ser no passado!\""
           }
         },
         {
           "name": "POST [RN] Bloqueio: agência de retirada com status Inativa",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-05 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 4,\n  \"agenciaDevolucaoId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-05 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 4,\n  \"agenciaDevolucaoId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Erro esperado (400): \"A agência de retirada está inativa e não pode receber reservas!\"\nagenciaRetiradaId 4 = Agência Serra (Inativa)."
           }
         },
         {
           "name": "POST [RN] Bloqueio: agência de devolução com status Inativa",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-05 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 4\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2030-06-01 08:00:00\",\n  \"dataDevolucao\": \"2030-06-05 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Erro esperado (400): \"A agência de devolução está inativa e não pode receber reservas!\"\nagenciaDevolucaoId 4 = Agência Serra (Inativa)."
           }
         },
         {
           "name": "POST [RN] Bloqueio: cliente com reserva ativa no mesmo período",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataRetirada\": \"2030-02-04 08:00:00\",\n  \"dataDevolucao\": \"2030-02-12 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas", "host": ["{{baseUrl}}"], "path": ["reservas"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataRetirada\": \"2030-02-04 08:00:00\",\n  \"dataDevolucao\": \"2030-02-12 18:00:00\",\n  \"clienteId\": 2,\n  \"categoriaVeiculoId\": 2,\n  \"funcionarioId\": 1,\n  \"agenciaRetiradaId\": 1,\n  \"agenciaDevolucaoId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas"
+              ]
+            },
             "description": "Erro esperado (400): \"O cliente já possui uma reserva no período solicitado!\"\nCliente 2 (Marina) tem reserva7 de 2030-02-01 a 2030-02-08. Este body usa 2030-02-04→12, que sobrepõe."
           }
         },
         {
           "name": "PUT Atualizar (cancelar)",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Cancelada\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/reservas/7", "host": ["{{baseUrl}}"], "path": ["reservas", "7"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Cancelada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reservas/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas",
+                "7"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/reservas/7", "host": ["{{baseUrl}}"], "path": ["reservas", "7"] }, "description": "Falha com FK se existir checkin vinculado." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reservas/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservas",
+                "7"
+              ]
+            },
+            "description": "Falha com FK se existir checkin vinculado."
+          }
+        }
       ]
     },
     {
       "name": "Check-in",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/checkins/7", "host": ["{{baseUrl}}"], "path": ["checkins", "7"] } } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins",
+                "7"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido — reserva12)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-05-01 08:30:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 12,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-05-01 08:30:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 12,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Reserva 12 (reserva_ci_valido) — cliente2 (Marina, CNH 23456789012), catHatch, status Pendente.\nVeículo 3 = Hatch, Disponível.\nEfeitos: veiculo3 → Reservado | reserva12 → Confirmada."
           }
         },
         {
           "name": "POST [RN] Upgrade automático: sem disponibilidade na categoria da reserva",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-04-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 500.00,\n  \"reservaId\": 11,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-04-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 500.00,\n  \"reservaId\": 11,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Reserva 11 (reserva_upgrade) — cliente2 / catEconômico (id=1).\nTODOS os veículos catEconômico estão Reservados no seed → sistema busca categoria superior (id>1).\nUpgrade automático para catHatch (id=2) com veiculo3 ou veiculo8 (Disponíveis).\nEsperado: 201 com veículo catHatch no retorno; reserva11 → Confirmada."
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"data-invalida\",\n  \"cnhCondutor\": \"ABC\",\n  \"cnhValidade\": \"2020-01-01\",\n  \"quilometragemCheckin\": -100,\n  \"reservaId\": 9999,\n  \"veiculoId\": null,\n  \"funcionarioId\": null\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"data-invalida\",\n  \"cnhCondutor\": \"ABC\",\n  \"cnhValidade\": \"2020-01-01\",\n  \"quilometragemCheckin\": -100,\n  \"reservaId\": 9999,\n  \"veiculoId\": null,\n  \"funcionarioId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro imediato: reservaId 9999 não encontrado (404). Se fosse válido: erros de modelo em cascata."
           }
         },
         {
           "name": "POST [RN] Bloqueio: reserva com status diferente de Pendente",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2026-01-15 08:00:00\",\n  \"cnhCondutor\": \"12345678901\",\n  \"cnhValidade\": \"2030-01-01\",\n  \"quilometragemCheckin\": 26000.00,\n  \"reservaId\": 1,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2026-01-15 08:00:00\",\n  \"cnhCondutor\": \"12345678901\",\n  \"cnhValidade\": \"2030-01-01\",\n  \"quilometragemCheckin\": 26000.00,\n  \"reservaId\": 1,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro esperado (400): \"Só é possível realizar check-in em reservas com status Pendente!\"\nReserva 1 tem status Concluída."
           }
         },
         {
           "name": "POST [RN] Bloqueio: CNH do condutor não corresponde à do cliente",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"99999999999\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"99999999999\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 3,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro esperado (400): \"A CNH informada não corresponde à CNH cadastrada para o cliente da reserva!\"\nReserva 7 pertence a cliente2 (Marina, CNH 23456789012). Body envia CNH 99999999999.\nReserva 7 não é alterada — pode ser testada em qualquer ordem."
           }
         },
         {
           "name": "POST [RN] Bloqueio: cliente com multa Pendente (débito ativo)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-03-01 08:00:00\",\n  \"cnhCondutor\": \"12345678901\",\n  \"cnhValidade\": \"2030-01-01\",\n  \"quilometragemCheckin\": 26000.00,\n  \"reservaId\": 8,\n  \"veiculoId\": 4,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-03-01 08:00:00\",\n  \"cnhCondutor\": \"12345678901\",\n  \"cnhValidade\": \"2030-01-01\",\n  \"quilometragemCheckin\": 26000.00,\n  \"reservaId\": 8,\n  \"veiculoId\": 4,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro esperado (400): \"O cliente possui débitos pendentes e não pode realizar o check-in!\"\nReserva 8 pertence a cliente1 (Henrique) que tem Multa Pendente.\nCNH correta informada propositalmente para isolar só esta regra.\nReserva 8 não é alterada — pode ser testada em qualquer ordem."
           }
         },
         {
           "name": "POST [RN] Bloqueio: veículo sem status Disponível",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 7,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 7,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro esperado (400): \"O veículo selecionado não está disponível!\"\nVeículo 7 = Hatch, status Reservado (seeded assim para este teste).\nReserva 7 não é alterada — pode ser testada em qualquer ordem."
           }
         },
         {
           "name": "POST [RN] Bloqueio: veículo de categoria diferente da reserva",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 6,\n  \"funcionarioId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins", "host": ["{{baseUrl}}"], "path": ["checkins"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckin\": \"2030-02-01 08:00:00\",\n  \"cnhCondutor\": \"23456789012\",\n  \"cnhValidade\": \"2029-12-31\",\n  \"quilometragemCheckin\": 1600.00,\n  \"reservaId\": 7,\n  \"veiculoId\": 6,\n  \"funcionarioId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins"
+              ]
+            },
             "description": "Erro esperado (400): \"O veículo selecionado não pertence à categoria da reserva!\"\nReserva 7 = catHatch (id=2). Veículo 6 = Picape (categoriaVeiculoId=5).\nReserva 7 não é alterada — pode ser testada em qualquer ordem."
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"quilometragemCheckin\": 50100.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkins/7", "host": ["{{baseUrl}}"], "path": ["checkins", "7"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quilometragemCheckin\": 50100.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkins/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins",
+                "7"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/checkins/7", "host": ["{{baseUrl}}"], "path": ["checkins", "7"] }, "description": "Falha se existir checkout vinculado (FK constraint). Checkin 7 não tem checkout." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkins/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkins",
+                "7"
+              ]
+            },
+            "description": "Falha se existir checkout vinculado (FK constraint). Checkin 7 não tem checkout."
+          }
+        }
       ]
     },
     {
       "name": "Check-out",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/checkouts/1", "host": ["{{baseUrl}}"], "path": ["checkouts", "1"] } } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido — checkin7, sem taxa de inspeção)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckout\": \"2026-01-20 17:00:00\",\n  \"quilometragemCheckout\": 51000.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"observacoes\": \"Veículo devolvido em ótimo estado.\",\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"2026-01-20 17:00:00\",\n  \"quilometragemCheckout\": 51000.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"observacoes\": \"Veículo devolvido em ótimo estado.\",\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            },
             "description": "Checkin 7: quilometragemCheckin=50000, dataCheckin=2026-01-10.\nquilometragemCheckout 51000 > 50000 ✓ | dataCheckout 2026-01-20 > 2026-01-10 ✓\nCliente 3 (Paulo) tem 1 avaria histórica → taxaInspecao = 0.\nEfeitos: veiculo5(Sedan) → Disponível | reserva9 → Concluída."
           }
         },
         {
           "name": "POST Criar (válido — checkin8, com taxa de inspeção R$150)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckout\": \"2026-04-10 17:00:00\",\n  \"quilometragemCheckout\": 26000.00,\n  \"nivelCombustivel\": \"Médio\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 8,\n  \"funcionarioId\": 2,\n  \"avariaIds\": [5]\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] },
-            "description": "Checkin 8: quilometragemCheckin=25000, dataCheckin=2026-04-01.\nMax quilometragem histórica do veiculo4(SUV) = 25800 (checkout6) → quilometragemCheckout=26000 > 25800 ✓\nCliente 5 (Lucas) tem 4 avarias históricas (checkout5: avaria1+2, checkout6: avaria3+4) → taxaInspecao = R$150,00 aplicada automaticamente.\nEfeitos: veiculo4(SUV) → Disponível | reserva10 → Concluída."
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"2026-04-10 17:00:00\",\n  \"quilometragemCheckout\": 26000.00,\n  \"nivelCombustivel\": \"Médio\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 8,\n  \"funcionarioId\": 2,\n  \"avariaIds\": [5]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            },
+            "description": "Checkin 8: quilometragemCheckin=25000, dataCheckin=2026-04-01.\nMax quilometragem histórica do veiculo4(SUV) = 25800 (checkout6) → quilometragemCheckout=26000 > 25800 ✓\nCliente 5 (Lucas) tem 4 avárias históricas → taxaInspecao = R$150,00 aplicada automaticamente.\nAvária 5 (Vidro lateral trincado, R$600), reserva10 sem seguro → multa de avária R$600,00 gerada automaticamente (status Pendente, clienteId=5, reservaId=10).\nEfeitos: veiculo4(SUV) → Disponível | reserva10 → Concluída | Multa R$600 criada para cliente5."
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckout\": \"data-invalida\",\n  \"quilometragemCheckout\": -1,\n  \"nivelCombustivel\": \"Cheio\",\n  \"condicaoPneus\": \"Perfeito\",\n  \"condicaoPalhetas\": \"Ok\",\n  \"limpoInternamente\": null,\n  \"limpoExternamente\": null,\n  \"checkinId\": 9999,\n  \"funcionarioId\": null\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"data-invalida\",\n  \"quilometragemCheckout\": -1,\n  \"nivelCombustivel\": \"Cheio\",\n  \"condicaoPneus\": \"Perfeito\",\n  \"condicaoPalhetas\": \"Ok\",\n  \"limpoInternamente\": null,\n  \"limpoExternamente\": null,\n  \"checkinId\": 9999,\n  \"funcionarioId\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            },
             "description": "Erro imediato: checkinId 9999 não encontrado (404). Se fosse válido: erros de modelo em cascata."
           }
         },
         {
           "name": "POST [RN] Bloqueio: quilometragem de devolução menor que a do check-in",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckout\": \"2026-01-20 17:00:00\",\n  \"quilometragemCheckout\": 49999.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"2026-01-20 17:00:00\",\n  \"quilometragemCheckout\": 49999.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            },
             "description": "Erro esperado (400): \"A quilometragem de devolução deve ser maior que a quilometragem registrada no check-in!\"\nCheckin 7 tem quilometragemCheckin=50000. Body envia 49999 (menor).\nCheckin 7 não é alterado — pode ser testado em qualquer ordem."
           }
         },
         {
           "name": "POST [RN] Bloqueio: data de devolução anterior ao check-in",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"dataCheckout\": \"2026-01-09 08:00:00\",\n  \"quilometragemCheckout\": 51000.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts", "host": ["{{baseUrl}}"], "path": ["checkouts"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataCheckout\": \"2026-01-09 08:00:00\",\n  \"quilometragemCheckout\": 51000.00,\n  \"nivelCombustivel\": \"Alto\",\n  \"condicaoPneus\": \"Bom\",\n  \"condicaoPalhetas\": \"Boas\",\n  \"limpoInternamente\": true,\n  \"limpoExternamente\": true,\n  \"checkinId\": 7,\n  \"funcionarioId\": 1,\n  \"avariaIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts"
+              ]
+            },
             "description": "Erro esperado (400): \"A data de devolução não pode ser anterior à data do check-in!\"\nCheckin 7 tem dataCheckin=2026-01-10. Body envia dataCheckout=2026-01-09 (anterior).\nCheckin 7 não é alterado — pode ser testado em qualquer ordem."
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nivelCombustivel\": \"Médio\",\n  \"observacoes\": \"Risco identificado no para-choque.\",\n  \"avariaIds\": [1]\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/checkouts/1", "host": ["{{baseUrl}}"], "path": ["checkouts", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivelCombustivel\": \"Médio\",\n  \"observacoes\": \"Risco identificado no para-choque.\",\n  \"avariaIds\": [1]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/checkouts/1", "host": ["{{baseUrl}}"], "path": ["checkouts", "1"] }, "description": "Checkout 1 — deve remover com sucesso. O FK aponta para cima (checkout → checkin), não o contrário; avarias da M:N cascadeiam automaticamente." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkouts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkouts",
+                "1"
+              ]
+            },
+            "description": "Checkout 1 — deve remover com sucesso. O FK aponta para cima (checkout → checkin), não o contrário; avarias da M:N cascadeiam automaticamente."
+          }
+        }
       ]
     },
     {
       "name": "Cliente",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/clientes", "host": ["{{baseUrl}}"], "path": ["clientes"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/clientes/1", "host": ["{{baseUrl}}"], "path": ["clientes", "1"] } } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Fernanda Lima\",\n  \"cpf\": \"987.654.321-00\",\n  \"dataNascimento\": \"1995-07-20\",\n  \"telefone\": \"(27) 99876-5432\",\n  \"email\": \"fernanda.lima@email.com\",\n  \"cnh\": \"55566677788\",\n  \"categoriaCnh\": \"B\",\n  \"validadeCnh\": \"2030-06-01\",\n  \"endereco\": \"Rua Nova, 321, Vitória\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/clientes", "host": ["{{baseUrl}}"], "path": ["clientes"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fernanda Lima\",\n  \"cpf\": \"987.654.321-00\",\n  \"dataNascimento\": \"1995-07-20\",\n  \"telefone\": \"(27) 99876-5432\",\n  \"email\": \"fernanda.lima@email.com\",\n  \"cnh\": \"55566677788\",\n  \"categoriaCnh\": \"B\",\n  \"validadeCnh\": \"2030-06-01\",\n  \"endereco\": \"Rua Nova, 321, Vitória\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"dataNascimento\": \"2012-05-15\",\n  \"telefone\": \"99999\",\n  \"email\": \"email-invalido\",\n  \"cnh\": \"123\",\n  \"categoriaCnh\": \"Z\",\n  \"validadeCnh\": \"nao-e-data\",\n  \"endereco\": \"\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/clientes", "host": ["{{baseUrl}}"], "path": ["clientes"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"dataNascimento\": \"2012-05-15\",\n  \"telefone\": \"99999\",\n  \"email\": \"email-invalido\",\n  \"cnh\": \"123\",\n  \"categoriaCnh\": \"Z\",\n  \"validadeCnh\": \"nao-e-data\",\n  \"endereco\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"telefone\": \"(28) 99111-2233\",\n  \"email\": \"henrique.novo@email.com\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/clientes/1", "host": ["{{baseUrl}}"], "path": ["clientes", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefone\": \"(28) 99111-2233\",\n  \"email\": \"henrique.novo@email.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/clientes/6", "host": ["{{baseUrl}}"], "path": ["clientes", "6"] }, "description": "Cliente 6 (Beatriz). Sem reservas nem multas — deve remover com sucesso." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "6"
+              ]
+            },
+            "description": "Cliente 6 (Beatriz). Sem reservas nem multas — deve remover com sucesso."
+          }
+        }
       ]
     },
     {
       "name": "Cobertura",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/coberturas", "host": ["{{baseUrl}}"], "path": ["coberturas"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/coberturas/1", "host": ["{{baseUrl}}"], "path": ["coberturas", "1"] } } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Proteção Chuva de Granizo\",\n  \"valorIndenizacaoMax\": 15000.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/coberturas", "host": ["{{baseUrl}}"], "path": ["coberturas"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Proteção Chuva de Granizo\",\n  \"valorIndenizacaoMax\": 15000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"valorIndenizacaoMax\": -1000\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/coberturas", "host": ["{{baseUrl}}"], "path": ["coberturas"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"valorIndenizacaoMax\": -1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Roubo, Furto e Extorsão\",\n  \"valorIndenizacaoMax\": 60000.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/coberturas/1", "host": ["{{baseUrl}}"], "path": ["coberturas", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Roubo, Furto e Extorsão\",\n  \"valorIndenizacaoMax\": 60000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/coberturas/5", "host": ["{{baseUrl}}"], "path": ["coberturas", "5"] }, "description": "Cobertura 5 (Perda Total). Sem seguros vinculados — deve remover com sucesso. Coberturas 1–4 são preservadas pois são usadas nos testes de POST e PUT de Seguro." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coberturas/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "coberturas",
+                "5"
+              ]
+            },
+            "description": "Cobertura 5 (Perda Total). Sem seguros vinculados — deve remover com sucesso. Coberturas 1–4 são preservadas pois são usadas nos testes de POST e PUT de Seguro."
+          }
+        }
       ]
     },
     {
       "name": "Funcionário",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/funcionarios", "host": ["{{baseUrl}}"], "path": ["funcionarios"] }, "description": "Campo 'senha' excluído de todas as respostas." } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/funcionarios/1", "host": ["{{baseUrl}}"], "path": ["funcionarios", "1"] } } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios"
+              ]
+            },
+            "description": "Campo 'senha' excluído de todas as respostas."
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Ana Paula Costa\",\n  \"cpf\": \"123.456.789-09\",\n  \"cargo\": \"Atendente\",\n  \"dataNascimento\": \"1998-03-15\",\n  \"telefone\": \"(27) 98765-4321\",\n  \"email\": \"anapaula@trityon.com\",\n  \"senha\": \"Senh@Forte1\",\n  \"agenciaId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/funcionarios", "host": ["{{baseUrl}}"], "path": ["funcionarios"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Ana Paula Costa\",\n  \"cpf\": \"123.456.789-09\",\n  \"cargo\": \"Atendente\",\n  \"dataNascimento\": \"1998-03-15\",\n  \"telefone\": \"(27) 98765-4321\",\n  \"email\": \"anapaula@trityon.com\",\n  \"senha\": \"Senh@Forte1\",\n  \"agenciaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"cargo\": \"Diretor\",\n  \"dataNascimento\": \"2015-01-01\",\n  \"telefone\": \"12345\",\n  \"email\": \"email\",\n  \"senha\": \"fraca\",\n  \"agenciaId\": 9999\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/funcionarios", "host": ["{{baseUrl}}"], "path": ["funcionarios"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cpf\": \"000\",\n  \"cargo\": \"Diretor\",\n  \"dataNascimento\": \"2015-01-01\",\n  \"telefone\": \"12345\",\n  \"email\": \"email\",\n  \"senha\": \"fraca\",\n  \"agenciaId\": 9999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"cargo\": \"Gerente\",\n  \"telefone\": \"(28) 98888-9999\",\n  \"email\": \"emanuelly.nova@trityon.com\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/funcionarios/1", "host": ["{{baseUrl}}"], "path": ["funcionarios", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cargo\": \"Gerente\",\n  \"telefone\": \"(28) 98888-9999\",\n  \"email\": \"emanuelly.nova@trityon.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/funcionarios/5", "host": ["{{baseUrl}}"], "path": ["funcionarios", "5"] }, "description": "Funcionário 5 (Amanda). Sem reservas, checkins ou checkouts — deve remover com sucesso." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/funcionarios/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "funcionarios",
+                "5"
+              ]
+            },
+            "description": "Funcionário 5 (Amanda). Sem reservas, checkins ou checkouts — deve remover com sucesso."
+          }
+        }
       ]
     },
     {
       "name": "Multa",
       "item": [
-        { "name": "GET Listar todas", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/multas", "host": ["{{baseUrl}}"], "path": ["multas"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/multas/1", "host": ["{{baseUrl}}"], "path": ["multas", "1"] } } },
+        {
+          "name": "GET Listar todas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"valor\": 293.47,\n  \"dataEmissao\": \"2026-04-10\",\n  \"descricao\": \"Estacionamento em local proibido na Av. Beira Mar.\",\n  \"status\": \"Pendente\",\n  \"clienteId\": 3,\n  \"reservaId\": 3\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/multas", "host": ["{{baseUrl}}"], "path": ["multas"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 293.47,\n  \"dataEmissao\": \"2026-04-10\",\n  \"descricao\": \"Estacionamento em local proibido na Av. Beira Mar.\",\n  \"status\": \"Pendente\",\n  \"clienteId\": 3,\n  \"reservaId\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"valor\": -100,\n  \"dataEmissao\": \"2030-01-01\",\n  \"status\": \"Arquivada\",\n  \"clienteId\": 9999\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/multas", "host": ["{{baseUrl}}"], "path": ["multas"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": -100,\n  \"dataEmissao\": \"2030-01-01\",\n  \"status\": \"Arquivada\",\n  \"clienteId\": 9999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar (quitar multa do cliente1)",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Paga\"\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/multas/1", "host": ["{{baseUrl}}"], "path": ["multas", "1"] },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Paga\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/multas/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas",
+                "7"
+              ]
+            },
             "description": "Quita a multa pendente do Cliente 1 (Henrique). Após isso, reserva8 pode ter check-in realizado."
-          }
+          },
+          "description": "Quita a multa pendente de trânsito do Cliente 1 (Henrique) — ID 7. Após isso, reserva8 pode ter check-in realizado."
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/multas/5", "host": ["{{baseUrl}}"], "path": ["multas", "5"] } } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/multas/11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "multas",
+                "11"
+              ]
+            }
+          },
+          "description": "Multa 11 (trânsito, cliente5, Paga). Sem referências externas — deve remover com sucesso."
+        }
       ]
     },
     {
       "name": "Seguro",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/seguros", "host": ["{{baseUrl}}"], "path": ["seguros"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/seguros/1", "host": ["{{baseUrl}}"], "path": ["seguros", "1"] } } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros",
+                "1"
+              ]
+            }
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Plano Diamond\",\n  \"empresaSeguradora\": \"Mapfre Seguros\",\n  \"valorDiariaAdicional\": 75.00,\n  \"franquia\": 500.00,\n  \"coberturaIds\": [1, 2, 3, 4]\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/seguros", "host": ["{{baseUrl}}"], "path": ["seguros"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Plano Diamond\",\n  \"empresaSeguradora\": \"Mapfre Seguros\",\n  \"valorDiariaAdicional\": 75.00,\n  \"franquia\": 500.00,\n  \"coberturaIds\": [1, 2, 3, 4]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros"
+              ]
+            }
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"\",\n  \"empresaSeguradora\": \"\",\n  \"valorDiariaAdicional\": -1,\n  \"franquia\": -500\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/seguros", "host": ["{{baseUrl}}"], "path": ["seguros"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"empresaSeguradora\": \"\",\n  \"valorDiariaAdicional\": -1,\n  \"franquia\": -500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar (com coberturas)",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"valorDiariaAdicional\": 55.00,\n  \"franquia\": 1200.00,\n  \"coberturaIds\": [1, 2]\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/seguros/1", "host": ["{{baseUrl}}"], "path": ["seguros", "1"] }
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valorDiariaAdicional\": 55.00,\n  \"franquia\": 1200.00,\n  \"coberturaIds\": [1, 2]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros",
+                "1"
+              ]
+            }
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/seguros/1", "host": ["{{baseUrl}}"], "path": ["seguros", "1"] } } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/seguros/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "seguros",
+                "1"
+              ]
+            }
+          }
+        }
       ]
     },
     {
       "name": "Veículo",
       "item": [
-        { "name": "GET Listar todos", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/veiculos", "host": ["{{baseUrl}}"], "path": ["veiculos"] } } },
-        { "name": "GET Buscar por ID", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/veiculos/3", "host": ["{{baseUrl}}"], "path": ["veiculos", "3"] }, "description": "Veículo 3 = Hatch, Disponível." } },
+        {
+          "name": "GET Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Buscar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos",
+                "3"
+              ]
+            },
+            "description": "Veículo 3 = Hatch, Disponível."
+          }
+        },
         {
           "name": "POST Criar (válido)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"placa\": \"GHI5J67\",\n  \"chassi\": \"9BWZZZ37ZVT000099\",\n  \"status\": \"Disponível\",\n  \"marca\": \"Honda\",\n  \"modelo\": \"HR-V\",\n  \"cor\": \"Branco\",\n  \"anoFabricacao\": \"2024\",\n  \"quilometragem\": 0.00,\n  \"categoriaVeiculoId\": 3,\n  \"agenciaId\": 1\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/veiculos", "host": ["{{baseUrl}}"], "path": ["veiculos"] },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"GHI5J67\",\n  \"chassi\": \"9BWZZZ37ZVT000099\",\n  \"status\": \"Disponível\",\n  \"marca\": \"Honda\",\n  \"modelo\": \"HR-V\",\n  \"cor\": \"Branco\",\n  \"anoFabricacao\": \"2024\",\n  \"quilometragem\": 0.00,\n  \"categoriaVeiculoId\": 3,\n  \"agenciaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos"
+              ]
+            },
             "description": "categoriaVeiculoId 3 = SUV Premium."
           }
         },
         {
           "name": "POST Criar (máximo de erros por validação de campos)",
           "request": {
-            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"placa\": \"INVALIDA\",\n  \"chassi\": \"ABCDEFG\",\n  \"status\": \"Alugado\",\n  \"marca\": \"Lamborghini\",\n  \"modelo\": \"\",\n  \"cor\": \"Vermelha\",\n  \"anoFabricacao\": \"2099\",\n  \"quilometragem\": -100,\n  \"categoriaVeiculoId\": 9999,\n  \"agenciaId\": 9999\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/veiculos", "host": ["{{baseUrl}}"], "path": ["veiculos"] }
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"INVALIDA\",\n  \"chassi\": \"ABCDEFG\",\n  \"status\": \"Alugado\",\n  \"marca\": \"Lamborghini\",\n  \"modelo\": \"\",\n  \"cor\": \"Vermelha\",\n  \"anoFabricacao\": \"2099\",\n  \"quilometragem\": -100,\n  \"categoriaVeiculoId\": 9999,\n  \"agenciaId\": 9999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos"
+              ]
+            }
           }
         },
         {
           "name": "PUT Atualizar",
           "request": {
-            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Manutenção\",\n  \"quilometragem\": 41000.00\n}", "options": { "raw": { "language": "json" } } },
-            "url": { "raw": "{{baseUrl}}/veiculos/6", "host": ["{{baseUrl}}"], "path": ["veiculos", "6"] },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Manutenção\",\n  \"quilometragem\": 41000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos",
+                "6"
+              ]
+            },
             "description": "Veículo 6 = Picape, Disponível — sem checkin ativo, seguro para atualizar."
           }
         },
-        { "name": "DELETE Remover", "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/veiculos/2", "host": ["{{baseUrl}}"], "path": ["veiculos", "2"] }, "description": "Veículo 2 = Econômico, Reservado — não possui checkins vinculados, deve remover com sucesso." } }
+        {
+          "name": "DELETE Remover",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos",
+                "2"
+              ]
+            },
+            "description": "Veículo 2 = Econômico, Reservado — não possui checkins vinculados, deve remover com sucesso."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "item": [
+        {
+          "name": "GET Reservas por funcionário (todos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa reservas do período por funcionário com quantidade, valor total, médio e breakdown por status.\nCobre reservas 1–6 do seed (dataRetirada entre 2026-04-06 e 2026-04-26)."
+          }
+        },
+        {
+          "name": "GET Reservas por funcionário (filtrado por funcionário)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario?inicio=2026-04-01&termino=2026-05-16&funcionarioId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "funcionarioId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Restrito ao funcionário 1 (Emanuelly). Reservas 1 e 5 no período."
+          }
+        },
+        {
+          "name": "GET Reservas por categoria (todas)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-categoria?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-categoria"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa reservas do período por categoria de veículo com totais, médias e contagem de clientes/funcionários únicos."
+          }
+        },
+        {
+          "name": "GET Reservas por categoria (filtrada)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-categoria?inicio=2026-04-01&termino=2026-05-16&categoriaVeiculoId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-categoria"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "categoriaVeiculoId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Restrito à categoria 3 (SUV Premium). Reservas 1 e 6 no período."
+          }
+        },
+        {
+          "name": "GET Check-ins por agência (todos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkins-por-agencia?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkins-por-agencia"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa check-ins do período por agência de retirada, com veículos utilizados, clientes únicos e cliente com mais check-ins."
+          }
+        },
+        {
+          "name": "GET Check-ins por agência (filtrado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkins-por-agencia?inicio=2026-04-01&termino=2026-05-16&agenciaId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkins-por-agencia"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "agenciaId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Restrito à Agência 1 (Cachoeiro). Check-ins 1, 2 e 5 passaram por esta agência no período."
+          }
+        },
+        {
+          "name": "GET Check-ins por veículo (todos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkins-por-veiculo?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkins-por-veiculo"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa check-ins do período por veículo com quilometragem média/máxima, clientes únicos e funcionário mais frequente."
+          }
+        },
+        {
+          "name": "GET Check-ins por veículo (filtrado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkins-por-veiculo?inicio=2026-04-01&termino=2026-05-16&veiculoId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkins-por-veiculo"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "veiculoId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Restrito ao veículo 3 (BYD Dolphin, Hatch). Check-ins 2 e 5 utilizaram este veículo no período."
+          }
+        },
+        {
+          "name": "GET Checkouts com avárias por veículo (todos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkouts-avarias-por-veiculo?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkouts-avarias-por-veiculo"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa checkouts com avárias por veículo: quantidade de checkouts, quantidade/valor de avárias e tipos registrados.\nTodos os checkouts históricos (1–6) possuíram avárias."
+          }
+        },
+        {
+          "name": "GET Checkouts com avárias por veículo (filtrado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkouts-avarias-por-veiculo?inicio=2026-04-01&termino=2026-05-16&veiculoId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkouts-avarias-por-veiculo"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "veiculoId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Restrito ao veículo 3 (BYD Dolphin). Checkouts 2 e 5 possuíram avárias neste veículo no período."
+          }
+        },
+        {
+          "name": "GET Checkouts com multas por cliente (todos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkouts-multas-por-cliente?inicio=2026-04-01&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkouts-multas-por-cliente"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Agrupa checkouts do período por cliente, somando multas de avária vinculadas às reservas (reservaId preenchido).\nMultas 1–6 estão vinculadas às reservas 1–6, todas com checkouts neste período."
+          }
+        },
+        {
+          "name": "GET Checkouts com multas por cliente (filtrado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/checkouts-multas-por-cliente?inicio=2026-04-01&termino=2026-05-16&clienteId=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "checkouts-multas-por-cliente"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Restrito ao cliente 5 (Lucas). Multas de avária das reservas 5 e 6: R$1250 + R$630 = R$1880 total."
+          }
+        },
+        {
+          "name": "GET Paginação (exemplo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario?inicio=2026-04-01&termino=2026-05-16&pagina=1&itensPorPagina=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "pagina",
+                  "value": "1"
+                },
+                {
+                  "key": "itensPorPagina",
+                  "value": "2"
+                }
+              ]
+            },
+            "description": "Retorna até 2 resultados por página. O envelope inclui: dados[], paginacao.{ pagina, itensPorPagina, total, totalPaginas }."
+          }
+        },
+        {
+          "name": "GET [Erro] Datas obrigatórias ausentes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ]
+            },
+            "description": "Erro esperado (400): \"Os campos 'inicio' e 'termino' são obrigatórios!\""
+          }
+        },
+        {
+          "name": "GET [Erro] Data inválida",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario?inicio=nao-e-uma-data&termino=2026-05-16",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "nao-e-uma-data"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-05-16"
+                }
+              ]
+            },
+            "description": "Erro esperado (400): \"O parâmetro 'inicio' não é uma data válida!\""
+          }
+        },
+        {
+          "name": "GET [Erro] Período invertido (termino < inicio)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/reservas-por-funcionario?inicio=2026-05-16&termino=2026-04-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "relatorios",
+                "reservas-por-funcionario"
+              ],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2026-05-16"
+                },
+                {
+                  "key": "termino",
+                  "value": "2026-04-01"
+                }
+              ]
+            },
+            "description": "Erro esperado (400): \"A data 'termino' deve ser igual ou posterior à data 'inicio'!\""
+          }
+        }
       ]
     }
   ]
