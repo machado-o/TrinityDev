@@ -22,17 +22,17 @@ function validarPeriodo(inicio, termino) {
 
 // Lê pagina/itensPorPagina da query string e calcula o deslocamento SQL
 function parsePaginacao(query) {
-  const pagina        = Math.max(1, parseInt(query.pagina)        || 1);
+  const pagina = Math.max(1, parseInt(query.pagina) || 1);
   const itensPorPagina = Math.min(100, Math.max(1, parseInt(query.itensPorPagina) || 20));
-  const deslocamento  = (pagina - 1) * itensPorPagina;
+  const deslocamento = (pagina - 1) * itensPorPagina;
   return { pagina, itensPorPagina, deslocamento };
 }
 
 // Monta o envelope de resposta com metadados de paginação
 function montarResposta(rows, pagina, itensPorPagina) {
-  const total       = rows.length > 0 ? parseInt(rows[0].totalRegistros) : 0;
+  const total = rows.length > 0 ? parseInt(rows[0].totalRegistros) : 0;
   const totalPaginas = Math.ceil(total / itensPorPagina) || 1;
-  const dados       = rows.map(({ totalRegistros, ...rest }) => rest);
+  const dados = rows.map(({ totalRegistros, ...rest }) => rest);
   return { dados, paginacao: { pagina, itensPorPagina, total, totalPaginas } };
 }
 
@@ -85,6 +85,55 @@ class RelatoriosService {
     return montarResposta(rows, pagina, itensPorPagina);
   }
 
+  static async findReservasPorFuncionarioById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+      // Verifica se o funcionário existe antes de rodar o relatório
+    const funcionario = await sequelize.query(
+      `SELECT id FROM funcionarios WHERE id = :id`,
+      { replacements: { id }, type: QueryTypes.SELECT }
+    );
+
+    if (funcionario.length === 0) throw `Funcionário com id ${id} não encontrado!`;
+   
+    const rows = await sequelize.query(
+      `SELECT
+        f.id                                                      AS "funcionarioId",
+        f.nome                                                    AS "funcionarioNome",
+        f.cargo,
+        a.nome                                                    AS "agenciaNome",
+        COUNT(r.id)                                               AS "quantidadeReservas",
+        COALESCE(SUM(r.valor_final), 0)                           AS "valorTotal",
+        ROUND(COALESCE(AVG(r.valor_final), 0)::numeric, 2)        AS "valorMedio",
+        COUNT(CASE WHEN r.status = 'Concluída'  THEN 1 END)       AS "reservasConcluidas",
+        COUNT(CASE WHEN r.status = 'Cancelada'  THEN 1 END)       AS "reservasCanceladas",
+        COUNT(CASE WHEN r.status = 'Pendente'   THEN 1 END)       AS "reservasPendentes",
+        COUNT(CASE WHEN r.status = 'Confirmada' THEN 1 END)       AS "reservasConfirmadas",
+        COUNT(*) OVER()                                           AS "totalRegistros"
+      FROM reservas r
+      INNER JOIN funcionarios f ON r.funcionario_id = f.id
+      INNER JOIN agencias a     ON f.agencia_id     = a.id
+      WHERE r.data_retirada >= :inicio
+        AND r.data_retirada <= :termino
+        AND f.id = :id
+      GROUP BY f.id, f.nome, f.cargo, a.nome
+      ORDER BY "quantidadeReservas" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  }
+
   // 2. Reservas por categoria de veículo em um período informado.
   // Filtros: Categoria de Veículo (opcional) e Data (obrigatório).
   // Totalização: Quantidade e valor de reservas de uma categoria de veículo.
@@ -122,6 +171,54 @@ class RelatoriosService {
       LIMIT :limite OFFSET :deslocamento`,
       {
         replacements: { inicio, termino, categoriaVeiculoId: categoriaVeiculoId ?? null, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  }
+
+  static async findReservasPorCategoriaById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+      // Verifica se a categoria de veículo existe antes de rodar o relatório
+    const categoria = await sequelize.query(
+      `SELECT id FROM "categoriasVeiculos" WHERE id = :id`,
+      { replacements: { id }, type: QueryTypes.SELECT }
+    );
+
+    if (categoria.length === 0) throw `Categoria de veículo com id ${id} não encontrada!`;
+
+    const rows = await sequelize.query(
+      `SELECT
+        cv.id                                                     AS "categoriaId",
+        cv.nome                                                   AS "categoriaNome",
+        cv.tipo_carroceria                                        AS "tipoCarroceria",
+        cv.valor_diaria                                           AS "valorDiariaCadastrado",
+        COUNT(r.id)                                               AS "quantidadeReservas",
+        COALESCE(SUM(r.valor_final), 0)                           AS "valorTotal",
+        ROUND(COALESCE(AVG(r.valor_final), 0)::numeric, 2)        AS "valorMedio",
+        COUNT(DISTINCT r.cliente_id)                              AS "clientesUnicos",
+        COUNT(DISTINCT r.funcionario_id)                          AS "funcionariosQueReservaram",
+        COUNT(CASE WHEN r.status = 'Concluída' THEN 1 END)        AS "reservasConcluidas",
+        COUNT(CASE WHEN r.status = 'Cancelada' THEN 1 END)        AS "reservasCanceladas",
+        COUNT(*) OVER()                                           AS "totalRegistros"
+      FROM reservas r
+      INNER JOIN "categoriasVeiculos" cv ON r.categoria_veiculo_id = cv.id
+      WHERE r.data_retirada >= :inicio
+        AND r.data_retirada <= :termino
+        AND cv.id = :id
+      GROUP BY cv.id, cv.nome, cv.tipo_carroceria, cv.valor_diaria
+      ORDER BY "quantidadeReservas" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
         type: QueryTypes.SELECT,
       }
     );
@@ -186,6 +283,64 @@ class RelatoriosService {
     return montarResposta(rows, pagina, itensPorPagina);
   }
 
+  static async findCheckinsPorAgenciaById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+      // Verifica se a agência existe antes de rodar o relatório
+    const agencia = await sequelize.query(
+      `SELECT id FROM agencias WHERE id = :id`,
+      { replacements: { id }, type: QueryTypes.SELECT }
+    );
+
+    if (agencia.length === 0) throw `Agência com id ${id} não encontrada!`;
+
+    const rows = await sequelize.query(
+      `SELECT
+        a.id                               AS "agenciaId",
+        a.nome                             AS "agenciaNome",
+        a.endereco,
+        a.status                           AS "agenciaStatus",
+        COUNT(ci.id)                       AS "quantidadeCheckins",
+        COUNT(DISTINCT r.cliente_id)       AS "clientesUnicos",
+        COUNT(DISTINCT ci.veiculo_id)      AS "veiculosUtilizados",
+        COUNT(DISTINCT ci.funcionario_id)  AS "funcionariosEnvolvidos",
+        (
+          SELECT cl.nome
+          FROM clientes cl
+          INNER JOIN reservas r2  ON r2.cliente_id  = cl.id
+          INNER JOIN checkins ci2 ON ci2.reserva_id = r2.id
+          WHERE r2.agencia_retirada_id = a.id
+            AND ci2.data_checkin >= :inicio
+            AND ci2.data_checkin <= :termino
+          GROUP BY cl.id, cl.nome
+          ORDER BY COUNT(ci2.id) DESC
+          LIMIT 1
+        )                                  AS "clienteComMaisCheckins",
+        COUNT(*) OVER()                    AS "totalRegistros"
+      FROM checkins ci
+      INNER JOIN reservas r ON ci.reserva_id        = r.id
+      INNER JOIN agencias a ON r.agencia_retirada_id = a.id
+      WHERE ci.data_checkin >= :inicio
+        AND ci.data_checkin <= :termino
+        AND a.id = :id
+      GROUP BY a.id, a.nome, a.endereco, a.status
+      ORDER BY "quantidadeCheckins" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  }
+
   // 4. Check-ins agrupados por veículo em um período informado.
   // Filtros: Veículo (opcional) e Data (obrigatório).
   // Totalização: Quantidade de check-ins de um veículo.
@@ -235,6 +390,66 @@ class RelatoriosService {
       LIMIT :limite OFFSET :deslocamento`,
       {
         replacements: { inicio, termino, veiculoId: veiculoId ?? null, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  } 
+
+  static async findCheckinsPorVeiculoById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+      // Verifica se o veículo existe antes de rodar o relatório
+    const veiculo = await sequelize.query(
+      `SELECT id FROM veiculos WHERE id = :id`,
+      { replacements: { id }, type: QueryTypes.SELECT }
+    );
+
+    if (veiculo.length === 0) throw `Veículo com id ${id} não encontrado!`;
+
+    const rows = await sequelize.query(
+      `SELECT
+        v.id                                                          AS "veiculoId",
+        v.placa,
+        v.marca,
+        v.modelo,
+        v.ano_fabricacao                                              AS "anoFabricacao",
+        cv.nome                                                       AS "categoriaNome",
+        COUNT(ci.id)                                                  AS "quantidadeCheckins",
+        ROUND(AVG(ci.quilometragem_checkin)::numeric, 2)              AS "quilometragemMediaCheckin",
+        MAX(ci.quilometragem_checkin)                                  AS "maiorQuilometragemCheckin",
+        COUNT(DISTINCT r.cliente_id)                                  AS "clientesUnicos",
+        (
+          SELECT f.nome
+          FROM funcionarios f
+          INNER JOIN checkins ci2 ON ci2.funcionario_id = f.id
+          WHERE ci2.veiculo_id = v.id
+            AND ci2.data_checkin >= :inicio
+            AND ci2.data_checkin <= :termino
+          GROUP BY f.id, f.nome
+          ORDER BY COUNT(ci2.id) DESC
+          LIMIT 1
+        )                                                             AS "funcionarioComMaisCheckins",
+        COUNT(*) OVER()                                               AS "totalRegistros"
+      FROM checkins ci
+      INNER JOIN veiculos v              ON ci.veiculo_id          = v.id
+      INNER JOIN "categoriasVeiculos" cv ON v.categoria_veiculo_id = cv.id
+      INNER JOIN reservas r              ON ci.reserva_id          = r.id
+      WHERE ci.data_checkin >= :inicio
+        AND ci.data_checkin <= :termino
+        AND v.id = :id
+      GROUP BY v.id, v.placa, v.marca, v.modelo, v.ano_fabricacao, cv.nome
+      ORDER BY "quantidadeCheckins" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
         type: QueryTypes.SELECT,
       }
     );
@@ -292,6 +507,58 @@ class RelatoriosService {
     return montarResposta(rows, pagina, itensPorPagina);
   }
 
+  static async findCheckoutsComAvariasPorVeiculoById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+     // Verifica se o veículo existe antes de rodar o relatório
+    const veiculo = await sequelize.query(
+    `SELECT id FROM veiculos WHERE id = :id`,
+    { replacements: { id }, type: QueryTypes.SELECT }
+    );
+    
+    if (veiculo.length === 0) throw `Veículo com id ${id} não encontrado!`;
+
+    const rows = await sequelize.query(
+      `SELECT
+        v.id                                                      AS "veiculoId",
+        v.placa,
+        v.marca,
+        v.modelo,
+        cv.nome                                                   AS "categoriaNome",
+        COUNT(DISTINCT co.id)                                     AS "quantidadeCheckouts",
+        COUNT(ca.avaria_id)                                       AS "quantidadeAvarias",
+        COALESCE(SUM(av.valor), 0)                                AS "valorTotalAvarias",
+        ROUND(COALESCE(AVG(av.valor), 0)::numeric, 2)             AS "valorMedioAvaria",
+        MAX(av.valor)                                             AS "maiorValorAvaria",
+        STRING_AGG(DISTINCT av.nome, ', ' ORDER BY av.nome)       AS "tiposAvarias",
+        COUNT(*) OVER()                                           AS "totalRegistros"
+      FROM checkouts co
+      INNER JOIN checkins ci             ON co.checkin_id           = ci.id
+      INNER JOIN veiculos v              ON ci.veiculo_id           = v.id
+      INNER JOIN "categoriasVeiculos" cv ON v.categoria_veiculo_id  = cv.id
+      INNER JOIN checkout_avaria ca      ON ca.checkout_id          = co.id
+      INNER JOIN avarias av              ON av.id                   = ca.avaria_id
+      WHERE co.data_checkout >= :inicio
+      AND co.data_checkout <= :termino
+      AND v.id = :id
+      GROUP BY v.id, v.placa, v.marca, v.modelo, cv.nome
+      ORDER BY "quantidadeAvarias" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  }
+
   // 6. Check-outs com multas aplicadas a clientes em um período.
   // Filtros: Cliente (opcional) e Data (obrigatório, baseado na data do checkout).
   // Totalização: Quantidade e valor de multas de um cliente.
@@ -331,6 +598,57 @@ class RelatoriosService {
       LIMIT :limite OFFSET :deslocamento`,
       {
         replacements: { inicio, termino, clienteId: clienteId ?? null, limite: itensPorPagina, deslocamento },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return montarResposta(rows, pagina, itensPorPagina);
+  }
+
+  static async findCheckoutsComMultasPorClienteById(req) {
+    const { inicio, termino } = req.query;
+    const { id } = req.params;
+
+    const erros = validarPeriodo(inicio, termino);
+    if (erros.length > 0) throw erros.join(" ");
+
+    const { pagina, itensPorPagina, deslocamento } = parsePaginacao(req.query);
+
+    // Verifica se o cliente existe antes de rodar o relatório
+    const cliente = await sequelize.query(
+      `SELECT id FROM clientes WHERE id = :id`,
+      { replacements: { id }, type: QueryTypes.SELECT }
+    );
+
+    if (cliente.length === 0) throw `Cliente com id ${id} não encontrado!`;
+
+    const rows = await sequelize.query(
+      `SELECT
+        cl.id                                                                      AS "clienteId",
+        cl.nome                                                                    AS "clienteNome",
+        cl.cpf,
+        cl.email,
+        COUNT(DISTINCT co.id)                                                      AS "quantidadeCheckouts",
+        COUNT(m.id)                                                                AS "quantidadeMultas",
+        COALESCE(SUM(m.valor), 0)                                                  AS "valorTotalMultas",
+        COUNT(CASE WHEN m.status = 'Pendente' THEN 1 END)                          AS "multasPendentes",
+        COUNT(CASE WHEN m.status = 'Paga'     THEN 1 END)                          AS "multasPagas",
+        COALESCE(SUM(CASE WHEN m.status = 'Pendente' THEN m.valor ELSE 0 END), 0)  AS "valorMultasPendentes",
+        COALESCE(SUM(co.taxa_inspecao), 0)                                          AS "totalTaxasInspecao",
+        COUNT(*) OVER()                                                             AS "totalRegistros"
+      FROM checkouts co
+      INNER JOIN checkins ci ON co.checkin_id = ci.id
+      INNER JOIN reservas r  ON ci.reserva_id = r.id
+      INNER JOIN clientes cl ON r.cliente_id  = cl.id
+      INNER JOIN multas m    ON m.reserva_id  = r.id
+      WHERE co.data_checkout >= :inicio
+        AND co.data_checkout <= :termino
+        AND cl.id = :id
+      GROUP BY cl.id, cl.nome, cl.cpf, cl.email
+      ORDER BY "valorTotalMultas" DESC
+      LIMIT :limite OFFSET :deslocamento`,
+      {
+        replacements: { inicio, termino, id, limite: itensPorPagina, deslocamento },
         type: QueryTypes.SELECT,
       }
     );
