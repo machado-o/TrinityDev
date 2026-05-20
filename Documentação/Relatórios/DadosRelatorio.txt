@@ -1,0 +1,46 @@
+Com esses dados, você consegue montar coisas bem práticas. Vou separar por tipo de visual:
+
+  ---
+  Tabelas (o core de tudo)
+
+  São a base de todos os 6 relatórios — filtro de período + tabela com os agregados. Simples e direto.
+
+  ---
+  O que dá pra ir além das tabelas
+
+  Relatório 1 — Reservas por funcionário
+  - Ranking dos funcionários (barra horizontal) → quem vendeu mais
+  - Comparativo visual: reservas concluídas vs canceladas por funcionário
+
+  Relatório 2 — Reservas por categoria
+  - Pizza ou barra: distribuição de receita por categoria
+  - Qual categoria gera mais dinheiro vs qual tem mais volume
+
+  Relatório 3 — Check-ins por agência
+  - Ranking de agências por movimento
+  - Comparativo: clientes únicos vs total de check-ins (mostra fidelização)
+
+  Relatório 4 — Check-ins por veículo
+  - Quais veículos mais rodam → lista de mais utilizados
+  - Evolução da quilometragem média (sinaliza desgaste)
+
+  Relatório 5 — Avarias por veículo
+  - Quais veículos dão mais prejuízo
+  - Tipos de avaria mais comuns (barra dos tiposAvarias)
+
+  Relatório 6 — Multas por cliente
+  - Clientes com maior dívida pendente → útil pra cobrança
+  - Relação multas pagas vs pendentes
+
+  ---
+  O que os dados não permitem mostrar
+
+  - Evolução no tempo (sem quebra por mês/semana — tudo vem num único agregado do período)
+  - Mapa geográfico das agências (não tem lat/long)
+  - Funil de conversão reserva→checkin→checkout (dados estão em relatórios separados, sem ligação entre eles)
+
+  ---
+  Conclusão prática
+
+  O mais útil visualmente seria: tabela + um gráfico de barras por relatório. Os dados têm volume (quantidade) e valor (R$) em quase todos, então sempre dá pra fazer uma comparação rápida. Nada de dashboard
+  exótico — o que os SQLs entregam é ranking e totalização, e barra horizontal representa isso direto.
