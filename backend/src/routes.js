@@ -102,23 +102,12 @@ routes.delete("/veiculos/:id", VeiculoController.delete);
 
 // Relatórios
 // Henrique
-routes.get("/relatorios/reservas-por-funcionario", RelatoriosController.findReservasPorFuncionario);
-routes.get("/relatorios/reservas-por-funcionario/:id", RelatoriosController.findReservasPorFuncionarioById);
-
-routes.get("/relatorios/reservas-por-categoria", RelatoriosController.findReservasPorCategoria);
-routes.get("/relatorios/reservas-por-categoria/:id", RelatoriosController.findReservasPorCategoriaById);
-
+routes.get("/relatorios/reservas-por-funcionario",     RelatoriosController.findReservasPorFuncionario);
+routes.get("/relatorios/reservas-por-categoria",       RelatoriosController.findReservasPorCategoria);
 // Lorrayne
-routes.get("/relatorios/checkins-por-agencia", RelatoriosController.findCheckinsPorAgencia);
-routes.get("/relatorios/checkins-por-agencia/:id", RelatoriosController.findCheckinsPorAgenciaById);
-
-routes.get("/relatorios/checkins-por-veiculo", RelatoriosController.findCheckinsPorVeiculo);
-routes.get("/relatorios/checkins-por-veiculo/:id", RelatoriosController.findCheckinsPorVeiculoById);
-
+routes.get("/relatorios/checkins-por-agencia",         RelatoriosController.findCheckinsPorAgencia);
+routes.get("/relatorios/checkins-por-veiculo",         RelatoriosController.findCheckinsPorVeiculo);
 // Julia
 routes.get("/relatorios/checkouts-avarias-por-veiculo", RelatoriosController.findCheckoutsComAvariasPorVeiculo);
-routes.get("/relatorios/checkouts-avarias-por-veiculo/:id", RelatoriosController.findCheckoutsComAvariasPorVeiculoById);
-
-routes.get("/relatorios/checkouts-multas-por-cliente", RelatoriosController.findCheckoutsComMultasPorCliente);
-routes.get("/relatorios/checkouts-multas-por-cliente/:id", RelatoriosController.findCheckoutsComMultasPorClienteById);
+routes.get("/relatorios/checkouts-multas-por-cliente",  RelatoriosController.findCheckoutsComMultasPorCliente);
 export default routes;
