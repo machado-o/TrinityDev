@@ -38,7 +38,7 @@ export const databaseConfig = {
     freezeTableName: true,
     underscored: true
   },
-  ...(!process.env.DB_HOST && { dialectOptions: { ssl: true } })
+  ...(!process.env.DB_HOST && { dialectOptions: { ssl: { rejectUnauthorized: false } } })
 };
 
 
