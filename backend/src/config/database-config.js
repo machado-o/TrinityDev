@@ -27,22 +27,18 @@ export const databaseConfig = {
 };
 */
 
-//ADICIONAR CONFIGURAÇÃO DO BANCO DE DADOS PARA O AMBIENTE DE PRODUÇÃO NO RENDER
-// Configuração do banco de dados no ambiente de produção
 export const databaseConfig = {
   dialect: 'postgres',
-  host: 'dpg-d8c70lmrnols739koiug-a.oregon-postgres.render.com',
-  username: 'sav_trinitydev_db_user',
-  password: 'OqGbMK162JIRckf6J9BesA08hNs7aF9M',
-  database: 'sav_trinitydev_db',
+  host:     process.env.DB_HOST || 'dpg-d8d3kvt7vvec73ftakb0-a.oregon-postgres.render.com',
+  username: process.env.DB_USER || 'sav_trinitydev_db_user',
+  password: process.env.DB_PASS || 'ppETReCruy5tVrHk8poCezdIbN94GLb4',
+  database: process.env.DB_NAME || 'sav_trinitydev_db',
   define: {
     timestamps: true,
     freezeTableName: true,
     underscored: true
   },
-  dialectOptions: {
-    ssl: true
-  }
+  ...(!process.env.DB_HOST && { dialectOptions: { ssl: true } })
 };
 
 

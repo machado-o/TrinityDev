@@ -42,13 +42,13 @@ Reserva.associate(sequelize.models);
 Seguro.associate(sequelize.models);
 Veiculo.associate(sequelize.models);
 
-//databaseInserts(); // comentar quando estiver em ambiente de produção (não criar tabelas e não inserir registros de teste)
+databaseInserts(); // comentar quando estiver em ambiente de produção (não criar tabelas e não inserir registros de teste)
 
 function databaseInserts() {
     (async () => {
 
-        await sequelize.sync({ force: true });
-
+        await sequelize.sync();
+/*
         const toDateOnly = (d) => d.toISOString().slice(0, 10);
         const plusDays = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return d; };
         const fmt = (date, hhmm) => `${toDateOnly(date)} ${hhmm}:00`;
@@ -247,7 +247,7 @@ function databaseInserts() {
         await Multa.create({ valor:  88.50, dataEmissao: "2023-12-05", descricao: "Estacionamento irregular",             status: "Paga",     clienteId: cliente3.id });
         await Multa.create({ valor: 540.90, dataEmissao: "2024-01-17", descricao: "Ultrapassagem em local proibido",      status: "Pendente", clienteId: cliente4.id });
         await Multa.create({ valor: 150.00, dataEmissao: "2024-06-10", descricao: "Velocidade excessiva em zona escolar", status: "Paga",     clienteId: cliente5.id });
-
+*/
     })();
 }
 
