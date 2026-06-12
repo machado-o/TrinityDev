@@ -45,6 +45,13 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
 volumes:
   pg_data:
   node_modules_data:

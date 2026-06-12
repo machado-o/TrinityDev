@@ -1,5 +1,6 @@
 import express from "express";
 
+import { AuthController } from './controllers/AuthController.js';
 import { AgenciaController } from './controllers/AgenciaController.js';
 import { AvariaController } from './controllers/AvariaController.js';
 import { CategoriaVeiculoController } from './controllers/CategoriaVeiculoController.js';
@@ -15,6 +16,9 @@ import { VeiculoController } from './controllers/VeiculoController.js';
 import { RelatoriosController } from './controllers/RelatoriosController.js';
 
 const routes = express.Router();
+
+// Auth
+routes.post("/login", AuthController.login);
 
 // Agencia
 routes.get("/agencias", AgenciaController.findAll);

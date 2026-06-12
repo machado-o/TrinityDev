@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-color: #FAFAF9;
+    color: #1F2937;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #D97706;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 font-medium text-sm px-4 py-2 rounded-md transition-colors;
+    background-color: #D97706;
+    color: #451A03;
+  }
+  .btn-primary:hover { background-color: #B45309; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-1.5 bg-white font-medium text-sm px-4 py-2 rounded-md border transition-colors;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+  .btn-secondary:hover { background-color: #F5F5F4; }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-danger {
+    @apply inline-flex items-center gap-1.5 bg-red-600 text-white font-medium text-sm px-4 py-2 rounded-md transition-colors;
+  }
+  .btn-danger:hover { background-color: #B91C1C; }
+  .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 font-medium text-sm px-3 py-1.5 rounded-md transition-colors;
+    color: #6B7280;
+  }
+  .btn-ghost:hover { background-color: #F5F5F4; color: #374151; }
+
+  .field-label {
+    @apply block text-sm font-medium mb-1;
+    color: #374151;
+  }
+
+  .field-input {
+    @apply w-full px-3 py-2 text-sm border rounded-md bg-white transition-colors;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+  .field-input::placeholder { color: #9CA3AF; }
+  .field-input:focus { border-color: #D97706; outline: none; box-shadow: 0 0 0 1px #D97706; }
+
+  .field-select {
+    @apply w-full px-3 py-2 text-sm border rounded-md bg-white transition-colors;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+  .field-select:focus { border-color: #D97706; outline: none; box-shadow: 0 0 0 1px #D97706; }
+
+  .field-textarea {
+    @apply w-full px-3 py-2 text-sm border rounded-md bg-white transition-colors resize-y;
+    color: #1F2937;
+    border-color: #E7E5E4;
+    min-height: 80px;
+  }
+  .field-textarea:focus { border-color: #D97706; outline: none; box-shadow: 0 0 0 1px #D97706; }
+
+  .field-error {
+    @apply text-red-600 text-xs mt-1;
+  }
+
+  .field-hint {
+    @apply text-xs mt-1;
+    color: #6B7280;
+  }
+
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif;
+    @apply text-2xl font-semibold;
+    color: #111827;
+  }
+
+  .section-label {
+    @apply text-[10px] font-semibold uppercase tracking-widest mb-1 px-3;
+    color: #6B7280;
+  }
+
+  .card {
+    @apply bg-white rounded-lg border;
+    border-color: #E7E5E4;
+  }
+
+  .th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b;
+    color: #6B7280;
+    background-color: #F5F5F4;
+    border-color: #E7E5E4;
+  }
+
+  .th-r {
+    @apply px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider border-b;
+    color: #6B7280;
+    background-color: #F5F5F4;
+    border-color: #E7E5E4;
+  }
+
+  .td {
+    @apply px-4 py-3 text-sm border-b;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+
+  .td-mono {
+    @apply px-4 py-3 text-sm border-b;
+    font-family: 'JetBrains Mono', monospace;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+
+  .td-r {
+    @apply px-4 py-3 text-sm text-right border-b;
+    font-family: 'JetBrains Mono', monospace;
+    color: #1F2937;
+    border-color: #E7E5E4;
+  }
+
+  .callout-info {
+    @apply flex items-start gap-2 px-3 py-2 rounded-md text-sm;
+    background-color: #EFF6FF;
+    color: #1E40AF;
+    border: 1px solid #BFDBFE;
+  }
+
+  .callout-warning {
+    @apply flex items-start gap-2 px-3 py-2 rounded-md text-sm;
+    background-color: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+  }
+
+  .callout-amber {
+    @apply flex items-start gap-2 px-3 py-2 rounded-md text-sm;
+    background-color: #FFFBEB;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+}

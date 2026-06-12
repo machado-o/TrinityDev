@@ -98,3 +98,144 @@ Follow the pattern already established:
 
 **FuncionarioService:**
 - `senha` is excluded from all read queries (`findAll`, `findByPk`) — never returned in responses
+
+## Frontend / UI Guidelines
+
+The frontend is an **internal operational tool** for agency employees (attendants and
+managers), consuming the REST API described above. Optimize for speed of work, clarity of
+status, and low error rates — **not** for visual persuasion. This is a back-office app, not
+a marketing site: there is no marketing hero, no destination cards, no "inspire the visitor"
+sections. Borrow the discipline of a confident product (one strong brand color, generous
+spacing, organized structure), not the layout of a landing page.
+
+### Stack (React)
+
+- React. Styling via Bootstrap 5 (retheme it) and/or CSS Modules.
+- Define the palette once as CSS custom properties in `:root` and reference the variables —
+  never hardcode hex in components.
+- **Retheme Bootstrap — never ship the defaults.** Override its variables so the stock look
+  disappears: `--bs-primary: #D97706`, `--bs-body-bg: #FAFAF9`, `--bs-body-color: #1F2937`,
+  `--bs-border-color: #E7E5E4`, and set `--bs-border-radius` to a single consistent value.
+  Default blue, default rounded cards, and untouched Bootstrap components are the generic look.
+- Enforce consistency with a small set of shared components, reused everywhere:
+  - `<Button>` — one primary variant only (the chosen amber-with-dark-text OR charcoal-with-white pattern)
+  - `<StatusBadge status={...} />` — maps each domain status to its fixed color (single source of truth)
+  - `<DataTable>` — right-aligned, mono-face numeric columns
+  - `<FormField>` — label + input + inline error, wired to the Service-rule validations
+- Keep state simple (useState/useContext); this is a CRUD tool, not a SPA framework showcase.
+
+### Design philosophy
+
+- **Make deliberate choices, not defaults.** If a screen could have come out identical for
+  any other CRUD app, it is generic — redo it. Avoid the "AI look".
+- **The work surface is the hero.** Each screen opens on the task (the reservation list, the
+  check-in form), never on a slogan or a big-number-plus-gradient banner.
+- **Spend boldness in one place.** One signature element per screen; everything else quiet
+  and disciplined. Removing one thing usually improves the result.
+
+### Palette — Charcoal + amber
+
+Use **one** accent (amber), sparingly. No gradients, no gradient text, no second competing accent.
+
+- `#111827` — **Base dark**: header/sidebar, emphasis blocks
+- `#1F2937` — **Surface dark 2**: cards/blocks over a dark surface; also primary text on light
+- `#D97706` — **Action / accent**: primary CTAs, active links, key indicators
+- `#F59E0B` — **Highlight**: badges and punctual emphasis
+- `#FAFAF9` — **Page background**: warm off-white, **never** pure `#FFFFFF`
+- `#FFFFFF` — **Card surface** over the page background
+- `#6B7280` — **Secondary text**
+- `#E7E5E4` — **Borders / dividers**: warm, low-contrast — never blue-gray
+
+> **Critical (contrast):** Text on amber is **always dark** (`#451A03` or `#1F2937`), never
+> white. Pick one primary-button pattern and keep it product-wide — amber `#D97706` with dark
+> text, **or** charcoal `#111827` with white text. Amber is an accent (~10–15% of the screen),
+> never a large background. All text and interactive states must meet AA contrast (4.5:1).
+
+### Status colors (domain-tied)
+
+Status is the most important signal in this system — give it a fixed, semantic color and use
+it **everywhere** that status appears (lists, detail headers, badges). Never invent per-screen colors.
+
+- **Reserva** — `Pendente`: amber `#D97706` · `Confirmada`: blue `#2563EB` · `Concluída`:
+  green `#16A34A` · `Cancelada`: gray `#6B7280`
+- **Veiculo** — `Disponível`: green `#16A34A` · `Reservado`: amber `#D97706`
+- **Multa** — `Pendente`: red `#DC2626` · paid/settled: green `#16A34A`
+
+> **Important:** `Multa Pendente` blocks check-in (Rule 2). Surface it loudly in red on the
+> client/reservation view so the attendant sees the blocker before attempting check-in.
+
+### Typography
+
+- **Two families, distinct roles:** a display face (titles, with personality) and a body face
+  (legible). Display ≠ body. **Do not** use Inter for everything.
+- Starting point (swap to fit a brand): display `Space Grotesk`; body `IBM Plex Sans`; mono
+  `JetBrains Mono` for IDs, plates, odometer values, and report figures.
+- Intentional type scale with defined weights. Hierarchy via scale and weight, not via shadows
+  or borders on every element. **Sentence case** everywhere.
+
+### Layout & structure
+
+- **Persistent navigation** (sidebar or top bar) for the main areas: Reservas, Check-in,
+  Check-out, Relatórios, and cadastros (Agências, Funcionários, Clientes, Veículos, Categorias,
+  Seguros, Coberturas, Avarias, Multas).
+- **Data-dense but scannable** lists/tables. Right-align numeric columns (valores, quilometragem),
+  use the mono face for them, and keep row height generous enough to scan.
+- **Reports screens** mirror the API: filter bar with required `inicio`/`termino` plus optional
+  entity filters, and a paginated table bound to the `{ dados, paginacao: { pagina,
+  itensPorPagina, total, totalPaginas } }` envelope.
+- Numbering / eyebrows / dividers only when they encode something true (a real step order, like
+  the check-in → check-out flow). No decorative `01 / 02 / 03`.
+- No emojis. Icons from **one** library (Lucide or Tabler), consistent size and stroke.
+
+### Forms & states (mirror the business rules)
+
+Forms are where this app lives — surface the Service-layer rules inline, before submit when possible:
+
+- `ReservaService`: `dataRetirada` cannot be in the past; both agencies must be `Ativa`; warn on
+  conflicting client reservations. Financial values (`valorDiaria`, `valorFinal`, etc.) are
+  **computed by the backend** — display them read-only, never as editable inputs.
+- `CheckinService`: `cnhCondutor` must equal the client's CNH; block on any `Multa Pendente`;
+  if the category has no vehicle, communicate the **upgrade** clearly (which superior category /
+  vehicle was assigned) instead of a silent change.
+- `CheckoutService`: `quilometragemCheckout` must exceed `quilometragemCheckin` **and** the
+  vehicle's historical max — validate inline and explain the minimum allowed value.
+- **Buttons say the action** ("Confirmar check-in", not "Enviar") and keep the same verb through
+  the flow (button "Concluir check-out" → toast "Check-out concluído").
+- **Keyboard focus always visible** — attendants are heavy keyboard users; support tab order and
+  Enter-to-submit on forms.
+- **Errors are specific and in the interface's voice**, never vague apologies. Map the API
+  contract: a `"não encontrado!"` message → "not found" empty/404 state; a 400 (validation or
+  business rule) → inline field or form-level error with how to fix it.
+- **Empty states are an invitation to act** (e.g., "Nenhuma reserva pendente. Criar reserva.").
+
+### Copy
+
+- **User-facing copy is in Portuguese**, using the system's own domain vocabulary that employees
+  already know: Reserva, Check-in, Check-out, Avaria, Multa, Apólice, Cobertura, Franquia.
+- Active voice, plain verbs, no filler. Consistent vocabulary across the whole product.
+
+### Building a New Screen
+
+Parallel to "Adding a New Entity":
+1. State the screen's single job and which entity/flow it serves before designing.
+2. Bind to the existing endpoint(s); show backend-computed values read-only.
+3. Apply the status color system to every status shown.
+4. Wire validation/errors to the Service rules and the error-handler's 404/400 semantics.
+5. Run the quality checklist below before considering it done.
+
+### Quality checklist (floor, not ceiling)
+
+- [ ] Responsive down to small laptop / tablet widths.
+- [ ] AA contrast on all text and states (hover/focus/disabled).
+- [ ] Visible keyboard focus on every interactive element.
+- [ ] `prefers-reduced-motion` respected; animation minimal (this is a speed tool).
+- [ ] No pure `#FFFFFF` background; no white text on amber.
+- [ ] Status colors used consistently and matching the domain values above.
+
+### Avoid (AI-look signals)
+
+- Purple/blue gradients, gradient text, default Tailwind slate palette.
+- Generic hero: big number + gradient + three identical cards.
+- Decorative `01 / 02 / 03` markers with no real sequence.
+- Inter everywhere, heavy 600/700 weights, a shadow on every box.
+- Emojis, mixed icon libraries, excessive animation.
