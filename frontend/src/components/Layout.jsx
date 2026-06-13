@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  ClipboardList, LogIn, LogOut, BarChart2, Building2,
+  LayoutDashboard, ClipboardList, LogIn, LogOut, BarChart2, Building2,
   Users, UserCheck, Car, Tag, Shield, ShieldCheck,
   AlertTriangle, FileWarning, Menu, X,
 } from 'lucide-react';
@@ -13,9 +13,10 @@ const OPS = [
   { to: '/checkouts', label: 'Check-out', Icon: LogOut },
 ];
 
+// `gerenteOnly` esconde o item para Atendentes (gating só de UI; não há enforcement no back ainda).
 const CADASTROS = [
-  { to: '/agencias',     label: 'Agências',     Icon: Building2 },
-  { to: '/funcionarios', label: 'Funcionários', Icon: UserCheck },
+  { to: '/agencias',     label: 'Agências',     Icon: Building2,      gerenteOnly: true },
+  { to: '/funcionarios', label: 'Funcionários', Icon: UserCheck,      gerenteOnly: true },
   { to: '/clientes',     label: 'Clientes',     Icon: Users },
   { to: '/veiculos',     label: 'Veículos',     Icon: Car },
   { to: '/categorias',   label: 'Categorias',   Icon: Tag },
@@ -49,6 +50,8 @@ export default function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isGerente = user?.cargo === 'Gerente';
+  const cadastros = CADASTROS.filter(item => !item.gerenteOnly || isGerente);
 
   const handleLogout = () => {
     logout();
@@ -93,6 +96,12 @@ export default function Layout({ children }) {
 
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-5">
           <div>
+            <div className="space-y-0.5">
+              <NavItem to="/" label="Visão geral" Icon={LayoutDashboard} end onClick={() => setOpen(false)} />
+            </div>
+          </div>
+
+          <div>
             <p className="section-label">Operações</p>
             <div className="space-y-0.5">
               {OPS.map(({ to, label, Icon }) => (
@@ -101,22 +110,24 @@ export default function Layout({ children }) {
             </div>
           </div>
 
-          <div>
-            <p className="section-label">Relatórios</p>
-            <div className="space-y-0.5">
-              <NavItem
-                to="/relatorios"
-                label="Relatórios"
-                Icon={BarChart2}
-                onClick={() => setOpen(false)}
-              />
+          {isGerente && (
+            <div>
+              <p className="section-label">Relatórios</p>
+              <div className="space-y-0.5">
+                <NavItem
+                  to="/relatorios"
+                  label="Relatórios"
+                  Icon={BarChart2}
+                  onClick={() => setOpen(false)}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <p className="section-label">Cadastros</p>
             <div className="space-y-0.5">
-              {CADASTROS.map(({ to, label, Icon }) => (
+              {cadastros.map(({ to, label, Icon }) => (
                 <NavItem key={to} to={to} label={label} Icon={Icon} onClick={() => setOpen(false)} />
               ))}
             </div>

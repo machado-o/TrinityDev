@@ -146,35 +146,23 @@ class CheckoutService {
 
   static async update(req) {
     const { id } = req.params;
-    const { dataCheckout, quilometragemCheckout, nivelCombustivel, condicaoPneus, condicaoPalhetas,
-            limpoInternamente, limpoExternamente, observacoes, checkinId, funcionarioId, avariaIds } = req.body;
+    // Edição restrita a campos de inspeção/observação. Quilometragem e avarias são IMUTÁVEIS:
+    // alterá-las exigiria refazer o odômetro do veículo, a taxa de inspeção e a multa gerada
+    // (que é vinculada à reserva, não ao checkout). Para corrigir esses dados, remova e recrie.
+    const { nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, funcionarioId } = req.body;
 
     const obj = await Checkout.findByPk(id, { include: { all: true } });
     if (obj == null) throw 'Checkout não encontrado!';
 
-    const erros = [];
-
-    await verificarRegrasDeNegocio({
-      dataCheckout,
-      quilometragemCheckout,
-      checkinId: checkinId ?? obj.checkinId,
-      obj: null,
-      erros,
-    });
-
-    const patch = { dataCheckout, quilometragemCheckout, nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, checkinId, funcionarioId };
+    const patch = { nivelCombustivel, condicaoPneus, condicaoPalhetas, limpoInternamente, limpoExternamente, observacoes, funcionarioId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
 
-    erros.push(...await validarModel(obj));
-
+    const erros = await validarModel(obj);
     if (erros.length > 0) throw erros.join(" ");
 
-    return await sequelize.transaction(async (t) => {
-      await obj.save({ validate: false, transaction: t });
-      if (avariaIds !== undefined) await obj.setAvarias(avariaIds, { transaction: t });
-      return await Checkout.findByPk(obj.id, { include: { all: true }, transaction: t });
-    });
+    await obj.save({ validate: false });
+    return await Checkout.findByPk(obj.id, { include: { all: true } });
   }
 
   static async delete(req) {

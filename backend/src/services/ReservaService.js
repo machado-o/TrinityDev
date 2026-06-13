@@ -68,6 +68,24 @@ function validarDataRetirada(dataRetirada, erros) {
   if (new Date(dataRetirada) < new Date()) erros.push("A data de retirada não pode ser no passado!");
 }
 
+// Transições de status permitidas via update. O fluxo normal (Confirmada no check-in,
+// Concluída no check-out) é feito direto nos respectivos services; aqui cobrimos o
+// cancelamento manual e impedimos transições inválidas.
+const TRANSICOES_STATUS = {
+  Pendente: ['Confirmada', 'Cancelada'],
+  Confirmada: ['Concluída', 'Cancelada'],
+  Concluída: [],
+  Cancelada: [],
+};
+
+function validarTransicaoStatus(statusAtual, statusNovo, erros) {
+  if (statusNovo === undefined || statusNovo === statusAtual) return;
+  const permitidas = TRANSICOES_STATUS[statusAtual] ?? [];
+  if (!permitidas.includes(statusNovo)) {
+    erros.push(`Não é possível alterar o status de '${statusAtual}' para '${statusNovo}'.`);
+  }
+}
+
 // Regra: agência de retirada deve existir e estar ativa
 function validarAgenciaRetirada(agenciaRetirada, erros) {
   if (!agenciaRetirada) erros.push("Agência de retirada não encontrada!");
@@ -145,12 +163,15 @@ class ReservaService {
 
   static async update(req) {
     const { id } = req.params;
-    const { dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId } = req.body;
+    // valorDiaria/quantidadeDias/valorSeguro/valorFinal não são aceitos do body — são recalculados no servidor.
+    const { dataRetirada, dataDevolucao, status, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId } = req.body;
 
     const obj = await Reserva.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Reserva não encontrada!";
 
     const erros = [];
+
+    validarTransicaoStatus(obj.status, status, erros);
 
     const clienteFinal = clienteId ?? obj.clienteId;
     const retiradaFinal = dataRetirada ?? obj.dataRetirada;
@@ -166,7 +187,31 @@ class ReservaService {
       erros,
     });
 
-    const patch = { dataRetirada, dataDevolucao, valorDiaria, quantidadeDias, valorSeguro, valorFinal, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId };
+    // Valores financeiros nunca vêm do cliente. Quando datas/categoria/seguro/agência mudam,
+    // recalculamos no servidor (mesma regra do create) para a edição não deixar valores defasados.
+    let financeiroRecalculado = {};
+    const mudouFinanceiro = [dataRetirada, dataDevolucao, categoriaVeiculoId, seguroId, agenciaRetiradaId]
+      .some((v) => v !== undefined);
+    if (mudouFinanceiro) {
+      const categoriaIdFinal = categoriaVeiculoId ?? obj.categoriaVeiculoId;
+      const seguroIdFinal = seguroId !== undefined ? seguroId : obj.seguroId;
+      const agenciaRetiradaIdFinal = agenciaRetiradaId ?? obj.agenciaRetiradaId;
+
+      const [categoria, seguro] = await Promise.all([
+        categoriaIdFinal ? CategoriaVeiculo.findByPk(categoriaIdFinal) : Promise.resolve(null),
+        seguroIdFinal ? Seguro.findByPk(seguroIdFinal) : Promise.resolve(null),
+      ]);
+
+      financeiroRecalculado = await calcularValoresFinanceiros({
+        agenciaRetiradaId: agenciaRetiradaIdFinal,
+        categoria,
+        seguro,
+        dataRetirada: retiradaFinal,
+        dataDevolucao: devolucaoFinal,
+      });
+    }
+
+    const patch = { dataRetirada, dataDevolucao, status, clienteId, categoriaVeiculoId, funcionarioId, seguroId, agenciaRetiradaId, agenciaDevolucaoId, ...financeiroRecalculado };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
 

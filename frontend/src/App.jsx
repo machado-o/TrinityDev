@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext.jsx';
 import Layout from './components/Layout.jsx';
 import Login from './pages/Login.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import Reservas from './pages/Reservas.jsx';
 import Checkins from './pages/Checkins.jsx';
 import Checkouts from './pages/Checkouts.jsx';
@@ -21,6 +22,12 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
+// Gating só de UI: restringe telas de gestão/relatórios a Gerentes. Sem enforcement no backend ainda.
+function GerenteRoute({ children }) {
+  const { user } = useAuth();
+  return user?.cargo === 'Gerente' ? children : <Navigate to="/" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -31,14 +38,14 @@ export default function App() {
           <PrivateRoute>
             <Layout>
               <Routes>
-                <Route path="/" element={<Navigate to="/reservas" replace />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="/reservas" element={<Reservas />} />
                 <Route path="/checkins" element={<Checkins />} />
                 <Route path="/checkouts" element={<Checkouts />} />
-                <Route path="/relatorios/*" element={<Relatorios />} />
-                <Route path="/agencias" element={<Agencias />} />
+                <Route path="/relatorios/*" element={<GerenteRoute><Relatorios /></GerenteRoute>} />
+                <Route path="/agencias" element={<GerenteRoute><Agencias /></GerenteRoute>} />
                 <Route path="/clientes" element={<Clientes />} />
-                <Route path="/funcionarios" element={<Funcionarios />} />
+                <Route path="/funcionarios" element={<GerenteRoute><Funcionarios /></GerenteRoute>} />
                 <Route path="/veiculos" element={<Veiculos />} />
                 <Route path="/categorias" element={<Categorias />} />
                 <Route path="/seguros" element={<Seguros />} />

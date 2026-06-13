@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useCrud } from '../hooks/useCrud.js';
+import { useListView } from '../hooks/useListView.js';
 import { api } from '../api/client.js';
 import { useToast } from '../components/Toast.jsx';
 import Modal from '../components/Modal.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ListToolbar from '../components/ListToolbar.jsx';
+import Pagination from '../components/Pagination.jsx';
 
 const EMPTY = { nome: '', cpf: '', cargo: 'Atendente', dataNascimento: '', telefone: '', email: '', senha: '', agenciaId: '' };
 
 export default function Funcionarios() {
   const { data, loading, refetch } = useCrud('/funcionarios');
   const { data: agencias } = useCrud('/agencias');
+  const list = useListView(data, r => `${r.nome} ${r.cpf} ${r.email} ${r.cargo} ${r.agencia?.nome ?? ''}`);
   const toast = useToast();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -59,12 +63,20 @@ export default function Funcionarios() {
         <h1 className="page-title">Funcionários</h1>
         <button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Novo funcionário</button>
       </div>
+
+      {data.length > 0 && (
+        <ListToolbar query={list.query} onQuery={list.setQuery} placeholder="Buscar por nome, CPF, e-mail ou cargo…" total={list.paginacao.total} />
+      )}
+
       <div className="card">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm" style={{ color: '#6B7280' }}>Carregando…</div>
         ) : data.length === 0 ? (
           <EmptyState message="Nenhum funcionário cadastrado." action={<button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Novo funcionário</button>} />
+        ) : list.isEmpty ? (
+          <EmptyState message={`Nenhum funcionário encontrado para “${list.query}”.`} />
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -78,7 +90,7 @@ export default function Funcionarios() {
                 </tr>
               </thead>
               <tbody>
-                {data.map(row => (
+                {list.pageItems.map(row => (
                   <tr key={row.id} className="hover:bg-stone-50 transition-colors">
                     <td className="td font-medium">{row.nome}</td>
                     <td className="td"><StatusBadge status={row.cargo} /></td>
@@ -96,6 +108,8 @@ export default function Funcionarios() {
               </tbody>
             </table>
           </div>
+          <Pagination paginacao={list.paginacao} onChange={list.setPage} />
+          </>
         )}
       </div>
 

@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useCrud } from '../hooks/useCrud.js';
+import { useListView } from '../hooks/useListView.js';
 import { api } from '../api/client.js';
 import { useToast } from '../components/Toast.jsx';
 import Modal from '../components/Modal.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ListToolbar from '../components/ListToolbar.jsx';
+import Pagination from '../components/Pagination.jsx';
 
 const EMPTY = { valor: '', dataEmissao: '', descricao: '', status: 'Pendente', clienteId: '', reservaId: '' };
 
@@ -19,6 +22,7 @@ export default function Multas() {
   const { data, loading, refetch } = useCrud('/multas');
   const { data: clientes } = useCrud('/clientes');
   const { data: reservas } = useCrud('/reservas');
+  const list = useListView(data, r => `#${r.id} ${r.cliente?.nome ?? ''} ${r.status} ${r.descricao ?? ''}`);
   const toast = useToast();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -64,12 +68,20 @@ export default function Multas() {
         <h1 className="page-title">Multas</h1>
         <button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Nova multa</button>
       </div>
+
+      {data.length > 0 && (
+        <ListToolbar query={list.query} onQuery={list.setQuery} placeholder="Buscar por cliente, status ou descrição…" total={list.paginacao.total} />
+      )}
+
       <div className="card">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm" style={{ color: '#6B7280' }}>Carregando…</div>
         ) : data.length === 0 ? (
           <EmptyState message="Nenhuma multa registrada." action={<button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Nova multa</button>} />
+        ) : list.isEmpty ? (
+          <EmptyState message={`Nenhuma multa encontrada para “${list.query}”.`} />
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -84,7 +96,7 @@ export default function Multas() {
                 </tr>
               </thead>
               <tbody>
-                {data.map(row => (
+                {list.pageItems.map(row => (
                   <tr key={row.id} className="hover:bg-stone-50 transition-colors">
                     <td className="td-mono" style={{ color: '#6B7280' }}>#{row.id}</td>
                     <td className="td font-medium">{row.cliente?.nome || clienteNome(row.clienteId)}</td>
@@ -103,6 +115,8 @@ export default function Multas() {
               </tbody>
             </table>
           </div>
+          <Pagination paginacao={list.paginacao} onChange={list.setPage} />
+          </>
         )}
       </div>
 

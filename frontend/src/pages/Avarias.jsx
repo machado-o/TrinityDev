@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useCrud } from '../hooks/useCrud.js';
+import { useListView } from '../hooks/useListView.js';
 import { api } from '../api/client.js';
 import { useToast } from '../components/Toast.jsx';
 import Modal from '../components/Modal.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ListToolbar from '../components/ListToolbar.jsx';
+import Pagination from '../components/Pagination.jsx';
 
 const EMPTY = { nome: '', valor: '' };
 
 export default function Avarias() {
   const { data, loading, refetch } = useCrud('/avarias');
+  const list = useListView(data, r => r.nome);
   const toast = useToast();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -69,6 +73,10 @@ export default function Avarias() {
         </button>
       </div>
 
+      {data.length > 0 && (
+        <ListToolbar query={list.query} onQuery={list.setQuery} placeholder="Buscar avaria…" total={list.paginacao.total} />
+      )}
+
       <div className="card">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm" style={{ color: '#6B7280' }}>
@@ -79,36 +87,41 @@ export default function Avarias() {
             message="Nenhuma avaria cadastrada."
             action={<button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Nova avaria</button>}
           />
+        ) : list.isEmpty ? (
+          <EmptyState message={`Nenhuma avaria encontrada para “${list.query}”.`} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="th">Nome</th>
-                  <th className="th-r">Valor</th>
-                  <th className="th" style={{ width: 80 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map(row => (
-                  <tr key={row.id} className="hover:bg-stone-50 transition-colors">
-                    <td className="td">{row.nome}</td>
-                    <td className="td-r">R$ {parseFloat(row.valor).toFixed(2)}</td>
-                    <td className="td">
-                      <div className="flex items-center gap-1 justify-end">
-                        <button className="btn-ghost p-1.5" onClick={() => openEdit(row)} aria-label="Editar">
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button className="btn-ghost p-1.5" onClick={() => setDelId(row.id)} aria-label="Remover">
-                          <Trash2 className="h-3.5 w-3.5" style={{ color: '#DC2626' }} />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="th">Nome</th>
+                    <th className="th-r">Valor</th>
+                    <th className="th" style={{ width: 80 }}></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {list.pageItems.map(row => (
+                    <tr key={row.id} className="hover:bg-stone-50 transition-colors">
+                      <td className="td">{row.nome}</td>
+                      <td className="td-r">R$ {parseFloat(row.valor).toFixed(2)}</td>
+                      <td className="td">
+                        <div className="flex items-center gap-1 justify-end">
+                          <button className="btn-ghost p-1.5" onClick={() => openEdit(row)} aria-label="Editar">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="btn-ghost p-1.5" onClick={() => setDelId(row.id)} aria-label="Remover">
+                            <Trash2 className="h-3.5 w-3.5" style={{ color: '#DC2626' }} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination paginacao={list.paginacao} onChange={list.setPage} />
+          </>
         )}
       </div>
 

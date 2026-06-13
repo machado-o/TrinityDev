@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Info, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Info, AlertTriangle, Pencil } from 'lucide-react';
 import { useCrud } from '../hooks/useCrud.js';
+import { useListView } from '../hooks/useListView.js';
 import { api } from '../api/client.js';
 import { useToast } from '../components/Toast.jsx';
 import Modal from '../components/Modal.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ListToolbar from '../components/ListToolbar.jsx';
+import Pagination from '../components/Pagination.jsx';
 
 const EMPTY = { reservaId: '', funcionarioId: '', dataCheckin: '', cnhCondutor: '', cnhValidade: '', quilometragemCheckin: '', veiculoId: '' };
 
@@ -14,8 +17,16 @@ function fmt(dt) {
   return new Date(dt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
+function toInput(dt) {
+  if (!dt) return '';
+  const d = new Date(dt);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function Checkins() {
   const { data, loading, refetch } = useCrud('/checkins');
+  const list = useListView(data, r => `#${r.id} #${r.reservaId} ${r.reserva?.cliente?.nome ?? ''} ${r.veiculo?.placa ?? ''} ${r.funcionario?.nome ?? ''}`);
   const { data: reservas } = useCrud('/reservas');
   const { data: funcionarios } = useCrud('/funcionarios');
   const { data: veiculos } = useCrud('/veiculos');
@@ -27,6 +38,9 @@ export default function Checkins() {
   const [saving, setSaving] = useState(false);
   const [delId, setDelId] = useState(null);
   const [delLoading, setDelLoading] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [editSaving, setEditSaving] = useState(false);
 
   const [selectedReserva, setSelectedReserva] = useState(null);
   const [veiculosDisponiveis, setVeiculosDisponiveis] = useState([]);
@@ -59,8 +73,16 @@ export default function Checkins() {
         quilometragemCheckin: parseFloat(form.quilometragemCheckin),
       };
       if (form.veiculoId) body.veiculoId = parseInt(form.veiculoId);
-      await api.post('/checkins', body);
-      toast('Check-in realizado.');
+      const created = await api.post('/checkins', body);
+      const assignedId = created?.veiculoId ?? created?.veiculo?.id;
+      const assigned = veiculos.find(v => v.id === assignedId) || created?.veiculo;
+      const placa = assigned?.placa;
+      const foiUpgrade = assigned && selectedReserva && assigned.categoriaVeiculoId !== selectedReserva.categoriaVeiculoId;
+      if (foiUpgrade) {
+        toast(`Check-in realizado com upgrade automático: veículo ${placa} (categoria ${assigned.categoria?.nome ?? 'superior'}) atribuído.`);
+      } else {
+        toast(placa ? `Check-in realizado. Veículo ${placa} atribuído.` : 'Check-in realizado.');
+      }
       setModal(false);
       refetch();
     } catch (e) { toast(e.message, 'error'); }
@@ -74,6 +96,44 @@ export default function Checkins() {
     finally { setDelLoading(false); }
   };
 
+  const EF = (k) => (e) => setEditForm(p => ({ ...p, [k]: e.target.value }));
+
+  const openEdit = (row) => {
+    setEditId(row.id);
+    setEditForm({
+      dataCheckin: toInput(row.dataCheckin),
+      cnhCondutor: row.cnhCondutor || '',
+      cnhValidade: row.cnhValidade?.split('T')[0] || row.cnhValidade || '',
+      quilometragemCheckin: row.quilometragemCheckin ?? '',
+      funcionarioId: String(row.funcionarioId ?? ''),
+      veiculoId: String(row.veiculoId ?? ''),
+    });
+  };
+
+  const saveEdit = async () => {
+    setEditSaving(true);
+    try {
+      const body = {
+        dataCheckin: editForm.dataCheckin,
+        cnhCondutor: editForm.cnhCondutor,
+        cnhValidade: editForm.cnhValidade,
+        quilometragemCheckin: parseFloat(editForm.quilometragemCheckin),
+        funcionarioId: parseInt(editForm.funcionarioId),
+        veiculoId: parseInt(editForm.veiculoId),
+      };
+      await api.put(`/checkins/${editId}`, body);
+      toast('Check-in atualizado.');
+      setEditId(null);
+      refetch();
+    } catch (e) { toast(e.message, 'error'); }
+    finally { setEditSaving(false); }
+  };
+
+  // Para troca de veículo: disponíveis + o atualmente vinculado (que está como Reservado).
+  const veiculosParaTroca = editForm
+    ? veiculos.filter(v => v.status === 'Disponível' || v.id === parseInt(editForm.veiculoId))
+    : [];
+
   const bloqueado = multasPendentes.length > 0;
 
   return (
@@ -85,12 +145,19 @@ export default function Checkins() {
         </button>
       </div>
 
+      {data.length > 0 && (
+        <ListToolbar query={list.query} onQuery={list.setQuery} placeholder="Buscar por cliente, placa ou reserva…" total={list.paginacao.total} />
+      )}
+
       <div className="card">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm" style={{ color: '#6B7280' }}>Carregando…</div>
         ) : data.length === 0 ? (
           <EmptyState message="Nenhum check-in registrado." action={<button className="btn-primary" onClick={() => { setForm(EMPTY); setModal(true); }}><Plus className="h-4 w-4" /> Novo check-in</button>} />
+        ) : list.isEmpty ? (
+          <EmptyState message={`Nenhum check-in encontrado para “${list.query}”.`} />
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -102,11 +169,11 @@ export default function Checkins() {
                   <th className="th">Funcionário</th>
                   <th className="th">Data check-in</th>
                   <th className="th-r">Km saída</th>
-                  <th className="th" style={{ width: 60 }}></th>
+                  <th className="th" style={{ width: 90 }}></th>
                 </tr>
               </thead>
               <tbody>
-                {data.map(row => (
+                {list.pageItems.map(row => (
                   <tr key={row.id} className="hover:bg-stone-50 transition-colors">
                     <td className="td-mono" style={{ color: '#6B7280' }}>#{row.id}</td>
                     <td className="td-mono" style={{ color: '#6B7280' }}>#{row.reservaId}</td>
@@ -116,15 +183,24 @@ export default function Checkins() {
                     <td className="td">{fmt(row.dataCheckin)}</td>
                     <td className="td-r">{parseFloat(row.quilometragemCheckin).toLocaleString('pt-BR')} km</td>
                     <td className="td">
-                      <button className="btn-ghost p-1.5" onClick={() => setDelId(row.id)}>
-                        <Trash2 className="h-3.5 w-3.5" style={{ color: '#DC2626' }} />
-                      </button>
+                      <div className="flex items-center gap-1 justify-end">
+                        {!row.checkout && (
+                          <button className="btn-ghost p-1.5" onClick={() => openEdit(row)} title="Editar check-in">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <button className="btn-ghost p-1.5" onClick={() => setDelId(row.id)} title="Remover">
+                          <Trash2 className="h-3.5 w-3.5" style={{ color: '#DC2626' }} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <Pagination paginacao={list.paginacao} onChange={list.setPage} />
+          </>
         )}
       </div>
 
@@ -223,6 +299,54 @@ export default function Checkins() {
             </button>
           </div>
         </div>
+      </Modal>
+
+      <Modal open={!!editId} onClose={() => setEditId(null)} title={`Editar check-in #${editId ?? ''}`} size="lg">
+        {editForm && (
+          <div className="space-y-4">
+            <div className="callout-info">
+              <Info className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>A reserva vinculada não muda. Trocar o veículo libera o anterior e reserva o novo.</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="field-label">Data e hora do check-in</label>
+                <input className="field-input" type="datetime-local" value={editForm.dataCheckin} onChange={EF('dataCheckin')} />
+              </div>
+              <div>
+                <label className="field-label">Quilometragem de saída</label>
+                <input className="field-input" type="number" min="0" step="0.01" value={editForm.quilometragemCheckin} onChange={EF('quilometragemCheckin')} />
+              </div>
+              <div>
+                <label className="field-label">CNH do condutor</label>
+                <input className="field-input" value={editForm.cnhCondutor} onChange={EF('cnhCondutor')} maxLength={11} style={{ fontFamily: "'JetBrains Mono', monospace" }} />
+                <p className="field-hint">Deve ser idêntica à CNH do cliente da reserva</p>
+              </div>
+              <div>
+                <label className="field-label">Validade da CNH</label>
+                <input className="field-input" type="date" value={editForm.cnhValidade} onChange={EF('cnhValidade')} />
+              </div>
+              <div>
+                <label className="field-label">Veículo</label>
+                <select className="field-select" value={editForm.veiculoId} onChange={EF('veiculoId')}>
+                  {veiculosParaTroca.map(v => (
+                    <option key={v.id} value={v.id}>{v.placa} — {v.marca} {v.modelo} ({v.status})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="field-label">Funcionário responsável</label>
+                <select className="field-select" value={editForm.funcionarioId} onChange={EF('funcionarioId')}>
+                  {funcionarios.map(f => <option key={f.id} value={f.id}>{f.nome} — {f.cargo}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button className="btn-secondary" onClick={() => setEditId(null)} disabled={editSaving}>Cancelar</button>
+              <button className="btn-primary" onClick={saveEdit} disabled={editSaving}>{editSaving ? 'Salvando…' : 'Salvar alterações'}</button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       <ConfirmDialog open={!!delId} onClose={() => setDelId(null)} onConfirm={confirmDelete} loading={delLoading} title="Remover check-in" message="Este check-in será removido permanentemente. Confirma?" />

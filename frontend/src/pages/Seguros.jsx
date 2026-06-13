@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useCrud } from '../hooks/useCrud.js';
+import { useListView } from '../hooks/useListView.js';
 import { api } from '../api/client.js';
 import { useToast } from '../components/Toast.jsx';
 import Modal from '../components/Modal.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import ListToolbar from '../components/ListToolbar.jsx';
+import Pagination from '../components/Pagination.jsx';
 
 const EMPTY = { nome: '', empresaSeguradora: '', descricao: '', valorDiariaAdicional: '', franquia: '', coberturaIds: [] };
 
 export default function Seguros() {
   const { data, loading, refetch } = useCrud('/seguros');
   const { data: coberturas } = useCrud('/coberturas');
+  const list = useListView(data, r => `${r.nome} ${r.empresaSeguradora}`);
   const toast = useToast();
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
@@ -60,12 +64,20 @@ export default function Seguros() {
         <h1 className="page-title">Seguros</h1>
         <button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Novo seguro</button>
       </div>
+
+      {data.length > 0 && (
+        <ListToolbar query={list.query} onQuery={list.setQuery} placeholder="Buscar por plano ou seguradora…" total={list.paginacao.total} />
+      )}
+
       <div className="card">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-sm" style={{ color: '#6B7280' }}>Carregando…</div>
         ) : data.length === 0 ? (
           <EmptyState message="Nenhum seguro cadastrado." action={<button className="btn-primary" onClick={openCreate}><Plus className="h-4 w-4" /> Novo seguro</button>} />
+        ) : list.isEmpty ? (
+          <EmptyState message={`Nenhum seguro encontrado para “${list.query}”.`} />
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -78,7 +90,7 @@ export default function Seguros() {
                 </tr>
               </thead>
               <tbody>
-                {data.map(row => (
+                {list.pageItems.map(row => (
                   <tr key={row.id} className="hover:bg-stone-50 transition-colors">
                     <td className="td">
                       <div className="font-medium">{row.nome}</div>
@@ -98,6 +110,8 @@ export default function Seguros() {
               </tbody>
             </table>
           </div>
+          <Pagination paginacao={list.paginacao} onChange={list.setPage} />
+          </>
         )}
       </div>
 

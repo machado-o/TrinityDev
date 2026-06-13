@@ -138,7 +138,7 @@ class CheckinService {
 
   static async update(req) {
     const { id } = req.params;
-    const { dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, reservaId, veiculoId, funcionarioId } = req.body;
+    const { dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, veiculoId, funcionarioId } = req.body;
 
     const obj = await Checkin.findByPk(id, { include: { all: true } });
     if (obj == null) throw "Checkin não encontrado!";
@@ -146,19 +146,38 @@ class CheckinService {
     const erros = [];
 
     if (cnhCondutor !== undefined) {
-      const reserva = await Reserva.findByPk(reservaId ?? obj.reservaId, { include: { all: true } });
+      const reserva = await Reserva.findByPk(obj.reservaId, { include: { all: true } });
       if (reserva) await verificarRegrasDeNegocio({ cnhCondutor, reserva, isUpdate: true, erros });
     }
 
-    const patch = { dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, reservaId, veiculoId, funcionarioId };
+    // Troca de veículo: precisa liberar o antigo e reservar o novo, mantendo a frota consistente.
+    const veiculoAntigoId = obj.veiculoId;
+    const trocouVeiculo = veiculoId !== undefined && veiculoId !== veiculoAntigoId;
+    if (trocouVeiculo) {
+      if (obj.checkout) erros.push("Não é possível trocar o veículo de um check-in que já possui check-out!");
+      const novoVeiculo = await Veiculo.findByPk(veiculoId);
+      if (!novoVeiculo) erros.push("Veículo não encontrado!");
+      else if (novoVeiculo.status !== 'Disponível') erros.push("O veículo selecionado não está disponível!");
+    }
+
+    const patch = { dataCheckin, cnhCondutor, cnhValidade, quilometragemCheckin, veiculoId, funcionarioId };
     Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
     Object.assign(obj, patch);
 
     erros.push(...await validarModel(obj));
     if (erros.length > 0) throw erros.join(" ");
 
-    await obj.save({ validate: false });
-    return await Checkin.findByPk(obj.id, { include: { all: true } });
+    return await sequelize.transaction(async (t) => {
+      if (trocouVeiculo) {
+        const antigo = await Veiculo.findByPk(veiculoAntigoId, { transaction: t });
+        if (antigo) { antigo.status = 'Disponível'; await antigo.save({ transaction: t }); }
+        const novo = await Veiculo.findByPk(veiculoId, { transaction: t });
+        novo.status = 'Reservado';
+        await novo.save({ transaction: t });
+      }
+      await obj.save({ validate: false, transaction: t });
+      return await Checkin.findByPk(obj.id, { include: { all: true }, transaction: t });
+    });
   }
 
   static async delete(req) {
